@@ -1,0 +1,2793 @@
+{
+  "schemaVersion": "1.3",
+  "systemId": "personal-fgv0-3",
+  "systemName": "Personal FG 2/1 v0.3",
+  "description": "A structured extraction of the FG 30-minute notes into executable tree format. Persistent fact-state edition sourced from FG Bidding System in 30 minutes (1).xlsx.",
+  "notes": "Nodes were intentionally kept compact where the source diagram was conceptual. Extend each branch in SystemBuilder for exact card-by-card style.",
+  "conventions": [
+    {
+      "id": "fg-opening",
+      "name": "Opening and major opening control",
+      "children": [
+        {
+          "id": "fg1C",
+          "trigger": "1C",
+          "meaning": "FG strong club opening: 12+ HCP, 3+ clubs, unbiddable diamonds, no 5-card major.",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 12,
+            "maxHcp": 20,
+            "minSuit": {
+              "C": 3
+            },
+            "maxSuit": {
+              "C": 13,
+              "M": 4,
+              "D": 2
+            }
+          },
+          "children": [
+            {
+              "id": "fg1C-1D",
+              "trigger": "1D",
+              "meaning": "Responder with 4+ diamonds.",
+              "children": [
+                {
+                  "id": "fg1C-1D-1NT",
+                  "trigger": "1NT",
+                  "meaning": "Balanced or light continuation; often game-forcing uncertainty exists.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1C-1D-2D",
+                  "trigger": "2D",
+                  "meaning": "Game interest route.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {},
+              "alert": false
+            },
+            {
+              "id": "fg1C-1H",
+              "trigger": "1H",
+              "meaning": "Responder shows hearts.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1C-1S",
+              "trigger": "1S",
+              "meaning": "Responder shows spades.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1C-1NT",
+              "trigger": "1NT",
+              "meaning": "Responder minimum/no major emphasis.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1C-2C",
+              "trigger": "2C",
+              "meaning": "Artificial forcing continuation in this FG profile.",
+              "children": [
+                {
+                  "id": "fg1C-2C-2D",
+                  "trigger": "2D",
+                  "meaning": "Opener confirms shape or distribution.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1C-2C-2H",
+                  "trigger": "2H",
+                  "meaning": "Transfer-style response or major support.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1C-2C-2S",
+                  "trigger": "2S",
+                  "meaning": "Transfer-style response or major support.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1C-2C-2NT",
+                  "trigger": "2NT",
+                  "meaning": "Balanced confirmation.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {},
+              "alert": false
+            }
+          ],
+          "alert": false
+        },
+        {
+          "id": "fg1D",
+          "trigger": "1D",
+          "meaning": "Natural 1D opening.",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 12,
+            "maxHcp": 20,
+            "minSuit": {
+              "D": 3
+            },
+            "maxSuit": {
+              "D": 13
+            }
+          },
+          "children": [
+            {
+              "id": "fg1D-1H",
+              "trigger": "1H",
+              "meaning": "Heart response; suit support.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1D-1S",
+              "trigger": "1S",
+              "meaning": "Spade response; suit support.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1D-1NT",
+              "trigger": "1NT",
+              "meaning": "Balanced invite/no big force.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1D-2C-21",
+              "trigger": "2C",
+              "meaning": "2/1 game force in clubs: highest-priority eligible new-suit response after 1♦.",
+              "priority": 100,
+              "filters": {
+                "minHcp": 12,
+                "maxHcp": 40
+              },
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg1D-2D",
+              "trigger": "2D",
+              "meaning": "Diamond support/raise branch, not a 2/1 game-force response.",
+              "generated": {
+                "type": "control-bids",
+                "agreedSuit": "D",
+                "suits": [
+                  "C",
+                  "H",
+                  "S"
+                ],
+                "startLevel": 4,
+                "description": "Elimination control bidding after a diamond-support control phase."
+              },
+              "children": [
+                {
+                  "id": "fg1D-2D-4NT",
+                  "trigger": "4NT",
+                  "meaning": "Ace/king check after at least one control phase.",
+                  "clearControl": true,
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {},
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "alert": false
+        },
+        {
+          "id": "fg1H",
+          "trigger": "1H",
+          "meaning": "5+ card heart opening.",
+          "children": [
+            {
+              "id": "fg1H-1NT",
+              "trigger": "1NT",
+              "meaning": "Responder minimum (6-9), likely no 4-card support in spades.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1H-2H",
+              "trigger": "2H",
+              "meaning": "Major-suit raise, not a 2/1 response. A qualifying 2/1 new-suit response has higher priority.",
+              "children": [
+                {
+                  "id": "fg1H-2H-2NT",
+                  "trigger": "2NT",
+                  "meaning": "Invitation phase (incomplete support).",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1H-2H-3H",
+                  "trigger": "3H",
+                  "meaning": "Control-phase start in fitted heart sequence.",
+                  "generated": {
+                    "type": "control-bids",
+                    "agreedSuit": "H",
+                    "suits": [
+                      "C",
+                      "D",
+                      "S"
+                    ],
+                    "startLevel": 4,
+                    "description": "Starting from agreed suit, bid first/second controls in unbid suits."
+                  },
+                  "children": [
+                    {
+                      "id": "fg1H-2H-3H-4NT",
+                      "trigger": "4NT",
+                      "meaning": "RKC/4NT (after a round of control-bidding).",
+                      "filters": {},
+                      "children": [],
+                      "alert": false,
+                      "facts": {
+                        "convention": {
+                          "rkcb": true
+                        },
+                        "slam": {
+                          "control": {
+                            "active": true,
+                            "suit": "{{call.suit}}",
+                            "round": "first-or-second",
+                            "elimination": {
+                              "method": "ascending-suit-elimination",
+                              "skippedSuitDeniesControl": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "fg1H-2H-3H-5NT",
+                      "trigger": "5NT",
+                      "meaning": "King ask after positive ace ask.",
+                      "filters": {},
+                      "children": [],
+                      "alert": false,
+                      "facts": {
+                        "slam": {
+                          "aceAsk": {
+                            "active": true,
+                            "method": "rkcb-1430",
+                            "interference": "D0P1",
+                            "accelerated": false,
+                            "type": "keycard"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "filters": {},
+                  "alert": false
+                },
+                {
+                  "id": "fg1H-2H-3S",
+                  "trigger": "3S",
+                  "meaning": "New-suit game try / side control.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1H-2H-4H",
+                  "trigger": "4H",
+                  "meaning": "Strong support or direct slam trial.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {},
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg1H-2C-21",
+              "trigger": "2C",
+              "meaning": "2/1 game force in clubs: highest-priority eligible new-suit response after 1♥.",
+              "priority": 100,
+              "filters": {
+                "minHcp": 12,
+                "maxHcp": 40
+              },
+              "children": [],
+              "alert": true,
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg1H-2D-21",
+              "trigger": "2D",
+              "meaning": "2/1 game force in diamonds: highest-priority eligible new-suit response after 1♥.",
+              "priority": 100,
+              "filters": {
+                "minHcp": 12,
+                "maxHcp": 40
+              },
+              "children": [],
+              "alert": true,
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 12,
+            "maxHcp": 21,
+            "minSuit": {
+              "H": 5
+            },
+            "maxSuit": {
+              "H": 13
+            }
+          },
+          "alert": false
+        },
+        {
+          "id": "fg1S",
+          "trigger": "1S",
+          "meaning": "5+ card spade opening.",
+          "children": [
+            {
+              "id": "fg1S-1NT",
+              "trigger": "1NT",
+              "meaning": "Responder minimum in balanced style.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1S-2S",
+              "trigger": "2S",
+              "meaning": "Major-suit raise, not a 2/1 response. A qualifying 2/1 new-suit response has higher priority.",
+              "children": [
+                {
+                  "id": "fg1S-2S-2NT",
+                  "trigger": "2NT",
+                  "meaning": "Invitational, not yet solid for force.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1S-2S-3S",
+                  "trigger": "3S",
+                  "meaning": "Strong fit and control-phase candidate.",
+                  "generated": {
+                    "type": "control-bids",
+                    "agreedSuit": "S",
+                    "suits": [
+                      "C",
+                      "D",
+                      "H"
+                    ],
+                    "startLevel": 4,
+                    "description": "Control bidding around spade fit with suit omissions."
+                  },
+                  "children": [
+                    {
+                      "id": "fg1S-2S-3S-4NT",
+                      "trigger": "4NT",
+                      "meaning": "RKC/Key-card query.",
+                      "filters": {},
+                      "children": [],
+                      "alert": false,
+                      "facts": {
+                        "convention": {
+                          "rkcb": true
+                        }
+                      }
+                    },
+                    {
+                      "id": "fg1S-2S-3S-5NT",
+                      "trigger": "5NT",
+                      "meaning": "Queen ask / king check if partnership uses this.",
+                      "filters": {},
+                      "children": [],
+                      "alert": false
+                    }
+                  ],
+                  "filters": {},
+                  "alert": false
+                },
+                {
+                  "id": "fg1S-2S-3C",
+                  "trigger": "3C",
+                  "meaning": "Minor-suit side control and feature bid.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {
+                "minHcp": 6,
+                "maxHcp": 9,
+                "minSuit": {
+                  "S": 3
+                },
+                "maxSuit": {
+                  "S": 3
+                }
+              },
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg1S-2C-21",
+              "trigger": "2C",
+              "meaning": "2/1 game force in clubs: highest-priority eligible new-suit response after 1♠.",
+              "priority": 100,
+              "filters": {
+                "minHcp": 12,
+                "maxHcp": 40
+              },
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg1S-2D-21",
+              "trigger": "2D",
+              "meaning": "2/1 game force in diamonds: highest-priority eligible new-suit response after 1♠.",
+              "priority": 100,
+              "filters": {
+                "minHcp": 12,
+                "maxHcp": 40
+              },
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg1S-2H-21",
+              "trigger": "2H",
+              "meaning": "2/1 game force in hearts: highest-priority eligible new-suit response after 1♠.",
+              "priority": 100,
+              "filters": {
+                "minHcp": 12,
+                "maxHcp": 40
+              },
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 12,
+            "maxHcp": 21,
+            "minSuit": {
+              "S": 5
+            },
+            "maxSuit": {
+              "S": 13
+            }
+          },
+          "alert": false
+        },
+        {
+          "id": "fg1NT",
+          "trigger": "1NT",
+          "meaning": "Natural no-trump opening (FG family range treated separately in this profile).",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 15,
+            "maxHcp": 17,
+            "maxSuit": {
+              "C": 5,
+              "D": 5,
+              "H": 5,
+              "S": 5
+            }
+          },
+          "children": [
+            {
+              "id": "fg1NT-2C",
+              "trigger": "2C",
+              "meaning": "Stayman.",
+              "filters": {
+                "minHcp": 8,
+                "maxHcp": 9
+              },
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "stayman": true
+                }
+              }
+            },
+            {
+              "id": "fg1NT-2D",
+              "trigger": "2D",
+              "meaning": "Transfer into hearts (optional).",
+              "filters": {
+                "minSuit": {
+                  "H": 5
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1NT-2H",
+              "trigger": "2H",
+              "meaning": "Transfer into spades (optional).",
+              "filters": {
+                "minSuit": {
+                  "S": 5
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1NT-2NTC",
+              "trigger": "2NT",
+              "meaning": "Transfer into clubs.",
+              "filters": {
+                "minSuit": {
+                  "C": 6
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg1NT-2S",
+              "trigger": "2S",
+              "meaning": "minor stayman, 5-4 in minors looking for 5-4 fits.",
+              "filters": {
+                "minHcp": 8,
+                "maxHcp": 9,
+                "minSuit": {
+                  "C": 4,
+                  "D": 4
+                }
+              },
+              "children": [
+                {
+                  "id": "fg1NT-2S-3C",
+                  "trigger": "3C",
+                  "meaning": "To play.",
+                  "filters": {
+                    "minSuit": {
+                      "C": 4
+                    }
+                  },
+                  "children": [],
+                  "generated": null,
+                  "alert": false
+                },
+                {
+                  "id": "fg1NT-2S-3D",
+                  "trigger": "3D",
+                  "meaning": "To play.",
+                  "filters": {
+                    "minSuit": {
+                      "D": 4
+                    }
+                  },
+                  "children": [],
+                  "generated": null,
+                  "alert": false
+                },
+                {
+                  "id": "fg1NT-2S-2NT",
+                  "trigger": "2NT",
+                  "meaning": "No fit, not enough for game.",
+                  "filters": {
+                    "minHcp": 15,
+                    "maxHcp": 16,
+                    "maxSuit": {
+                      "D": 3,
+                      "C": 3
+                    }
+                  },
+                  "children": [],
+                  "generated": null,
+                  "alert": false
+                },
+                {
+                  "id": "fg1NT-2S-3NT",
+                  "trigger": "3NT",
+                  "meaning": "Enough for game.",
+                  "filters": {
+                    "maxHcp": 17,
+                    "minHcp": 17
+                  },
+                  "children": [],
+                  "generated": null,
+                  "alert": false
+                }
+              ],
+              "generated": null,
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "minorStayman": true,
+                  "stayman": true
+                },
+                "fit": {
+                  "confirmed": true,
+                  "openerLength": 5,
+                  "responderLength": 4,
+                  "combinedMinimum": 9,
+                  "suit": "{{call.suit}}"
+                }
+              }
+            }
+          ],
+          "alert": false
+        }
+      ]
+    },
+    {
+      "id": "fg-phase-structure",
+      "name": "Phase II / Phase III controls",
+      "children": [
+        {
+          "id": "fg-enter-phase-ii",
+          "trigger": "2NT",
+          "meaning": "Entering Phase II (deciding color / color checks).",
+          "children": [
+            {
+              "id": "fg-ii-2D",
+              "trigger": "2D",
+              "meaning": "Move toward fit confirmation / feature checks.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-ii-3D",
+              "trigger": "3D",
+              "meaning": "Cuebid-style step for fit and hand strength.",
+              "filters": {},
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "cueBid": true
+                },
+                "slam": {
+                  "control": {
+                    "active": true,
+                    "suit": "{{call.suit}}",
+                    "round": "first-or-second",
+                    "elimination": {
+                      "method": "ascending-suit-elimination",
+                      "skippedSuitDeniesControl": true
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg-ii-3S",
+              "trigger": "3S",
+              "meaning": "Jump into control context depending on prior agreement.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            }
+          ],
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "alert": false
+        },
+        {
+          "id": "fg-enter-phase-iii",
+          "trigger": "3C",
+          "meaning": "Entering control phase / Phase III in FG flow.",
+          "generated": {
+            "type": "control-bids",
+            "agreedSuit": "",
+            "suits": [
+              "C",
+              "D",
+              "H",
+              "S"
+            ],
+            "startLevel": 4,
+            "description": "Generalized control-bid phase for FG; remove suits as controls are shown."
+          },
+          "children": [
+            {
+              "id": "fg-iii-4C",
+              "trigger": "4C",
+              "meaning": "Club control route with suit priority.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-iii-4D",
+              "trigger": "4D",
+              "meaning": "Diamond control route with suit priority.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-iii-4H",
+              "trigger": "4H",
+              "meaning": "Heart control route with suit priority.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-iii-4S",
+              "trigger": "4S",
+              "meaning": "Spade control route with suit priority.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-iii-5C",
+              "trigger": "5C",
+              "meaning": "Secondary control sequence if phase needs escalation.",
+              "filters": {},
+              "children": [],
+              "alert": false
+            }
+          ],
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "alert": false
+        }
+      ]
+    },
+    {
+      "id": "fg-ace-ask",
+      "name": "Ace/Kings and cuebids",
+      "children": [
+        {
+          "id": "fg-rkcb",
+          "trigger": "4NT",
+          "meaning": "RKCB/4NT query, typically after at least one round of controls.",
+          "children": [
+            {
+              "id": "fg-rkcb-5C",
+              "trigger": "5C",
+              "meaning": "1 or 4 key cards (RKCB 1430).",
+              "filters": {},
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "rkcb": true
+                },
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5C",
+                    "keycards": [
+                      0,
+                      3
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg-rkcb-5D",
+              "trigger": "5D",
+              "meaning": "0 or 3 key cards (RKCB 1430).",
+              "filters": {},
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "rkcb": true
+                },
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5D",
+                    "keycards": [
+                      1,
+                      4
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg-rkcb-5H",
+              "trigger": "5H",
+              "meaning": "2 key cards without the trump queen (RKCB 1430).",
+              "filters": {},
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "rkcb": true
+                },
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5H",
+                    "keycards": [
+                      2,
+                      5
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "fg-rkcb-5S",
+              "trigger": "5S",
+              "meaning": "2 key cards with the trump queen (RKCB 1430).",
+              "filters": {},
+              "children": [],
+              "alert": false,
+              "facts": {
+                "convention": {
+                  "rkcb": true
+                },
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  }
+                }
+              }
+            }
+          ],
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "alert": false,
+          "facts": {
+            "convention": {
+              "rkcb": true
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "keycard"
+              }
+            }
+          }
+        },
+        {
+          "id": "fg-5NT",
+          "trigger": "5NT",
+          "meaning": "King/queen inquiry.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "children": [],
+          "alert": false
+        },
+        {
+          "id": "fg-exclusion",
+          "trigger": "5D",
+          "meaning": "Exclusion RKC style when void is known.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "children": [],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "rkcb": true,
+              "exclusion": true
+            },
+            "shortness": {
+              "suit": "{{call.suit}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "excludedSuit": "{{call.suit}}",
+                "interference": "D0P1"
+              }
+            }
+          }
+        },
+        {
+          "id": "fg-gerber",
+          "trigger": "4C",
+          "meaning": "Gerber request; usually after NT or club-centered auctions.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "children": [],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "gerber": true
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "gerber",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "gerber"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "fg-controls-and-splinters",
+      "name": "Splinter and cuebids",
+      "children": [
+        {
+          "id": "fg-splinter",
+          "trigger": "3D",
+          "meaning": "Splinter route candidate: shortness + game force in 2/1 contexts.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "children": [],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "splinter": true,
+              "twoOverOne": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "partnership": {
+              "points": {
+                "opener": {
+                  "min": 12
+                },
+                "responder": {
+                  "min": 12
+                },
+                "combined": {
+                  "min": 24
+                }
+              }
+            },
+            "fit": {
+              "confirmed": true
+            },
+            "shortness": {
+              "suit": "{{call.suit}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            }
+          }
+        },
+        {
+          "id": "fg-exclusion-2-level",
+          "trigger": "4D",
+          "meaning": "Exclusion control line when singleton/void is established.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "children": [],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "exclusion": true
+            },
+            "shortness": {
+              "suit": "{{call.suit}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "excludedSuit": "{{call.suit}}",
+                "interference": "D0P1"
+              }
+            }
+          }
+        },
+        {
+          "id": "fg-cuebid",
+          "trigger": "4H",
+          "meaning": "Cuebid style; confirm side control and fit strength.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "children": [],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "cueBid": true
+            },
+            "slam": {
+              "control": {
+                "active": true,
+                "suit": "{{call.suit}}",
+                "round": "first-or-second",
+                "elimination": {
+                  "method": "ascending-suit-elimination",
+                  "skippedSuitDeniesControl": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "fg-michaels",
+          "trigger": "2NT",
+          "meaning": "Michaels cue at 5-5 two-suit discovery point.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "children": [],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "michaels": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "fg-overcalls",
+      "name": "Overcalls and competition",
+      "children": [
+        {
+          "id": "fg-oc1",
+          "trigger": "1C",
+          "meaning": "1-level club overcall (context-dependent).",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "children": [],
+          "alert": false
+        },
+        {
+          "id": "fg-oc1D",
+          "trigger": "1D",
+          "meaning": "1-level diamond overcall.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1C"
+          },
+          "children": [],
+          "alert": false
+        },
+        {
+          "id": "fg-oc1H",
+          "trigger": "1H",
+          "meaning": "1-level heart overcall.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1C"
+          },
+          "children": [],
+          "alert": false
+        },
+        {
+          "id": "fg-oc1S",
+          "trigger": "1S",
+          "meaning": "1-level spade overcall.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1C"
+          },
+          "children": [],
+          "alert": false
+        },
+        {
+          "id": "fg-ocX",
+          "trigger": "X",
+          "meaning": "Competitive double.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1C"
+          },
+          "children": [],
+          "alert": false
+        },
+        {
+          "id": "fg-ocXX",
+          "trigger": "XX",
+          "meaning": "Redouble.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "children": [],
+          "alert": false
+        },
+        {
+          "id": "fg-oc1NT",
+          "trigger": "1NT",
+          "meaning": "NT overcall when holding stopper.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1C"
+          },
+          "children": [],
+          "alert": false
+        },
+        {
+          "id": "fg-overcall2C",
+          "trigger": "2C",
+          "meaning": "2C overcall (potentially conventional).",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1C"
+          },
+          "children": [],
+          "alert": false
+        }
+      ]
+    },
+    {
+      "id": "fg-multi-landy",
+      "name": "Multi-Landy defense to 1NT",
+      "notes": "All branches assume the opponents opened 1NT and pass between displayed partnership calls.",
+      "children": [
+        {
+          "id": "fg-ml-2C",
+          "trigger": "2C",
+          "meaning": "Multi-Landy: both majors, typically at least 5-4.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1NT",
+            "minSuit": {
+              "H": 4,
+              "S": 4
+            }
+          },
+          "children": [
+            {
+              "id": "fg-ml-2C-2D",
+              "trigger": "2D",
+              "meaning": "No fit in majors.",
+              "children": [
+                {
+                  "id": "fg-ml-2C-2D-2H",
+                  "trigger": "2H",
+                  "meaning": "Hearts.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg-ml-2C-2D-2S",
+                  "trigger": "2S",
+                  "meaning": "Spades.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {
+                "maxSuit": {
+                  "H": 3,
+                  "S": 3
+                }
+              },
+              "alert": false,
+              "facts": {
+                "fit": {
+                  "confirmed": true
+                }
+              }
+            },
+            {
+              "id": "fg-ml-2C-2H",
+              "trigger": "2H",
+              "meaning": "Fit in hearts",
+              "filters": {
+                "minSuit": {
+                  "H": 4
+                }
+              },
+              "children": [],
+              "generated": null,
+              "alert": false,
+              "facts": {
+                "fit": {
+                  "confirmed": true
+                }
+              }
+            },
+            {
+              "id": "fg-ml-2C-2S",
+              "trigger": "2S",
+              "meaning": "Fit in spade",
+              "filters": {
+                "minSuit": {
+                  "S": 4
+                }
+              },
+              "children": [],
+              "generated": null,
+              "alert": false,
+              "facts": {
+                "fit": {
+                  "confirmed": true
+                }
+              }
+            }
+          ],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "multiLandy": true
+            }
+          }
+        },
+        {
+          "id": "fg-ml-2D",
+          "trigger": "2D",
+          "meaning": "Multi-Landy: one major, usually a six-card suit.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1NT"
+          },
+          "children": [
+            {
+              "id": "fg-ml-2D-2H",
+              "trigger": "2H",
+              "meaning": "Pass or correct: hearts is acceptable; 2S asks for the other major.",
+              "children": [
+                {
+                  "id": "fg-ml-2D-2H-2S",
+                  "trigger": "2S",
+                  "meaning": "Spades.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {},
+              "alert": false
+            }
+          ],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "multiLandy": true
+            }
+          }
+        },
+        {
+          "id": "fg-ml-2H",
+          "trigger": "2H",
+          "meaning": "Multi-Landy: hearts and a minor.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1NT",
+            "minSuit": {
+              "H": 5
+            }
+          },
+          "children": [
+            {
+              "id": "fg-ml-2H-2NT",
+              "trigger": "2NT",
+              "meaning": "Advancer asks for the minor.",
+              "children": [
+                {
+                  "id": "fg-ml-2H-2NT-3C",
+                  "trigger": "3C",
+                  "meaning": "Clubs.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg-ml-2H-2NT-3D",
+                  "trigger": "3D",
+                  "meaning": "Diamonds.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {},
+              "alert": false
+            }
+          ],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "multiLandy": true
+            }
+          }
+        },
+        {
+          "id": "fg-ml-2S",
+          "trigger": "2S",
+          "meaning": "Multi-Landy: spades and a minor.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1NT",
+            "minSuit": {
+              "S": 5
+            }
+          },
+          "children": [
+            {
+              "id": "fg-ml-2S-2NT",
+              "trigger": "2NT",
+              "meaning": "Advancer asks for the minor.",
+              "children": [
+                {
+                  "id": "fg-ml-2S-2NT-3C",
+                  "trigger": "3C",
+                  "meaning": "Clubs.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg-ml-2S-2NT-3D",
+                  "trigger": "3D",
+                  "meaning": "Diamonds.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {},
+              "alert": false
+            }
+          ],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "multiLandy": true
+            }
+          }
+        },
+        {
+          "id": "fg-ml-2NT",
+          "trigger": "2NT",
+          "meaning": "Multi-Landy: both minors, typically 5-5 or better.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1NT",
+            "minSuit": {
+              "C": 5,
+              "D": 5
+            }
+          },
+          "children": [
+            {
+              "id": "fg-ml-2NT-3C",
+              "trigger": "3C",
+              "meaning": "Advancer selects clubs or gives a pass-or-correct preference.",
+              "children": [
+                {
+                  "id": "fg-ml-2NT-3C-3D",
+                  "trigger": "3D",
+                  "meaning": "Correct to diamonds.",
+                  "filters": {},
+                  "children": [],
+                  "alert": false
+                }
+              ],
+              "filters": {},
+              "alert": false
+            }
+          ],
+          "alert": false,
+          "facts": {
+            "convention": {
+              "multiLandy": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "fg-weak-openings",
+      "name": "Weak openings and preempts",
+      "children": [
+        {
+          "id": "fg-weak-club-opening",
+          "nodeType": "group",
+          "label": "Weak club opening",
+          "meaning": "Parallel preemptive opening options in club: 3C, 4C. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 6,
+              "max": 10
+            },
+            "suit": "C",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "fg-3C",
+              "trigger": "3C",
+              "meaning": "Preemptive 3C opening: 6–10 HCP and a 7-card club suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "C",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-club-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "C": 7
+                },
+                "maxSuit": {
+                  "C": 7
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-4C",
+              "trigger": "4C",
+              "meaning": "Preemptive 4C opening: 6–10 HCP and a 8+-card club suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "C",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-club-opening"
+              },
+              "filters": {
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "C": 8
+                },
+                "maxSuit": {
+                  "C": 13
+                },
+                "auctionRole": "opening"
+              },
+              "children": [],
+              "alert": false
+            }
+          ],
+          "filters": {},
+          "alert": false
+        },
+        {
+          "id": "fg-weak-diamond-opening",
+          "nodeType": "group",
+          "label": "Weak diamond opening",
+          "meaning": "Parallel preemptive opening options in diamond: 2D, 3D, 4D. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 6,
+              "max": 10
+            },
+            "suit": "D",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "fg-2D",
+              "trigger": "2D",
+              "meaning": "Preemptive 2D opening (catalogue alternative): 6–10 HCP and a 6-card D suit. This is an alternative opening, not a continuation after the parent node.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "D",
+                "longestSuitLength": {
+                  "min": 6,
+                  "max": 6
+                },
+                "bidLevel": 2,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-diamond-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "D": 6
+                },
+                "maxSuit": {
+                  "D": 6
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-3D",
+              "trigger": "3D",
+              "meaning": "Preemptive 3D opening: 6–10 HCP and a 7-card diamond suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "D",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-diamond-opening"
+              },
+              "filters": {
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "D": 7
+                },
+                "maxSuit": {
+                  "D": 7
+                },
+                "auctionRole": "opening"
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-4D",
+              "trigger": "4D",
+              "meaning": "Preemptive 4D opening: 6–10 HCP and a 8+-card diamond suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "D",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-diamond-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "D": 8
+                },
+                "maxSuit": {
+                  "D": 13
+                }
+              },
+              "children": [],
+              "alert": false
+            }
+          ],
+          "filters": {},
+          "alert": false
+        },
+        {
+          "id": "fg-weak-heart-opening",
+          "nodeType": "group",
+          "label": "Weak heart opening",
+          "meaning": "Parallel preemptive opening options in heart: 2H, 3H, 4H. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 6,
+              "max": 10
+            },
+            "suit": "H",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "fg-2H",
+              "trigger": "2H",
+              "meaning": "Preemptive 2H opening (catalogue alternative): 6–10 HCP and a 6-card H suit. This is an alternative opening, not a continuation after the parent node.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "H",
+                "longestSuitLength": {
+                  "min": 6,
+                  "max": 6
+                },
+                "bidLevel": 2,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-heart-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "H": 6
+                },
+                "maxSuit": {
+                  "H": 6
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-3H",
+              "trigger": "3H",
+              "meaning": "Preemptive 3H opening: 6–10 HCP and a 7-card heart suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "H",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-heart-opening"
+              },
+              "filters": {
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "H": 7
+                },
+                "maxSuit": {
+                  "H": 7
+                },
+                "auctionRole": "opening"
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-4H",
+              "trigger": "4H",
+              "meaning": "Preemptive 4H opening: 6–10 HCP and a 8+-card heart suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "H",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-heart-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "H": 8
+                },
+                "maxSuit": {
+                  "H": 13
+                }
+              },
+              "children": [],
+              "alert": false
+            }
+          ],
+          "filters": {},
+          "alert": false
+        },
+        {
+          "id": "fg-weak-spade-opening",
+          "nodeType": "group",
+          "label": "Weak spade opening",
+          "meaning": "Parallel preemptive opening options in spade: 2S, 3S, 4S. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 6,
+              "max": 10
+            },
+            "suit": "S",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "fg-2S",
+              "trigger": "2S",
+              "meaning": "Preemptive 2S opening (catalogue alternative): 6–10 HCP and a 6-card S suit. This is an alternative opening, not a continuation after the parent node.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "S",
+                "longestSuitLength": {
+                  "min": 6,
+                  "max": 6
+                },
+                "bidLevel": 2,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-spade-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "S": 6
+                },
+                "maxSuit": {
+                  "S": 6
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-3S",
+              "trigger": "3S",
+              "meaning": "Preemptive 3S opening: 6–10 HCP and a 7-card spade suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "S",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-spade-opening"
+              },
+              "filters": {
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "S": 7
+                },
+                "maxSuit": {
+                  "S": 7
+                },
+                "auctionRole": "opening"
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-4S",
+              "trigger": "4S",
+              "meaning": "Preemptive 4S opening: 6–10 HCP and a 8+-card spade suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 6,
+                  "max": 10
+                },
+                "longestSuit": "S",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "fg-weak-spade-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "S": 8
+                },
+                "maxSuit": {
+                  "S": 13
+                }
+              },
+              "children": [],
+              "alert": false
+            }
+          ],
+          "filters": {},
+          "alert": false
+        }
+      ]
+    },
+    {
+      "id": "convention-1788925263125",
+      "name": "Ace and Keycard Asks",
+      "children": [
+        {
+          "id": "rkcb-4NT",
+          "trigger": "4NT",
+          "meaning": "Roman Keycard Asking for 4 aces and  trump King",
+          "filters": {},
+          "children": [
+            {
+              "id": "rkcb-4NT-5C",
+              "trigger": "5C",
+              "meaning": "1 or 4 key cards (RKCB 1430).",
+              "filters": {},
+              "children": [],
+              "generated": null,
+              "alert": false,
+              "facts": {
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5C",
+                    "keycards": [
+                      1,
+                      4
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "rkcb-4NT-5D",
+              "trigger": "5D",
+              "meaning": "0 or 3 key cards (RKCB 1430).",
+              "filters": {},
+              "children": [],
+              "generated": null,
+              "alert": false,
+              "facts": {
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5D",
+                    "keycards": [
+                      3,
+                      0
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "rkcb-4NT-5H",
+              "trigger": "5H",
+              "meaning": "2 key cards without the trump queen (RKCB 1430).",
+              "filters": {},
+              "children": [],
+              "generated": null,
+              "alert": false,
+              "facts": {
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5H",
+                    "keycards": [
+                      2,
+                      5
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "rkcb-4NT-5S",
+              "trigger": "5S",
+              "meaning": "2 key cards with the trump queen (RKCB 1430).",
+              "filters": {},
+              "children": [],
+              "generated": null,
+              "alert": false,
+              "facts": {
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5S",
+                    "keycards": [
+                      2,
+                      5
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "generated": null,
+          "alert": false,
+          "facts": {
+            "convention": {
+              "rkcb": true
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "keycard"
+              }
+            }
+          }
+        },
+        {
+          "id": "node-6",
+          "trigger": "5NT",
+          "meaning": "King Asks, responder answers the king in ascending order; stop back at trump",
+          "filters": {},
+          "children": [
+            {
+              "id": "node-7",
+              "trigger": "6C",
+              "meaning": "Has Club King",
+              "filters": {},
+              "children": [],
+              "generated": null,
+              "alert": false
+            },
+            {
+              "id": "node-8",
+              "trigger": "6D",
+              "meaning": "has Diamond King",
+              "filters": {},
+              "children": [],
+              "generated": null,
+              "alert": false
+            },
+            {
+              "id": "node-9",
+              "trigger": "6H",
+              "meaning": "has Heart King",
+              "filters": {},
+              "children": [],
+              "generated": null,
+              "alert": false
+            },
+            {
+              "id": "node-10",
+              "trigger": "6S",
+              "meaning": "has Spade King",
+              "filters": {},
+              "children": [],
+              "generated": null,
+              "alert": false
+            }
+          ],
+          "generated": null,
+          "alert": false
+        }
+      ],
+      "notes": ""
+    }
+  ],
+  "openingProfile": {
+    "1NT": {
+      "pointRange": {
+        "min": 15,
+        "max": 17
+      },
+      "suitLengthRange": {
+        "C": {
+          "min": 2,
+          "max": 5
+        },
+        "D": {
+          "min": 2,
+          "max": 5
+        },
+        "H": {
+          "min": 2,
+          "max": 5
+        },
+        "S": {
+          "min": 2,
+          "max": 5
+        }
+      },
+      "shape": "balanced"
+    },
+    "1Major": {
+      "pointRange": {
+        "min": 12,
+        "max": 21
+      },
+      "suitLengthRange": {
+        "H": {
+          "min": 5,
+          "max": 13
+        },
+        "S": {
+          "min": 5,
+          "max": 13
+        }
+      }
+    },
+    "1Minor": {
+      "clubs": {
+        "pointRange": {
+          "min": 12,
+          "max": 20
+        },
+        "suitLengthRange": {
+          "min": 3,
+          "max": 13
+        }
+      },
+      "diamonds": {
+        "pointRange": {
+          "min": 12,
+          "max": 20
+        },
+        "suitLengthRange": {
+          "min": 3,
+          "max": 13
+        }
+      }
+    },
+    "2NT": {
+      "pointRange": null,
+      "suitLengthRange": null,
+      "treatment": "not a natural opening in this profile"
+    },
+    "strongOpening": {
+      "bid": "1C",
+      "pointRange": {
+        "min": 12,
+        "max": 20
+      }
+    },
+    "weakTwos": {
+      "enabled": true,
+      "suits": [
+        "D",
+        "H",
+        "S"
+      ],
+      "pointRange": {
+        "min": 6,
+        "max": 10
+      },
+      "suitLengthRange": {
+        "min": 6,
+        "max": 13
+      }
+    },
+    "weakOpenings": {
+      "pointRange": {
+        "min": 6,
+        "max": 10
+      },
+      "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+      "ladders": [
+        {
+          "suit": "C",
+          "levels": [
+            3,
+            4
+          ],
+          "minimumLength": 7
+        },
+        {
+          "suit": "D",
+          "levels": [
+            2,
+            3,
+            4
+          ],
+          "minimumLength": 6
+        },
+        {
+          "suit": "H",
+          "levels": [
+            2,
+            3,
+            4
+          ],
+          "minimumLength": 6
+        },
+        {
+          "suit": "S",
+          "levels": [
+            2,
+            3,
+            4
+          ],
+          "minimumLength": 6
+        }
+      ]
+    }
+  },
+  "priorityPolicy": {
+    "2/1GameForce": "highest when the configured HCP range qualifies: 1D-2C, 1H-2C/2D, and 1S-2C/2D/2H only",
+    "priority": 100
+  },
+  "factSchema": {
+    "id": "bridge-bidding-facts",
+    "version": "1.0",
+    "patchSemantics": "deep-merge",
+    "deleteSentinel": {
+      "$delete": true
+    },
+    "templates": [
+      "{{M}}",
+      "{{X}}",
+      "{{Y}}",
+      "{{Z}}",
+      "{{W}}",
+      "{{call.code}}",
+      "{{call.suit}}"
+    ]
+  },
+  "initialFacts": {
+    "factLayer": {
+      "schema": "bridge-bidding-facts",
+      "version": "1.0",
+      "merge": "deep-patch"
+    },
+    "agreement": {
+      "aceAsk": {
+        "method": "rkcb-1430",
+        "interference": "D0P1",
+        "d0p1": {
+          "pass": {
+            "step": 1,
+            "keycards": [
+              1,
+              4
+            ]
+          },
+          "double": {
+            "step": 2,
+            "keycards": [
+              0,
+              3
+            ]
+          },
+          "nextAvailable": [
+            {
+              "step": 3,
+              "keycards": [
+                2
+              ],
+              "trumpQueen": false
+            },
+            {
+              "step": 4,
+              "keycards": [
+                2
+              ],
+              "trumpQueen": true
+            }
+          ]
+        }
+      }
+    },
+    "forcing": {
+      "game": false,
+      "round": false
+    },
+    "fit": {
+      "confirmed": false
+    }
+  },
+  "version": "0.3",
+  "sourceWorkbook": "FG Bidding System in 30 minutes (1).xlsx",
+  "sequenceRules": [
+    {
+      "id": "personal-fgv0-3-facts-two-over-one-entry",
+      "expression": "1M-2X",
+      "where": [
+        "X<M"
+      ],
+      "requiresAgreement": [],
+      "meaning": "2/1 game force: each partner has shown at least 12 points.",
+      "priority": 940,
+      "facts": {
+        "forcing": {
+          "game": true,
+          "source": "2/1"
+        },
+        "partnership": {
+          "points": {
+            "opener": {
+              "min": 12
+            },
+            "responder": {
+              "min": 12
+            },
+            "combined": {
+              "min": 24
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "personal-fgv0-3-facts-two-over-one-major-fit",
+      "expression": "1M-2X-2Y-#M",
+      "where": [
+        "X<M"
+      ],
+      "requiresAgreement": [
+        "M"
+      ],
+      "meaning": "2/1 major fit confirmed: opener has five and responder has three or more.",
+      "priority": 960,
+      "facts": {
+        "forcing": {
+          "game": true,
+          "source": "2/1"
+        },
+        "fit": {
+          "confirmed": true,
+          "suit": "{{M}}",
+          "openerLength": 5,
+          "responderLength": 3,
+          "combinedMinimum": 8
+        },
+        "partnership": {
+          "points": {
+            "opener": {
+              "min": 12
+            },
+            "responder": {
+              "min": 12
+            },
+            "combined": {
+              "min": 24
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "personal-fgv0-3-facts-control-phase",
+      "expression": "1H-2C-2D-2H-2S",
+      "where": [],
+      "requiresAgreement": [
+        "H"
+      ],
+      "meaning": "2/1 phase III: spades is a first- or second-round control; skipped suits deny control.",
+      "priority": 980,
+      "alert": true,
+      "facts": {
+        "forcing": {
+          "game": true,
+          "source": "2/1"
+        },
+        "fit": {
+          "confirmed": true,
+          "suit": "H",
+          "openerLength": 5,
+          "responderLength": 3,
+          "combinedMinimum": 8
+        },
+        "slam": {
+          "control": {
+            "active": true,
+            "suit": "S",
+            "round": "first-or-second",
+            "elimination": {
+              "method": "ascending-suit-elimination",
+              "skippedSuitDeniesControl": true
+            }
+          }
+        },
+        "partnership": {
+          "points": {
+            "opener": {
+              "min": 12
+            },
+            "responder": {
+              "min": 12
+            },
+            "combined": {
+              "min": 24
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "personal-fgv0-3-facts-accelerated-rkcb",
+      "expression": "1H-2C-2D-2H-2S-2NT",
+      "where": [],
+      "requiresAgreement": [
+        "H"
+      ],
+      "meaning": "Accelerated RKCB after a confirmed heart fit and one control bid.",
+      "priority": 1000,
+      "alert": true,
+      "facts": {
+        "slam": {
+          "interest": true,
+          "aceAsk": {
+            "active": true,
+            "method": "rkcb-1430",
+            "type": "keycard",
+            "accelerated": true,
+            "agreedSuit": "H",
+            "interference": "D0P1"
+          }
+        }
+      }
+    },
+    {
+      "id": "personal-fgv0-3-facts-splinter",
+      "expression": "1D-2C-2H-3S",
+      "where": [],
+      "requiresAgreement": [],
+      "meaning": "2/1 splinter: heart support with zero or one spade.",
+      "priority": 990,
+      "alert": true,
+      "facts": {
+        "forcing": {
+          "game": true,
+          "source": "2/1"
+        },
+        "fit": {
+          "confirmed": true,
+          "suit": "H",
+          "responderLength": 3,
+          "combinedMinimum": 8
+        },
+        "shortness": {
+          "suit": "S",
+          "min": 0,
+          "max": 1
+        },
+        "slam": {
+          "interest": true
+        }
+      }
+    },
+    {
+      "id": "personal-fgv0-3-facts-exclusion-rkcb",
+      "expression": "1D-2C-2H-3S-4C-5D",
+      "where": [],
+      "requiresAgreement": [],
+      "meaning": "Exclusion RKCB in diamonds, asking for key cards outside the diamond void.",
+      "priority": 1010,
+      "alert": true,
+      "facts": {
+        "fit": {
+          "confirmed": true,
+          "suit": "H"
+        },
+        "shortness": {
+          "suit": "D",
+          "exact": 0
+        },
+        "slam": {
+          "aceAsk": {
+            "active": true,
+            "method": "rkcb-1430",
+            "type": "exclusion",
+            "agreedSuit": "H",
+            "excludedSuit": "D",
+            "interference": "D0P1"
+          }
+        }
+      }
+    },
+    {
+      "id": "personal-fgv0-3-facts-fourth-suit-stopper",
+      "expression": "1D-2C-2H-2S-3C",
+      "where": [],
+      "requiresAgreement": [],
+      "meaning": "Fourth-suit inquiry asks for a club stopper before notrump.",
+      "priority": 970,
+      "alert": true,
+      "facts": {
+        "forcing": {
+          "round": true
+        },
+        "inquiry": {
+          "type": "stopper",
+          "suit": "C"
+        }
+      }
+    },
+    {
+      "id": "personal-fgv0-3-d0p1-pass",
+      "expression": "4NT-^#X-P",
+      "where": [],
+      "requiresAgreement": [],
+      "matchSuffix": true,
+      "alert": true,
+      "meaning": "D0P1 after interference: pass shows one or four key cards.",
+      "priority": 1100,
+      "facts": {
+        "slam": {
+          "aceAsk": {
+            "active": true,
+            "method": "rkcb-1430",
+            "interference": "D0P1"
+          },
+          "response": {
+            "convention": "D0P1",
+            "action": "pass",
+            "step": 1,
+            "keycards": [
+              1,
+              4
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "personal-fgv0-3-d0p1-double",
+      "expression": "4NT-^#X-X",
+      "where": [],
+      "requiresAgreement": [],
+      "matchSuffix": true,
+      "alert": true,
+      "meaning": "D0P1 after interference: double shows zero or three key cards.",
+      "priority": 1100,
+      "facts": {
+        "slam": {
+          "aceAsk": {
+            "active": true,
+            "method": "rkcb-1430",
+            "interference": "D0P1"
+          },
+          "response": {
+            "convention": "D0P1",
+            "action": "double",
+            "step": 2,
+            "keycards": [
+              0,
+              3
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

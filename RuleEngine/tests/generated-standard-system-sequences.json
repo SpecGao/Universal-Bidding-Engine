@@ -1,0 +1,1858 @@
+[
+  {
+    "id": "regex-auction-001",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-002",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1D",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-003",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1D",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-004",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "W",
+    "systemSide": "EW",
+    "auction": [
+      "P",
+      "P",
+      "1D",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-005",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-006",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1H",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-007",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1H",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-008",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "W",
+    "systemSide": "EW",
+    "auction": [
+      "P",
+      "P",
+      "1H",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-009",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H",
+      "Y": "D"
+    }
+  },
+  {
+    "id": "regex-auction-010",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1H",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H",
+      "Y": "D"
+    }
+  },
+  {
+    "id": "regex-auction-011",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1H",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H",
+      "Y": "D"
+    }
+  },
+  {
+    "id": "regex-auction-012",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "W",
+    "systemSide": "EW",
+    "auction": [
+      "P",
+      "P",
+      "1H",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H",
+      "Y": "D"
+    }
+  },
+  {
+    "id": "regex-auction-013",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1S",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-014",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1S",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-015",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-016",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "W",
+    "systemSide": "EW",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "C"
+    }
+  },
+  {
+    "id": "regex-auction-017",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1S",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "D"
+    }
+  },
+  {
+    "id": "regex-auction-018",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1S",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "D"
+    }
+  },
+  {
+    "id": "regex-auction-019",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "D"
+    }
+  },
+  {
+    "id": "regex-auction-020",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "W",
+    "systemSide": "EW",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "D"
+    }
+  },
+  {
+    "id": "regex-auction-021",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1S",
+      "P",
+      "2H"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "H"
+    }
+  },
+  {
+    "id": "regex-auction-022",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1S",
+      "P",
+      "2H"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "H"
+    }
+  },
+  {
+    "id": "regex-auction-023",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2H"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "H"
+    }
+  },
+  {
+    "id": "regex-auction-024",
+    "category": "two-over-one-positive",
+    "systemId": "two-over-one",
+    "dealer": "W",
+    "systemSide": "EW",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2H"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S",
+      "Y": "H"
+    }
+  },
+  {
+    "id": "regex-auction-025",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-026",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-027",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "2H"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-028",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "2S"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-029",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-030",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "2H"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-031",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "2S"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-032",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2H"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-033",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2S"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-034",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1S",
+      "P",
+      "2S"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-035",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1NT",
+      "P",
+      "2C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-036",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1NT",
+      "P",
+      "2D"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-037",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1NT",
+      "P",
+      "2H"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-038",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1NT",
+      "P",
+      "2S"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-039",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1S",
+      "P",
+      "3H"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-040",
+    "category": "two-over-one-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "3C"
+    ],
+    "expectRuleId": "two-over-one-learned-sequence",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-041",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "C"
+    }
+  },
+  {
+    "id": "regex-auction-042",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "2D",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D"
+    }
+  },
+  {
+    "id": "regex-auction-043",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-044",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-045",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2C",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-046",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-047",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2D",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D"
+    }
+  },
+  {
+    "id": "regex-auction-048",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "1D",
+      "P",
+      "1H",
+      "P",
+      "3C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "C"
+    }
+  },
+  {
+    "id": "regex-auction-049",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1H",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-050",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-051",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "C"
+    }
+  },
+  {
+    "id": "regex-auction-052",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "2D",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D"
+    }
+  },
+  {
+    "id": "regex-auction-053",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-054",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-055",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2C",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-056",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-057",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2D",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D"
+    }
+  },
+  {
+    "id": "regex-auction-058",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "1D",
+      "P",
+      "1H",
+      "P",
+      "3C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "C"
+    }
+  },
+  {
+    "id": "regex-auction-059",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1H",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-060",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-061",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "C"
+    }
+  },
+  {
+    "id": "regex-auction-062",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "2D",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D"
+    }
+  },
+  {
+    "id": "regex-auction-063",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-064",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-065",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2C",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-066",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-067",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2D",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D"
+    }
+  },
+  {
+    "id": "regex-auction-068",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "1D",
+      "P",
+      "1H",
+      "P",
+      "3C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "C"
+    }
+  },
+  {
+    "id": "regex-auction-069",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1H",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-070",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-071",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "C"
+    }
+  },
+  {
+    "id": "regex-auction-072",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "2D",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D"
+    }
+  },
+  {
+    "id": "regex-auction-073",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-074",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-075",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2C",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-076",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-077",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1D",
+      "P",
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2D",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "D"
+    }
+  },
+  {
+    "id": "regex-auction-078",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "1D",
+      "P",
+      "1H",
+      "P",
+      "3C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "C"
+    }
+  },
+  {
+    "id": "regex-auction-079",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "E",
+    "systemSide": "EW",
+    "auction": [
+      "1H",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "H"
+    }
+  },
+  {
+    "id": "regex-auction-080",
+    "category": "explicit-fit-blackwood-positive",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "P",
+      "P",
+      "1S",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": true,
+    "expectedBindings": {
+      "X": "S"
+    }
+  },
+  {
+    "id": "regex-auction-081",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-082",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-083",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1NT",
+      "P",
+      "3NT",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-084",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "1D",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-085",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "standard-natural",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2C",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "natural-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-086",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-087",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-088",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1NT",
+      "P",
+      "3NT",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-089",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "1D",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-090",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "two-over-one",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2C",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "two-over-one-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-091",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-092",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-093",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1NT",
+      "P",
+      "3NT",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-094",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "1D",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-095",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "precision-1c",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2C",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "precision-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-096",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-097",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "1S",
+      "P",
+      "2H",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-098",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1NT",
+      "P",
+      "3NT",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-099",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1C",
+      "P",
+      "1D",
+      "P",
+      "2C",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": false
+  },
+  {
+    "id": "regex-auction-100",
+    "category": "explicit-fit-blackwood-negative",
+    "systemId": "acol",
+    "dealer": "N",
+    "systemSide": "NS",
+    "auction": [
+      "1H",
+      "P",
+      "2C",
+      "P",
+      "2S",
+      "P",
+      "4NT"
+    ],
+    "expectRuleId": "acol-explicit-fit-blackwood",
+    "expectMatched": false
+  }
+]

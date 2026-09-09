@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bridge Rule Engine - Quick Customization</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="systembuilder-body" id="app">
+  <div class="systembuilder-shell">
+    <div class="page-shell quick-customization-shell">
+      <header>
+        <h1>Quick Customization</h1>
+        <nav class="page-links" aria-label="Quick customization navigation">
+          <a href="systembuilder.html" class="home">Convention tree editor</a>
+          <a href="index.html" class="home">Back to workspace</a>
+        </nav>
+      </header>
+
+      <main class="panel-grid">
+        <section class="panel quick-intro">
+          <h2>Start with your opening structure</h2>
+          <p>
+            This guided setup creates a working copy of a base system, applies your opening ranges and conventions,
+            then opens its convention tree for detailed editing. It does not alter the included base systems.
+          </p>
+        </section>
+
+        <form id="quickCustomizationForm" class="customization-form">
+          <section class="panel">
+            <h2>System</h2>
+            <div class="form-grid form-grid--wide">
+              <label>
+                Name for your system
+                <input id="customSystemName" name="systemName" type="text" maxlength="80" value="My natural system" required />
+              </label>
+              <label>
+                Start from
+                <select id="baseSystemSelect" name="baseSystem"></select>
+              </label>
+            </div>
+            <div id="baseSystemSummary" class="base-system-summary" aria-live="polite"></div>
+          </section>
+
+          <section class="panel">
+            <h2>Opening ranges and suit lengths</h2>
+            <p class="meta-note">Point ranges are aHCP. Natural openings are described in the generated convention tree.</p>
+            <div class="opening-grid">
+              <fieldset class="opening-card">
+                <legend>1NT</legend>
+                <p class="meta-note">Balanced hand</p>
+                <div class="range-row">
+                  <label>Minimum aHCP<input name="oneNtMin" type="number" min="0" max="40" value="15" required /></label>
+                  <label>Maximum aHCP<input name="oneNtMax" type="number" min="0" max="40" value="17" required /></label>
+                </div>
+              </fieldset>
+
+              <fieldset class="opening-card">
+                <legend>1 of a major</legend>
+                <p class="meta-note">Applies to 1♥ and 1♠</p>
+                <div class="range-row">
+                  <label>Minimum aHCP<input name="oneMajorMin" type="number" min="0" max="40" value="12" required /></label>
+                  <label>Maximum aHCP<input name="oneMajorMax" type="number" min="0" max="40" value="21" required /></label>
+                </div>
+                <label>Minimum major length
+                  <select name="majorLength"><option value="4">4 cards</option><option value="5" selected>5 cards</option></select>
+                </label>
+              </fieldset>
+
+              <fieldset class="opening-card">
+                <legend>1 of a minor</legend>
+                <p class="meta-note">Applies to a natural 1♣ and 1♦</p>
+                <div class="range-row">
+                  <label>Minimum aHCP<input name="oneMinorMin" type="number" min="0" max="40" value="12" required /></label>
+                  <label>Maximum aHCP<input name="oneMinorMax" type="number" min="0" max="40" value="20" required /></label>
+                </div>
+                <label>Minimum minor length
+                  <select name="minorLength"><option value="2">2 cards</option><option value="3" selected>3 cards</option><option value="4">4 cards</option><option value="5">5 cards</option></select>
+                </label>
+              </fieldset>
+
+              <fieldset class="opening-card">
+                <legend>2NT</legend>
+                <label class="switch-row"><input id="twoNtEnabled" name="twoNtEnabled" type="checkbox" checked /> Use a natural 2NT opening</label>
+                <p class="meta-note">Balanced hand; turn this off for a strong-club structure that routes all strong balanced hands through 1♣.</p>
+                <div class="range-row" data-two-nt-control>
+                  <label>Minimum aHCP<input name="twoNtMin" type="number" min="0" max="40" value="20" required /></label>
+                  <label>Maximum aHCP<input name="twoNtMax" type="number" min="0" max="40" value="21" required /></label>
+                </div>
+              </fieldset>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Strong and weak two-level openings</h2>
+            <div class="form-grid form-grid--wide">
+              <fieldset class="choice-group">
+                <legend>Artificial strong opening</legend>
+                <label class="choice"><input type="radio" name="strongOpening" value="2C" checked /> 2♣ is strong and artificial</label>
+                <label class="choice"><input type="radio" name="strongOpening" value="1C" /> 1♣ is strong and artificial</label>
+                <label class="choice"><input type="radio" name="strongOpening" value="none" /> Neither—keep 1♣ natural and omit an artificial strong opening</label>
+                <div class="range-row">
+                  <label>Minimum aHCP<input name="strongMin" type="number" min="0" max="40" value="22" required /></label>
+                  <label>Maximum aHCP<input name="strongMax" type="number" min="0" max="40" value="40" required /></label>
+                </div>
+              </fieldset>
+
+              <fieldset class="choice-group">
+                <legend>Weak twos</legend>
+                <label class="switch-row"><input id="weakTwosEnabled" name="weakTwosEnabled" type="checkbox" checked /> Use weak two openings</label>
+                <div class="range-row" data-weak-two-control>
+                  <label>Minimum aHCP<input name="weakTwoMin" type="number" min="0" max="40" value="5" required /></label>
+                  <label>Maximum aHCP<input name="weakTwoMax" type="number" min="0" max="40" value="10" required /></label>
+                  <label>Minimum suit length
+                    <select name="weakTwoLength"><option value="5">5 cards</option><option value="6" selected>6 cards</option><option value="7">7 cards</option></select>
+                  </label>
+                </div>
+                <div class="checkbox-row" data-weak-two-control>
+                  <label class="choice"><input name="weakTwoSuits" type="checkbox" value="D" checked /> 2♦</label>
+                  <label class="choice"><input name="weakTwoSuits" type="checkbox" value="H" checked /> 2♥</label>
+                  <label class="choice"><input name="weakTwoSuits" type="checkbox" value="S" checked /> 2♠</label>
+                </div>
+              </fieldset>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Intermediate conventions</h2>
+            <p class="meta-note">These add or remove the standard convention branches from your customized copy.</p>
+            <div class="convention-options">
+              <label class="switch-row"><input name="stayman" type="checkbox" checked /> Stayman after 1NT</label>
+              <label class="switch-row"><input name="transfers" type="checkbox" checked /> Jacoby transfers after 1NT</label>
+              <label class="switch-row"><input name="gerber" type="checkbox" /> Gerber (4♣ ace ask)</label>
+              <label class="switch-row"><input name="splinter" type="checkbox" /> Splinter raises after a major opening</label>
+              <fieldset class="choice-group slam-choice">
+                <legend>Slam tool</legend>
+                <label class="choice"><input type="radio" name="slamTool" value="none" /> None</label>
+                <label class="choice"><input type="radio" name="slamTool" value="blackwood" checked /> Blackwood</label>
+                <label class="choice"><input type="radio" name="slamTool" value="rkcb" /> Roman Key Card Blackwood</label>
+              </fieldset>
+            </div>
+          </section>
+
+          <section class="panel quick-actions">
+            <div>
+              <h2>Review and edit</h2>
+              <p class="meta-note">The next step opens the full convention tree, where every generated node remains editable.</p>
+            </div>
+            <button type="submit" class="primary-action">Create system and open convention tree</button>
+            <p id="quickCustomizationStatus" class="status-message" role="status" aria-live="polite"></p>
+          </section>
+        </form>
+      </main>
+    </div>
+  </div>
+  <script src="Customization/system-data.js"></script>
+  <script src="quick-customization.js"></script>
+</body>
+</html>

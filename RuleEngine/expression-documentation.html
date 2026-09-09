@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bridge Rule Engine - Expression Reference</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body id="app" class="documentation-body">
+  <main class="page-shell documentation-shell">
+    <header>
+      <h1>Bidding expression reference</h1>
+      <nav class="page-links" aria-label="Expression reference navigation">
+        <a href="systembuilder.html" class="home">Back to SystemBuilder</a>
+        <a href="index.html" class="home">Workspace</a>
+      </nav>
+    </header>
+
+    <div class="documentation-content">
+      <section class="documentation-intro">
+        <p class="documentation-kicker">Legal auctions, compact rules</p>
+        <h2>Describe a family of bidding sequences once.</h2>
+        <p>
+          The rule engine compiles every expression into a legality-aware state machine. It learns symbolic suits,
+          prunes concrete expansions that violate Bridge bidding order, and rejects expressions for which no legal
+          auction exists.
+        </p>
+      </section>
+
+      <section class="documentation-section" id="calls-and-symbols">
+        <h2>Calls and learned symbols</h2>
+        <div class="documentation-table-wrap">
+          <table class="documentation-table">
+            <thead><tr><th>Form</th><th>Meaning</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td><code>1C</code>, <code>4NT</code>, <code>P</code>, <code>X</code>, <code>XX</code></td><td>An exact call. A bare <code>X</code> is double.</td><td><code>1NT-2C</code></td></tr>
+              <tr><td><code>#D</code></td><td>Diamonds at any independently selected legal level.</td><td><code>1D-#D-4D</code></td></tr>
+              <tr><td><code>M</code></td><td>A learned major: hearts or spades. Reusing <code>M</code> means the same suit.</td><td><code>1M-2M</code></td></tr>
+              <tr><td><code>m</code></td><td>A learned minor: clubs or diamonds. Case matters.</td><td><code>1m-3m</code></td></tr>
+              <tr><td><code>X Y Z W</code></td><td>Distinct learned non-NT suits, first introduced in that order.</td><td><code>1X-2Y</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="documentation-callout">
+          <strong>Learning is persistent within one match.</strong>
+          If <code>1X</code> matches <code>1H</code>, a later <code>2X</code> can only match <code>2H</code>.
+          The <code>#</code> level is different: each occurrence is resolved independently.
+        </div>
+      </section>
+
+      <section class="documentation-section" id="sequence-syntax">
+        <h2>Sequence syntax</h2>
+        <div class="documentation-grid">
+          <article><code>A-B</code><h3>Sequence</h3><p>Match A followed by B.</p></article>
+          <article><code>(A|B)</code><h3>Alternative</h3><p>Match either branch. Non-capturing form <code>(?:A|B)</code> is accepted.</p></article>
+          <article><code>*</code><h3>Zero or more</h3><p>Match zero or any finite number of arbitrary legal calls.</p></article>
+          <article><code>?</code><h3>One or more</h3><p>Match one or any finite number of arbitrary legal calls. This intentionally differs from JavaScript RegExp.</p></article>
+          <article><code>^A</code><h3>Opponent call</h3><p>Require A to be called by an opponent. It may prefix a call, wildcard, or group, such as <code>^2C</code> or <code>^(2C|2D)</code>; it is a role marker, not a start-of-string anchor.</p></article>
+        </div>
+        <div class="documentation-callout">
+          <strong>System-side expressions are compact by default.</strong>
+          Without <code>^</code>, opponent calls are omitted before matching. When an expression contains <code>^</code>, it reads the full auction in turn order: unprefixed atoms belong to the selected system partnership and prefixed atoms belong to its opponents. For example, <code>1S-^2C-2H</code> matches a 1S opening, an opponent's 2C overcall, and partner's 2H response.
+        </div>
+      </section>
+
+      <section class="documentation-section" id="predicates">
+        <h2>Predicates, arithmetic, and order</h2>
+        <p>
+          A predicate group matches one contract bid. For example, <code>(?:!=NT)-4NT</code> recognizes 4NT
+          after any suit contract, but by itself does not prove that partner agreed that suit. Denominations support <code>=</code> and <code>!=</code>;
+          concrete contract operands also support <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, and <code>&gt;=</code>.
+        </p>
+        <p>
+          Contract arithmetic follows the 35-step ladder from 1C through 7NT, so <code>1D+5=2D</code> is true.
+          A rule's <code>where</code> relations can compare learned suits: <code>Y&lt;X</code> means Y has lower
+          denomination rank than X.
+        </p>
+      </section>
+
+      <section class="documentation-section" id="worked-examples">
+        <h2>Worked examples</h2>
+        <div class="example-list">
+          <article>
+            <h3><code>1D-#D-4D</code></h3>
+            <p>Compiles to exactly <code>1D-2D-4D</code> and <code>1D-3D-4D</code>. Other levels make one of the neighboring calls illegal.</p>
+          </article>
+          <article>
+            <h3><code>1C-1X-3NT</code></h3>
+            <p>The middle call can be <code>1D</code>, <code>1H</code>, or <code>1S</code>. Clubs repeat the current contract and NT is not a symbolic suit.</p>
+          </article>
+          <article>
+            <h3><code>1X-2Y</code> with <code>Y&lt;X</code></h3>
+            <p>Describes the six natural 2/1 new-suit responses: 1D–2C; 1H–2C/2D; and 1S–2C/2D/2H.</p>
+          </article>
+          <article>
+            <h3><code>*-#X-*-#X-*-4NT</code></h3>
+            <p>Finds two calls in the same learned suit anywhere before 4NT. Add <code>"requiresAgreement": ["X"]</code> to require those suit calls to come from both members of the partnership, rather than one player rebidding the suit.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="documentation-section" id="system-json">
+        <h2>System JSON</h2>
+        <p>Place reusable expressions in the system's top-level <code>sequenceRules</code> array:</p>
+        <pre><code>{
+  "id": "two-over-one",
+  "expression": "1X-2Y",
+  "where": ["Y&lt;X"],
+  "meaning": "2/1 game force",
+  "priority": 100
+}</code></pre>
+        <pre><code>{
+  "id": "explicit-fit-blackwood",
+  "expression": "*-#X-*-#X-*-4NT",
+  "requiresAgreement": ["X"],
+  "meaning": "Blackwood after explicit suit agreement",
+  "priority": 120
+}</code></pre>
+        <p>
+          SystemBuilder checks each rule as you type. An overlap is reported with a concrete legal witness.
+          An overlap with different meanings at the same priority is an inconsistency; a different priority is
+          reported as a warning because resolution is deterministic.
+        </p>
+      </section>
+
+      <section class="documentation-section" id="api">
+        <h2>Engine API</h2>
+        <pre><code>const rule = BridgeBiddingEngine.compileSequenceExpression("1C-1X-3NT");
+
+rule.expand();       // concrete legal sequences
+rule.match(calls);   // search a contiguous segment
+rule.matchExact(calls);
+rule.next(calls);    // legal calls that advance or complete the rule
+
+BridgeBiddingEngine.addToContractBid("1D", 5);       // "2D"
+BridgeBiddingEngine.evaluateBidRelation("1D+5=2D"); // true
+BridgeBiddingEngine.findSequenceOverlap("1M", "1H"); // ["1H"]</code></pre>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

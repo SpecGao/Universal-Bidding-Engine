@@ -1,0 +1,10 @@
+# Temporary local extraction
+.tmp_xlsx/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/

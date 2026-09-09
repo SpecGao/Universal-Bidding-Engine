@@ -1,0 +1,1411 @@
+{
+  "schemaVersion": "1.3",
+  "systemId": "precision-1c",
+  "systemName": "1C Precision (Core)",
+  "description": "Precision framework with 1C as artificial strong opening and 2/1-like continuation branches.",
+  "notes": "Used as a digitalizable baseline; feel free to edit all follow-up nodes in SystemBuilder.",
+  "sequenceRules": [
+    {
+      "id": "precision-explicit-fit-blackwood",
+      "expression": "*-#X-*-#X-*-4NT",
+      "requiresAgreement": [
+        "X"
+      ],
+      "meaning": "Blackwood / key-card ace ask after both partners explicitly bid the same suit.",
+      "priority": 120
+    },
+    {
+      "id": "precision-1c-d0p1-pass",
+      "expression": "4NT-^#X-P",
+      "where": [],
+      "requiresAgreement": [],
+      "matchSuffix": true,
+      "alert": true,
+      "meaning": "D0P1 after interference: pass shows one or four key cards.",
+      "priority": 1100,
+      "facts": {
+        "slam": {
+          "aceAsk": {
+            "active": true,
+            "method": "rkcb-1430",
+            "interference": "D0P1"
+          },
+          "response": {
+            "convention": "D0P1",
+            "action": "pass",
+            "step": 1,
+            "keycards": [
+              1,
+              4
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "precision-1c-d0p1-double",
+      "expression": "4NT-^#X-X",
+      "where": [],
+      "requiresAgreement": [],
+      "matchSuffix": true,
+      "alert": true,
+      "meaning": "D0P1 after interference: double shows zero or three key cards.",
+      "priority": 1100,
+      "facts": {
+        "slam": {
+          "aceAsk": {
+            "active": true,
+            "method": "rkcb-1430",
+            "interference": "D0P1"
+          },
+          "response": {
+            "convention": "D0P1",
+            "action": "double",
+            "step": 2,
+            "keycards": [
+              0,
+              3
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "conventions": [
+    {
+      "id": "precision-opening",
+      "name": "Precision openings",
+      "children": [
+        {
+          "id": "p1C",
+          "trigger": "1C",
+          "meaning": "Precision 1♣: artificial, forcing, 16+ aHCP; any shape.",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 16,
+            "maxHcp": 40,
+            "maxSuit": {
+              "C": 5,
+              "D": 5,
+              "H": 5,
+              "S": 5
+            }
+          },
+          "children": [
+            {
+              "id": "p1C-1D",
+              "trigger": "1D",
+              "meaning": "Artificial/semantically overloaded response (can be weak jump-relief in many variants).",
+              "facts": {
+                "convention": {
+                  "weakJump": true
+                }
+              }
+            },
+            {
+              "id": "p1C-1H",
+              "trigger": "1H",
+              "meaning": "12+ with five-card heart fit or strong 4+ suit response pattern."
+            },
+            {
+              "id": "p1C-1S",
+              "trigger": "1S",
+              "meaning": "12+ with five-card spade fit or strong 4+ suit response pattern."
+            },
+            {
+              "id": "p1C-1NT",
+              "trigger": "1NT",
+              "meaning": "Balanced 10-12, support, or waiting style by partnership agreement."
+            },
+            {
+              "id": "p1C-2C",
+              "trigger": "2C",
+              "meaning": "Artificial responder inquiry into opener shape.",
+              "children": [
+                {
+                  "id": "p1C-2C-2D",
+                  "trigger": "2D",
+                  "meaning": "Opener's rebid structure in diamonds."
+                },
+                {
+                  "id": "p1C-2C-2H",
+                  "trigger": "2H",
+                  "meaning": "Transfer or positive response to possible spade/heart orientation."
+                },
+                {
+                  "id": "p1C-2C-2S",
+                  "trigger": "2S",
+                  "meaning": "Responder shows major-suit emphasis after 2C."
+                },
+                {
+                  "id": "p1C-2C-2NT",
+                  "trigger": "2NT",
+                  "meaning": "Natural 12+ balanced path from 1C structures."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "p1D",
+          "trigger": "1D",
+          "meaning": "Precision 1♦: 11–15 aHCP and 2+ diamonds; may be a short diamond in a balanced limited hand.",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 11,
+            "maxHcp": 15,
+            "minSuit": {
+              "D": 2
+            },
+            "maxSuit": {
+              "D": 13
+            }
+          },
+          "children": [
+            {
+              "id": "p1D-1H",
+              "trigger": "1H",
+              "meaning": "4+ heart support."
+            },
+            {
+              "id": "p1D-1S",
+              "trigger": "1S",
+              "meaning": "4+ spade support."
+            },
+            {
+              "id": "p1D-2D",
+              "trigger": "2D",
+              "meaning": "New-suit game forcing in 2/1 context.",
+              "generated": {
+                "type": "control-bids",
+                "agreedSuit": "D",
+                "suits": [
+                  "C",
+                  "H",
+                  "S"
+                ],
+                "startLevel": 3,
+                "description": "Use control bids to show shortness and support in non-diamond suits."
+              },
+              "children": [
+                {
+                  "id": "p1D-2D-4NT",
+                  "trigger": "4NT",
+                  "meaning": "Control-structure-based ace ask.",
+                  "facts": {
+                    "slam": {
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "interference": "D0P1",
+                        "accelerated": false,
+                        "type": "keycard"
+                      }
+                    }
+                  }
+                }
+              ],
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "p1D-2NT",
+              "trigger": "2NT",
+              "meaning": "Not-forcing invitation hand."
+            }
+          ]
+        },
+        {
+          "id": "p1H",
+          "trigger": "1H",
+          "meaning": "Precision 1♥: 11–15 aHCP and 5+ hearts.",
+          "children": [
+            {
+              "id": "p1H-1NT",
+              "trigger": "1NT",
+              "meaning": "6-9 aHCP response range, no spade support."
+            },
+            {
+              "id": "p1H-2H-cbf",
+              "trigger": "2H",
+              "meaning": "Game-forcing support / 2/1 continuation.",
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "p1H-2S",
+              "trigger": "2S",
+              "meaning": "4+ spade second suit."
+            },
+            {
+              "id": "p1H-3H",
+              "trigger": "3H",
+              "meaning": "Control phase for heart fit.",
+              "generated": {
+                "type": "control-bids",
+                "agreedSuit": "H",
+                "suits": [
+                  "C",
+                  "D",
+                  "S"
+                ],
+                "startLevel": 4,
+                "description": "Elimination control phase: play highest available first-round control in unbid suits."
+              }
+            }
+          ],
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 11,
+            "maxHcp": 15,
+            "minSuit": {
+              "H": 5
+            },
+            "maxSuit": {
+              "H": 13
+            }
+          }
+        },
+        {
+          "id": "p1S",
+          "trigger": "1S",
+          "meaning": "Precision 1♠: 11–15 aHCP and 5+ spades.",
+          "children": [
+            {
+              "id": "p1S-1NT",
+              "trigger": "1NT",
+              "meaning": "6-9 aHCP response, no hearts."
+            },
+            {
+              "id": "p1S-2S",
+              "trigger": "2S",
+              "meaning": "Game-forcing support / 2/1 continuation.",
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "p1S-2S-cb",
+              "trigger": "3S",
+              "meaning": "3S as control phase anchor for spade fits.",
+              "generated": {
+                "type": "control-bids",
+                "agreedSuit": "S",
+                "suits": [
+                  "C",
+                  "D",
+                  "H"
+                ],
+                "startLevel": 4,
+                "description": "Slam control continuation after spade fit."
+              },
+              "children": [
+                {
+                  "id": "p1S-2S-cb-4NT",
+                  "trigger": "4NT",
+                  "meaning": "Key card inquiry (RKCB/Blackwood branch).",
+                  "facts": {
+                    "convention": {
+                      "blackwood": true,
+                      "rkcb": true
+                    },
+                    "slam": {
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "interference": "D0P1",
+                        "accelerated": false,
+                        "type": "keycard"
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "p1S-2S-cb-5NT",
+                  "trigger": "5NT",
+                  "meaning": "Grand-slam inquiry."
+                }
+              ]
+            }
+          ],
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 11,
+            "maxHcp": 15,
+            "minSuit": {
+              "S": 5
+            },
+            "maxSuit": {
+              "S": 13
+            }
+          }
+        },
+        {
+          "id": "p1NT",
+          "trigger": "1NT",
+          "meaning": "Precision 1NT: 13–15 aHCP, balanced, normally without a five-card major.",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 13,
+            "maxHcp": 15,
+            "maxSuit": {
+              "C": 5,
+              "D": 5,
+              "H": 5,
+              "S": 5
+            }
+          },
+          "children": [
+            {
+              "id": "p1NT-2C",
+              "trigger": "2C",
+              "meaning": "Stayman.",
+              "facts": {
+                "convention": {
+                  "stayman": true
+                }
+              }
+            },
+            {
+              "id": "p1NT-2D",
+              "trigger": "2D",
+              "meaning": "Stayman minor check or feature request depending partnership notes.",
+              "facts": {
+                "convention": {
+                  "stayman": true
+                }
+              }
+            },
+            {
+              "id": "p1NT-2D-2H",
+              "trigger": "2H",
+              "meaning": "Transfer-to-hearts."
+            },
+            {
+              "id": "p1NT-2D-2S",
+              "trigger": "2S",
+              "meaning": "Transfer-to-spades."
+            }
+          ]
+        },
+        {
+          "id": "precision-2C",
+          "trigger": "2C",
+          "meaning": "Precision 2♣: 11–15 aHCP and 6+ clubs (a partnership may use a five-card club variant with a four-card major).",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 11,
+            "maxHcp": 15,
+            "minSuit": {
+              "C": 6
+            },
+            "maxSuit": {
+              "C": 13
+            }
+          },
+          "children": []
+        },
+        {
+          "id": "precision-2D",
+          "trigger": "2D",
+          "meaning": "Precision 2♦: artificial shape bid in this base; 11–15 aHCP, with the exact distribution defined by partnership agreement.",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 11,
+            "maxHcp": 15
+          },
+          "children": []
+        },
+        {
+          "id": "precision-weak-club-opening",
+          "nodeType": "group",
+          "label": "Weak club opening",
+          "meaning": "Parallel preemptive opening options in club: 3C, 4C. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 5,
+              "max": 10
+            },
+            "suit": "C",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "precision-3C",
+              "trigger": "3C",
+              "meaning": "Preemptive 3C opening: 5–10 aHCP and a 7-card club suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "C",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-club-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "C": 7
+                },
+                "maxSuit": {
+                  "C": 7
+                }
+              },
+              "children": []
+            },
+            {
+              "id": "precision-4C",
+              "trigger": "4C",
+              "meaning": "Preemptive 4C opening: 5–10 aHCP and a 8+-card club suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "C",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-club-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "C": 8
+                },
+                "maxSuit": {
+                  "C": 13
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "precision-weak-diamond-opening",
+          "nodeType": "group",
+          "label": "Weak diamond opening",
+          "meaning": "Parallel preemptive opening options in diamond: 3D, 4D. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 5,
+              "max": 10
+            },
+            "suit": "D",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "precision-3D",
+              "trigger": "3D",
+              "meaning": "Preemptive 3D opening: 5–10 aHCP and a 7-card diamond suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "D",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-diamond-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "D": 7
+                },
+                "maxSuit": {
+                  "D": 7
+                }
+              },
+              "children": []
+            },
+            {
+              "id": "precision-4D",
+              "trigger": "4D",
+              "meaning": "Preemptive 4D opening: 5–10 aHCP and a 8+-card diamond suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "D",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-diamond-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "D": 8
+                },
+                "maxSuit": {
+                  "D": 13
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "precision-weak-heart-opening",
+          "nodeType": "group",
+          "label": "Weak heart opening",
+          "meaning": "Parallel preemptive opening options in heart: 2H, 3H, 4H. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 5,
+              "max": 10
+            },
+            "suit": "H",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "precision-2H",
+              "trigger": "2H",
+              "meaning": "Precision weak 2H: 5–10 aHCP and a sound six-card major.",
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "H": 6
+                },
+                "maxSuit": {
+                  "H": 13
+                }
+              },
+              "children": [],
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "H",
+                "longestSuitLength": {
+                  "min": 6,
+                  "max": 6
+                },
+                "bidLevel": 2,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-heart-opening"
+              }
+            },
+            {
+              "id": "precision-3H",
+              "trigger": "3H",
+              "meaning": "Preemptive 3H opening: 5–10 aHCP and a 7-card heart suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "H",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-heart-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "H": 7
+                },
+                "maxSuit": {
+                  "H": 7
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            },
+            {
+              "id": "precision-4H",
+              "trigger": "4H",
+              "meaning": "Preemptive 4H opening: 5–10 aHCP and a 8+-card heart suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "H",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-heart-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "H": 8
+                },
+                "maxSuit": {
+                  "H": 13
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "precision-weak-spade-opening",
+          "nodeType": "group",
+          "label": "Weak spade opening",
+          "meaning": "Parallel preemptive opening options in spade: 2S, 3S, 4S. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 5,
+              "max": 10
+            },
+            "suit": "S",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "precision-2S",
+              "trigger": "2S",
+              "meaning": "Precision weak 2S: 5–10 aHCP and a sound six-card major.",
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "S": 6
+                },
+                "maxSuit": {
+                  "S": 13
+                }
+              },
+              "children": [],
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "S",
+                "longestSuitLength": {
+                  "min": 6,
+                  "max": 6
+                },
+                "bidLevel": 2,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-spade-opening"
+              }
+            },
+            {
+              "id": "precision-3S",
+              "trigger": "3S",
+              "meaning": "Preemptive 3S opening: 5–10 aHCP and a 7-card spade suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "S",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-spade-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "S": 7
+                },
+                "maxSuit": {
+                  "S": 7
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            },
+            {
+              "id": "precision-4S",
+              "trigger": "4S",
+              "meaning": "Preemptive 4S opening: 5–10 aHCP and a 8+-card spade suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "S",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "precision-weak-spade-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "S": 8
+                },
+                "maxSuit": {
+                  "S": 13
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "precision-auxiliary",
+      "name": "Slam and control tools",
+      "children": [
+        {
+          "id": "prkcb",
+          "trigger": "4NT",
+          "meaning": "RKC/Blackwood request.",
+          "children": [
+            {
+              "id": "prkcb-5C",
+              "trigger": "5C",
+              "meaning": "1 or 4 key cards (RKCB 1430).",
+              "facts": {
+                "convention": {
+                  "rkcb": true
+                },
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5C",
+                    "keycards": [
+                      0,
+                      3
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "prkcb-5D",
+              "trigger": "5D",
+              "meaning": "0 or 3 key cards (RKCB 1430).",
+              "facts": {
+                "convention": {
+                  "rkcb": true
+                },
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5D",
+                    "keycards": [
+                      1,
+                      4
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "prkcb-5H",
+              "trigger": "5H",
+              "meaning": "2 key cards without the trump queen (RKCB 1430).",
+              "facts": {
+                "convention": {
+                  "rkcb": true
+                },
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5H",
+                    "keycards": [
+                      2,
+                      5
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "prkcb-5S",
+              "trigger": "5S",
+              "meaning": "2 key cards with the trump queen (RKCB 1430).",
+              "facts": {
+                "convention": {
+                  "rkcb": true
+                },
+                "slam": {
+                  "aceAsk": {
+                    "active": true,
+                    "method": "rkcb-1430",
+                    "interference": "D0P1",
+                    "accelerated": false,
+                    "type": "keycard"
+                  }
+                }
+              }
+            }
+          ],
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "facts": {
+            "convention": {
+              "blackwood": true,
+              "rkcb": true
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "keycard"
+              }
+            }
+          }
+        },
+        {
+          "id": "p5nt",
+          "trigger": "5NT",
+          "meaning": "King/queen inquiry after an affirmative RKCB context.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "facts": {
+            "convention": {
+              "rkcb": true
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "keycard"
+              }
+            }
+          }
+        },
+        {
+          "id": "pgerber",
+          "trigger": "3C",
+          "meaning": "Gerber-like ace ask path (used in some Precision agreements).",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "facts": {
+            "convention": {
+              "gerber": true
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "keycard"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "precision-overcalls",
+      "name": "Competitive openings",
+      "children": [
+        {
+          "id": "pX",
+          "trigger": "X",
+          "meaning": "Takeout/penalty double (context dependent).",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1C"
+          }
+        },
+        {
+          "id": "pXX",
+          "trigger": "XX",
+          "meaning": "Redouble.",
+          "filters": {
+            "auctionRole": "contextual"
+          }
+        },
+        {
+          "id": "poc1C",
+          "trigger": "1C",
+          "meaning": "Natural 1C overcall or convention agreement.",
+          "filters": {
+            "auctionRole": "contextual"
+          }
+        }
+      ]
+    }
+  ],
+  "openingProfile": {
+    "1NT": {
+      "pointRange": {
+        "min": 13,
+        "max": 15
+      },
+      "suitLengthRange": {
+        "C": {
+          "min": 2,
+          "max": 5
+        },
+        "D": {
+          "min": 2,
+          "max": 5
+        },
+        "H": {
+          "min": 2,
+          "max": 5
+        },
+        "S": {
+          "min": 2,
+          "max": 5
+        }
+      },
+      "shape": "balanced (4333, 4432, or 5332; no six-card suit)"
+    },
+    "1Major": {
+      "pointRange": {
+        "min": 11,
+        "max": 15
+      },
+      "suitLengthRange": {
+        "H": {
+          "min": 5,
+          "max": 13
+        },
+        "S": {
+          "min": 5,
+          "max": 13
+        }
+      }
+    },
+    "1Minor": {
+      "clubs": {
+        "pointRange": {
+          "min": 11,
+          "max": 15
+        },
+        "suitLengthRange": {
+          "min": 2,
+          "max": 13
+        }
+      },
+      "diamonds": {
+        "pointRange": {
+          "min": 11,
+          "max": 15
+        },
+        "suitLengthRange": {
+          "min": 2,
+          "max": 13
+        }
+      }
+    },
+    "2NT": {
+      "pointRange": null,
+      "suitLengthRange": {
+        "C": {
+          "min": 2,
+          "max": 5
+        },
+        "D": {
+          "min": 2,
+          "max": 5
+        },
+        "H": {
+          "min": 2,
+          "max": 5
+        },
+        "S": {
+          "min": 2,
+          "max": 5
+        }
+      },
+      "shape": "not used; strong balanced hands open 1C",
+      "enabled": false
+    },
+    "strongOpening": {
+      "bid": "1C",
+      "pointRange": {
+        "min": 16,
+        "max": 40
+      }
+    },
+    "weakTwos": {
+      "enabled": true,
+      "suits": [
+        "H",
+        "S"
+      ],
+      "pointRange": {
+        "min": 5,
+        "max": 10
+      },
+      "suitLengthRange": {
+        "min": 6,
+        "max": 13
+      }
+    },
+    "weakOpenings": {
+      "pointRange": {
+        "min": 5,
+        "max": 10
+      },
+      "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+      "ladders": [
+        {
+          "suit": "C",
+          "levels": [
+            3,
+            4
+          ],
+          "minimumLength": 7
+        },
+        {
+          "suit": "D",
+          "levels": [
+            2,
+            3,
+            4
+          ],
+          "minimumLength": 6
+        },
+        {
+          "suit": "H",
+          "levels": [
+            2,
+            3,
+            4
+          ],
+          "minimumLength": 6
+        },
+        {
+          "suit": "S",
+          "levels": [
+            2,
+            3,
+            4
+          ],
+          "minimumLength": 6
+        }
+      ]
+    }
+  },
+  "openingReference": {
+    "source": "Standard teaching reference; partnership agreements may vary.",
+    "summary": "Classic Precision Club base: artificial 16+ 1♣, limited natural openings, and weak twos in the majors.",
+    "openings": [
+      {
+        "bid": "1♣",
+        "pointRange": {
+          "min": 16,
+          "max": 40
+        },
+        "lengthLabel": "artificial strong; any shape"
+      },
+      {
+        "bid": "1♦",
+        "pointRange": {
+          "min": 11,
+          "max": 15
+        },
+        "lengthLabel": "limited natural/short diamond; 2+ diamonds"
+      },
+      {
+        "bid": "1♥",
+        "pointRange": {
+          "min": 11,
+          "max": 15
+        },
+        "lengthLabel": "natural; 5+ hearts"
+      },
+      {
+        "bid": "1♠",
+        "pointRange": {
+          "min": 11,
+          "max": 15
+        },
+        "lengthLabel": "natural; 5+ spades"
+      },
+      {
+        "bid": "1NT",
+        "pointRange": {
+          "min": 13,
+          "max": 15
+        },
+        "lengthLabel": "balanced; normally no five-card major"
+      },
+      {
+        "bid": "2♣",
+        "pointRange": {
+          "min": 11,
+          "max": 15
+        },
+        "lengthLabel": "natural; 6+ clubs or partnership variant"
+      },
+      {
+        "bid": "2♦",
+        "pointRange": {
+          "min": 11,
+          "max": 15
+        },
+        "lengthLabel": "artificial Multi-style/shape bid; partnership-defined"
+      },
+      {
+        "bid": "2♥/2♠",
+        "pointRange": {
+          "min": 5,
+          "max": 10
+        },
+        "lengthLabel": "weak two; sound six-card major"
+      },
+      {
+        "bid": "2NT",
+        "pointRange": null,
+        "lengthLabel": "not used as a natural opening; strong balanced hands start with 1♣"
+      }
+    ],
+    "conventions": [
+      {
+        "label": "Strong 1♣",
+        "description": "Artificial and forcing, showing 16+ aHCP regardless of shape."
+      },
+      {
+        "label": "Limited one-level openings",
+        "description": "All non-1♣ one-level openings are limited to 11–15 aHCP in this reference."
+      },
+      {
+        "label": "Weak major twos",
+        "description": "2♥ and 2♠ are 5–10 aHCP with a sound six-card major; 2♦ is reserved for the selected artificial structure."
+      }
+    ]
+  },
+  "factSchema": {
+    "id": "bridge-bidding-facts",
+    "version": "1.0",
+    "patchSemantics": "deep-merge",
+    "deleteSentinel": {
+      "$delete": true
+    },
+    "templates": [
+      "{{M}}",
+      "{{X}}",
+      "{{Y}}",
+      "{{Z}}",
+      "{{W}}",
+      "{{call.code}}",
+      "{{call.suit}}"
+    ]
+  },
+  "initialFacts": {
+    "factLayer": {
+      "schema": "bridge-bidding-facts",
+      "version": "1.0",
+      "merge": "deep-patch"
+    },
+    "agreement": {
+      "aceAsk": {
+        "method": "rkcb-1430",
+        "interference": "D0P1",
+        "d0p1": {
+          "pass": {
+            "step": 1,
+            "keycards": [
+              1,
+              4
+            ]
+          },
+          "double": {
+            "step": 2,
+            "keycards": [
+              0,
+              3
+            ]
+          },
+          "nextAvailable": [
+            {
+              "step": 3,
+              "keycards": [
+                2
+              ],
+              "trumpQueen": false
+            },
+            {
+              "step": 4,
+              "keycards": [
+                2
+              ],
+              "trumpQueen": true
+            }
+          ]
+        }
+      }
+    },
+    "forcing": {
+      "game": false,
+      "round": false
+    },
+    "fit": {
+      "confirmed": false
+    }
+  }
+}

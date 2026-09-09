@@ -1,0 +1,1292 @@
+{
+  "schemaVersion": "1.3",
+  "systemId": "acol",
+  "systemName": "ACOL (classic)",
+  "description": "ACOL-style profile with weak club treatment, natural majors, and structured game-forcing responses.",
+  "notes": "This file is a compact digital baseline and is intentionally editable via SystemBuilder.",
+  "sequenceRules": [
+    {
+      "id": "acol-explicit-fit-blackwood",
+      "expression": "*-#X-*-#X-*-4NT",
+      "requiresAgreement": [
+        "X"
+      ],
+      "meaning": "Blackwood / key-card ace ask after both partners explicitly bid the same suit.",
+      "priority": 120
+    },
+    {
+      "id": "acol-d0p1-pass",
+      "expression": "4NT-^#X-P",
+      "where": [],
+      "requiresAgreement": [],
+      "matchSuffix": true,
+      "alert": true,
+      "meaning": "D0P1 after interference: pass shows one ace.",
+      "priority": 1100,
+      "facts": {
+        "slam": {
+          "aceAsk": {
+            "active": true,
+            "method": "blackwood",
+            "interference": "D0P1"
+          },
+          "response": {
+            "convention": "D0P1",
+            "action": "pass",
+            "step": 1,
+            "keycards": [
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "acol-d0p1-double",
+      "expression": "4NT-^#X-X",
+      "where": [],
+      "requiresAgreement": [],
+      "matchSuffix": true,
+      "alert": true,
+      "meaning": "D0P1 after interference: double shows zero or four aces.",
+      "priority": 1100,
+      "facts": {
+        "slam": {
+          "aceAsk": {
+            "active": true,
+            "method": "blackwood",
+            "interference": "D0P1"
+          },
+          "response": {
+            "convention": "D0P1",
+            "action": "double",
+            "step": 2,
+            "keycards": [
+              0,
+              4
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "conventions": [
+    {
+      "id": "acol-opening",
+      "name": "Opening methods",
+      "children": [
+        {
+          "id": "acol1C",
+          "trigger": "1C",
+          "meaning": "Natural Acol 1♣: 12–19 aHCP and 3+ clubs.",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 12,
+            "maxHcp": 19,
+            "minSuit": {
+              "C": 3
+            },
+            "maxSuit": {
+              "C": 13
+            }
+          },
+          "children": [
+            {
+              "id": "acol1C-1D",
+              "trigger": "1D",
+              "meaning": "Responder natural 4+ diamonds."
+            },
+            {
+              "id": "acol1C-1H",
+              "trigger": "1H",
+              "meaning": "Natural 1H response."
+            },
+            {
+              "id": "acol1C-1S",
+              "trigger": "1S",
+              "meaning": "Natural 1S response."
+            },
+            {
+              "id": "acol1C-1NT",
+              "trigger": "1NT",
+              "meaning": "No major fit response/limp style."
+            },
+            {
+              "id": "acol1C-2C",
+              "trigger": "2C",
+              "meaning": "Game-forcing probe to a weak 1C opener."
+            },
+            {
+              "id": "acol1C-2D",
+              "trigger": "2D",
+              "meaning": "Control-oriented route for strong minor fit support."
+            }
+          ]
+        },
+        {
+          "id": "acol1D",
+          "trigger": "1D",
+          "meaning": "Natural Acol 1♦: 12–19 aHCP and 4+ diamonds.",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 12,
+            "maxHcp": 19,
+            "minSuit": {
+              "D": 4
+            },
+            "maxSuit": {
+              "D": 13
+            }
+          },
+          "children": [
+            {
+              "id": "acol1D-2D",
+              "trigger": "2D",
+              "meaning": "2/1 game-forcing response.",
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "acol1D-1NT",
+              "trigger": "1NT",
+              "meaning": "Balanced no-ruff, non-forcing."
+            },
+            {
+              "id": "acol1D-1H",
+              "trigger": "1H",
+              "meaning": "4+ hearts."
+            },
+            {
+              "id": "acol1D-1S",
+              "trigger": "1S",
+              "meaning": "4+ spades."
+            },
+            {
+              "id": "acol1D-2NT",
+              "trigger": "2NT",
+              "meaning": "Invitation to notrump in no-fit contexts."
+            }
+          ]
+        },
+        {
+          "id": "acol1H",
+          "trigger": "1H",
+          "meaning": "Natural Acol 1♥: 12–19 aHCP and 4+ hearts.",
+          "children": [
+            {
+              "id": "acol1H-1NT",
+              "trigger": "1NT",
+              "meaning": "6-9 pt continuation."
+            },
+            {
+              "id": "acol1H-2H",
+              "trigger": "2H",
+              "meaning": "2/1 game-forcing response.",
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "acol1H-2H-cb",
+              "trigger": "2S",
+              "meaning": "4+ spade new suit in game-forcing track."
+            },
+            {
+              "id": "acol1H-2H-bf",
+              "trigger": "2NT",
+              "meaning": "Slam-inclined invitation with game force uncertain.",
+              "facts": {
+                "forcing": {
+                  "game": true,
+                  "source": "system agreement"
+                }
+              }
+            },
+            {
+              "id": "acol1H-3H",
+              "trigger": "3H",
+              "meaning": "Control phase anchor for hearts fit.",
+              "generated": {
+                "type": "control-bids",
+                "agreedSuit": "H",
+                "suits": [
+                  "C",
+                  "D",
+                  "S"
+                ],
+                "startLevel": 4,
+                "description": "Control bidding available after agreed heart fit."
+              }
+            }
+          ],
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 12,
+            "maxHcp": 19,
+            "minSuit": {
+              "H": 4
+            },
+            "maxSuit": {
+              "H": 13
+            }
+          }
+        },
+        {
+          "id": "acol1S",
+          "trigger": "1S",
+          "meaning": "Natural Acol 1♠: 12–19 aHCP and 4+ spades.",
+          "children": [
+            {
+              "id": "acol1S-1NT",
+              "trigger": "1NT",
+              "meaning": "6-9 pt invitation and no spade support."
+            },
+            {
+              "id": "acol1S-2S",
+              "trigger": "2S",
+              "meaning": "2/1 game-forcing response.",
+              "facts": {
+                "convention": {
+                  "twoOverOne": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "partnership": {
+                  "points": {
+                    "opener": {
+                      "min": 12
+                    },
+                    "responder": {
+                      "min": 12
+                    },
+                    "combined": {
+                      "min": 24
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "acol1S-2S-2NT",
+              "trigger": "2NT",
+              "meaning": "In-between invitation."
+            },
+            {
+              "id": "acol1S-3S",
+              "trigger": "3S",
+              "meaning": "Control phase anchor for spade fit.",
+              "generated": {
+                "type": "control-bids",
+                "agreedSuit": "S",
+                "suits": [
+                  "C",
+                  "D",
+                  "H"
+                ],
+                "startLevel": 4,
+                "description": "Cuebids/control tries for slam in spade context."
+              }
+            }
+          ],
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 12,
+            "maxHcp": 19,
+            "minSuit": {
+              "S": 4
+            },
+            "maxSuit": {
+              "S": 13
+            }
+          }
+        },
+        {
+          "id": "acol1NT",
+          "trigger": "1NT",
+          "meaning": "Acol 1NT: 12–14 aHCP, balanced (4333, 4432, or suitable 5332) with no six-card suit.",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 12,
+            "maxHcp": 14,
+            "maxSuit": {
+              "C": 5,
+              "D": 5,
+              "H": 5,
+              "S": 5
+            }
+          },
+          "children": [
+            {
+              "id": "acol1NT-2C",
+              "trigger": "2C",
+              "meaning": "Major-suit inquiry."
+            },
+            {
+              "id": "acol1NT-2D",
+              "trigger": "2D",
+              "meaning": "Minor-suit inquiry."
+            },
+            {
+              "id": "acol1NT-2H",
+              "trigger": "2H",
+              "meaning": "Transfer or response to heart fit."
+            },
+            {
+              "id": "acol1NT-2S",
+              "trigger": "2S",
+              "meaning": "Transfer or response to spade fit."
+            }
+          ]
+        },
+        {
+          "id": "acol-2C",
+          "trigger": "2C",
+          "meaning": "Artificial strong 2♣: 22+ aHCP, any shape (or equivalent playing-trick strength).",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 22,
+            "maxHcp": 40
+          },
+          "children": []
+        },
+        {
+          "id": "acol-2NT",
+          "trigger": "2NT",
+          "meaning": "Natural 2NT: balanced 20–22 aHCP (4333, 4432, or 5332).",
+          "filters": {
+            "auctionRole": "opening",
+            "minHcp": 20,
+            "maxHcp": 22
+          },
+          "children": []
+        },
+        {
+          "id": "acol-weak-club-opening",
+          "nodeType": "group",
+          "label": "Weak club opening",
+          "meaning": "Parallel preemptive opening options in club: 3C, 4C. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 5,
+              "max": 10
+            },
+            "suit": "C",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "acol-3C",
+              "trigger": "3C",
+              "meaning": "Preemptive 3C opening: 5–10 aHCP and a 7-card club suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "C",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-club-opening"
+              },
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "C": 7
+                },
+                "maxSuit": {
+                  "C": 7
+                }
+              },
+              "children": []
+            },
+            {
+              "id": "acol-4C",
+              "trigger": "4C",
+              "meaning": "Preemptive 4C opening: 5–10 aHCP and a 8+-card club suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "C",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-club-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "C": 8
+                },
+                "maxSuit": {
+                  "C": 13
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "acol-weak-diamond-opening",
+          "nodeType": "group",
+          "label": "Weak diamond opening",
+          "meaning": "Parallel preemptive opening options in diamond: 2D, 3D, 4D. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 5,
+              "max": 10
+            },
+            "suit": "D",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "acol-2D",
+              "trigger": "2D",
+              "meaning": "Weak two in D: 5–10 aHCP and a sound six-card suit.",
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "D": 6
+                },
+                "maxSuit": {
+                  "D": 13
+                }
+              },
+              "children": [],
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "D",
+                "longestSuitLength": {
+                  "min": 6,
+                  "max": 6
+                },
+                "bidLevel": 2,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-diamond-opening"
+              }
+            },
+            {
+              "id": "acol-3D",
+              "trigger": "3D",
+              "meaning": "Preemptive 3D opening: 5–10 aHCP and a 7-card diamond suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "D",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-diamond-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "D": 7
+                },
+                "maxSuit": {
+                  "D": 7
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            },
+            {
+              "id": "acol-4D",
+              "trigger": "4D",
+              "meaning": "Preemptive 4D opening: 5–10 aHCP and a 8+-card diamond suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "D",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-diamond-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "D": 8
+                },
+                "maxSuit": {
+                  "D": 13
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "acol-weak-heart-opening",
+          "nodeType": "group",
+          "label": "Weak heart opening",
+          "meaning": "Parallel preemptive opening options in heart: 2H, 3H, 4H. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 5,
+              "max": 10
+            },
+            "suit": "H",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "acol-2H",
+              "trigger": "2H",
+              "meaning": "Weak two in H: 5–10 aHCP and a sound six-card suit.",
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "H": 6
+                },
+                "maxSuit": {
+                  "H": 13
+                }
+              },
+              "children": [],
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "H",
+                "longestSuitLength": {
+                  "min": 6,
+                  "max": 6
+                },
+                "bidLevel": 2,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-heart-opening"
+              }
+            },
+            {
+              "id": "acol-3H",
+              "trigger": "3H",
+              "meaning": "Preemptive 3H opening: 5–10 aHCP and a 7-card heart suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "H",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-heart-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "H": 7
+                },
+                "maxSuit": {
+                  "H": 7
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            },
+            {
+              "id": "acol-4H",
+              "trigger": "4H",
+              "meaning": "Preemptive 4H opening: 5–10 aHCP and a 8+-card heart suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "H",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-heart-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "H": 8
+                },
+                "maxSuit": {
+                  "H": 13
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "acol-weak-spade-opening",
+          "nodeType": "group",
+          "label": "Weak spade opening",
+          "meaning": "Parallel preemptive opening options in spade: 2S, 3S, 4S. Each is an alternative opening, not a continuation.",
+          "displayRole": "opener",
+          "weakOpeningGroup": {
+            "pointRange": {
+              "min": 5,
+              "max": 10
+            },
+            "suit": "S",
+            "layout": "parallel alternatives",
+            "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)"
+          },
+          "children": [
+            {
+              "id": "acol-2S",
+              "trigger": "2S",
+              "meaning": "Weak two in S: 5–10 aHCP and a sound six-card suit.",
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "S": 6
+                },
+                "maxSuit": {
+                  "S": 13
+                }
+              },
+              "children": [],
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "S",
+                "longestSuitLength": {
+                  "min": 6,
+                  "max": 6
+                },
+                "bidLevel": 2,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-spade-opening"
+              }
+            },
+            {
+              "id": "acol-3S",
+              "trigger": "3S",
+              "meaning": "Preemptive 3S opening: 5–10 aHCP and a 7-card spade suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "S",
+                "longestSuitLength": {
+                  "min": 7,
+                  "max": 7
+                },
+                "bidLevel": 3,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-spade-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "S": 7
+                },
+                "maxSuit": {
+                  "S": 7
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            },
+            {
+              "id": "acol-4S",
+              "trigger": "4S",
+              "meaning": "Preemptive 4S opening: 5–10 aHCP and a 8+-card spade suit.",
+              "displayRole": "opener",
+              "weakOpening": {
+                "catalogueAlternative": true,
+                "pointRange": {
+                  "min": 5,
+                  "max": 10
+                },
+                "longestSuit": "S",
+                "longestSuitLength": {
+                  "min": 8,
+                  "max": 13
+                },
+                "bidLevel": 4,
+                "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+                "parentLayout": "parallel suit opening options",
+                "parentGroupId": "acol-weak-spade-opening"
+              },
+              "filters": {
+                "minHcp": 5,
+                "maxHcp": 10,
+                "minSuit": {
+                  "S": 8
+                },
+                "maxSuit": {
+                  "S": 13
+                },
+                "auctionRole": "opening"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "acol-slam",
+      "name": "Slam structure",
+      "children": [
+        {
+          "id": "acol4NT",
+          "trigger": "4NT",
+          "meaning": "RKCB/Blackwood request.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "facts": {
+            "convention": {
+              "blackwood": true,
+              "rkcb": true
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "blackwood",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "keycard"
+              }
+            }
+          }
+        },
+        {
+          "id": "acol5C",
+          "trigger": "5C",
+          "meaning": "0/4 style response.",
+          "filters": {
+            "auctionRole": "contextual"
+          }
+        },
+        {
+          "id": "acol5D",
+          "trigger": "5D",
+          "meaning": "1/5 style response.",
+          "filters": {
+            "auctionRole": "contextual"
+          }
+        },
+        {
+          "id": "acol5H",
+          "trigger": "5H",
+          "meaning": "2/6 style response.",
+          "filters": {
+            "auctionRole": "contextual"
+          }
+        },
+        {
+          "id": "acol5S",
+          "trigger": "5S",
+          "meaning": "3 style response.",
+          "filters": {
+            "auctionRole": "contextual"
+          }
+        },
+        {
+          "id": "acol5NT",
+          "trigger": "5NT",
+          "meaning": "King/queen control ask.",
+          "filters": {
+            "auctionRole": "contextual"
+          }
+        },
+        {
+          "id": "acol6C",
+          "trigger": "6C",
+          "meaning": "Gerber path/ace ask in minor context.",
+          "filters": {
+            "auctionRole": "contextual"
+          },
+          "facts": {
+            "convention": {
+              "gerber": true
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "blackwood",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "keycard"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "acol-competition",
+      "name": "Overcalls and doubles",
+      "children": [
+        {
+          "id": "acolX",
+          "trigger": "X",
+          "meaning": "Takeout / penalty double.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1C"
+          }
+        },
+        {
+          "id": "acolXX",
+          "trigger": "XX",
+          "meaning": "Redouble.",
+          "filters": {
+            "auctionRole": "contextual"
+          }
+        },
+        {
+          "id": "acoloc1C",
+          "trigger": "1C",
+          "meaning": "Overcall in clubs.",
+          "filters": {
+            "auctionRole": "contextual"
+          }
+        },
+        {
+          "id": "acoloc1NT",
+          "trigger": "1NT",
+          "meaning": "No-trump overcall.",
+          "filters": {
+            "auctionRole": "overcall",
+            "opponentOpening": "1C"
+          }
+        }
+      ]
+    }
+  ],
+  "openingProfile": {
+    "1NT": {
+      "pointRange": {
+        "min": 12,
+        "max": 14
+      },
+      "suitLengthRange": {
+        "C": {
+          "min": 2,
+          "max": 5
+        },
+        "D": {
+          "min": 2,
+          "max": 5
+        },
+        "H": {
+          "min": 2,
+          "max": 5
+        },
+        "S": {
+          "min": 2,
+          "max": 5
+        }
+      },
+      "shape": "balanced (4333, 4432, or 5332; no six-card suit)"
+    },
+    "1Major": {
+      "pointRange": {
+        "min": 12,
+        "max": 19
+      },
+      "suitLengthRange": {
+        "H": {
+          "min": 4,
+          "max": 13
+        },
+        "S": {
+          "min": 4,
+          "max": 13
+        }
+      }
+    },
+    "1Minor": {
+      "clubs": {
+        "pointRange": {
+          "min": 12,
+          "max": 19
+        },
+        "suitLengthRange": {
+          "min": 3,
+          "max": 13
+        }
+      },
+      "diamonds": {
+        "pointRange": {
+          "min": 12,
+          "max": 19
+        },
+        "suitLengthRange": {
+          "min": 4,
+          "max": 13
+        }
+      }
+    },
+    "2NT": {
+      "pointRange": {
+        "min": 20,
+        "max": 22
+      },
+      "suitLengthRange": {
+        "C": {
+          "min": 2,
+          "max": 5
+        },
+        "D": {
+          "min": 2,
+          "max": 5
+        },
+        "H": {
+          "min": 2,
+          "max": 5
+        },
+        "S": {
+          "min": 2,
+          "max": 5
+        }
+      },
+      "shape": "balanced (4333, 4432, or 5332)",
+      "enabled": true
+    },
+    "strongOpening": {
+      "bid": "2C",
+      "pointRange": {
+        "min": 22,
+        "max": 40
+      }
+    },
+    "weakTwos": {
+      "enabled": true,
+      "suits": [
+        "D",
+        "H",
+        "S"
+      ],
+      "pointRange": {
+        "min": 5,
+        "max": 10
+      },
+      "suitLengthRange": {
+        "min": 6,
+        "max": 13
+      }
+    },
+    "weakOpenings": {
+      "pointRange": {
+        "min": 5,
+        "max": 10
+      },
+      "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
+      "ladders": [
+        {
+          "suit": "C",
+          "levels": [
+            3,
+            4
+          ],
+          "minimumLength": 7
+        },
+        {
+          "suit": "D",
+          "levels": [
+            2,
+            3,
+            4
+          ],
+          "minimumLength": 6
+        },
+        {
+          "suit": "H",
+          "levels": [
+            2,
+            3,
+            4
+          ],
+          "minimumLength": 6
+        },
+        {
+          "suit": "S",
+          "levels": [
+            2,
+            3,
+            4
+          ],
+          "minimumLength": 6
+        }
+      ]
+    }
+  },
+  "openingReference": {
+    "source": "Standard teaching reference; partnership agreements may vary.",
+    "summary": "Standard English Acol base: four-card majors, weak 12–14 notrump, strong 2♣, and an explicit three-weak-two option.",
+    "openings": [
+      {
+        "bid": "1♣",
+        "pointRange": {
+          "min": 12,
+          "max": 19
+        },
+        "lengthLabel": "natural; 3+ clubs"
+      },
+      {
+        "bid": "1♦",
+        "pointRange": {
+          "min": 12,
+          "max": 19
+        },
+        "lengthLabel": "natural; 4+ diamonds"
+      },
+      {
+        "bid": "1♥",
+        "pointRange": {
+          "min": 12,
+          "max": 19
+        },
+        "lengthLabel": "natural; 4+ hearts"
+      },
+      {
+        "bid": "1♠",
+        "pointRange": {
+          "min": 12,
+          "max": 19
+        },
+        "lengthLabel": "natural; 4+ spades"
+      },
+      {
+        "bid": "1NT",
+        "pointRange": {
+          "min": 12,
+          "max": 14
+        },
+        "lengthLabel": "balanced: 4333, 4432, or suitable 5332"
+      },
+      {
+        "bid": "2♣",
+        "pointRange": {
+          "min": 22,
+          "max": 40
+        },
+        "lengthLabel": "artificial strong; any shape or 8+ playing tricks"
+      },
+      {
+        "bid": "2♦/2♥/2♠",
+        "pointRange": {
+          "min": 5,
+          "max": 10
+        },
+        "lengthLabel": "weak-two option; six-card suit"
+      },
+      {
+        "bid": "2NT",
+        "pointRange": {
+          "min": 20,
+          "max": 22
+        },
+        "lengthLabel": "balanced: 4333, 4432, or 5332"
+      }
+    ],
+    "conventions": [
+      {
+        "label": "Stayman",
+        "description": "2♣ after 1NT asks for a four-card major."
+      },
+      {
+        "label": "Weak twos",
+        "description": "This base chooses three weak twos; some Acol partnerships instead use strong two-bids."
+      },
+      {
+        "label": "Blackwood",
+        "description": "4NT is an ace ask only after a suit has been agreed."
+      }
+    ]
+  },
+  "factSchema": {
+    "id": "bridge-bidding-facts",
+    "version": "1.0",
+    "patchSemantics": "deep-merge",
+    "deleteSentinel": {
+      "$delete": true
+    },
+    "templates": [
+      "{{M}}",
+      "{{X}}",
+      "{{Y}}",
+      "{{Z}}",
+      "{{W}}",
+      "{{call.code}}",
+      "{{call.suit}}"
+    ]
+  },
+  "initialFacts": {
+    "factLayer": {
+      "schema": "bridge-bidding-facts",
+      "version": "1.0",
+      "merge": "deep-patch"
+    },
+    "agreement": {
+      "aceAsk": {
+        "method": "blackwood",
+        "interference": "D0P1",
+        "d0p1": {
+          "double": {
+            "step": 1,
+            "aces": [
+              0,
+              4
+            ]
+          },
+          "pass": {
+            "step": 2,
+            "aces": [
+              1
+            ]
+          },
+          "nextAvailable": [
+            {
+              "step": 3,
+              "aces": [
+                2
+              ]
+            },
+            {
+              "step": 4,
+              "aces": [
+                3
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "forcing": {
+      "game": false,
+      "round": false
+    },
+    "fit": {
+      "confirmed": false
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "systems": [
+    {
+      "id": "standard-natural",
+      "name": "Standard Natural (Core)",
+      "file": "Customization/loadable/standard-natural.json",
+      "default": true
+    },
+    {
+      "id": "two-over-one",
+      "name": "2/1 Game Forcing",
+      "file": "Customization/loadable/standard-two-over-one.json"
+    },
+    {
+      "id": "precision-1c",
+      "name": "1C Precision (Core)",
+      "file": "Customization/loadable/standard-precision-1c.json"
+    },
+    {
+      "id": "acol",
+      "name": "ACOL (classic)",
+      "file": "Customization/loadable/standard-acol.json"
+    },
+    {
+      "id": "personal-fg",
+      "name": "Personal FG Notes (Extracted)",
+      "file": "Customization/loadable/personal-fgv0-4.json"
+    }
+  ]
+}

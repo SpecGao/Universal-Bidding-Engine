@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bridge Rule Engine - SystemBuilder</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="engine/biddingEngine.js"></script>
+</head>
+<body class="systembuilder-body" id="app">
+  <div class="systembuilder-shell">
+    <div class="page-shell">
+      <header>
+        <h1>SystemBuilder</h1>
+        <nav class="page-links" aria-label="SystemBuilder navigation">
+          <a href="expression-documentation.html" class="home">Expression reference</a>
+          <a href="quick-customization.html" class="home">Quick customization</a>
+          <a href="index.html" class="home">Back to workspace</a>
+        </nav>
+      </header>
+
+      <section class="panel-grid">
+        <div class="panel">
+          <div class="system-selectors row">
+            <label>
+              Base system
+              <select id="builderSystemSelect"></select>
+            </label>
+            <label>
+              Import system JSON
+              <input id="builderImport" type="file" accept="application/json" />
+            </label>
+            <div class="systembuilder-controls">
+              <button id="newConvention">Add Convention</button>
+              <button id="exportSystem">Export JSON</button>
+              <button id="downloadSystem">Export File</button>
+              <a href="quick-customization.html" class="button-link">Create a customized opening profile</a>
+            </div>
+          </div>
+          <p id="builderStatus" class="status-message" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading-row">
+            <div>
+              <h2>Sequence-expression rules</h2>
+              <p class="meta-note">Rules use compact partnership sequences, can learn unspecified suits, and can include opponent calls with ^. See the <a href="expression-documentation.html">expression reference</a>.</p>
+            </div>
+            <button id="newSequenceRule" type="button">Add expression rule</button>
+          </div>
+          <div id="sequenceRuleArea" class="sequence-rule-area"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Definition audit</h2>
+          <p class="meta-note">Updated while you edit. It checks legality, impossible filters, duplicate identifiers, and overlapping tree or expression routes.</p>
+          <div id="systemAudit" class="definition-audit" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Convention trees</h2>
+          <div id="systemMetadata"></div>
+          <div id="treeArea" class="tree-zone"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script src="Customization/system-data.js"></script>
+  <script src="systembuilder.js"></script>
+</body>
+</html>
