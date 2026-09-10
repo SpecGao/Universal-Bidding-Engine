@@ -253,6 +253,27 @@ test("transition trees learn the same abstract suit bindings", () => {
   assert.deepEqual(path.context.symbolBindings, { X: "H", Y: "D" });
 });
 
+test("symbolic suit filters apply to the suit learned by a transition", () => {
+  const engine = new api.UniversalBiddingEngine();
+  engine.setSystem({
+    conventions: [{
+      id: "symbolic-filter",
+      children: [{
+        id: "five-card-X",
+        trigger: "1X",
+        filters: { auctionRole: "opening", minSuit: { X: 5 }, maxSuit: { X: 13 } },
+        children: [],
+      }],
+    }],
+  });
+
+  const fourHearts = engine.evaluate(["1H"], "N", { minSuit: { H: 4 }, maxSuit: { H: 4 } }, "NS");
+  assert.equal(fourHearts.frames[0].matches.some((item) => item.toNodeId === "five-card-X"), false);
+
+  const fiveHearts = engine.evaluate(["1H"], "N", { minSuit: { H: 5 }, maxSuit: { H: 5 } }, "NS");
+  assert.equal(fiveHearts.frames[0].matches.some((item) => item.toNodeId === "five-card-X"), true);
+});
+
 test("the shipped 2/1 system explains 1S-P-2C with the default broad hand filter", () => {
   const systemPath = path.join(__dirname, "..", "Customization", "standard-two-over-one.json");
   const system = JSON.parse(fs.readFileSync(systemPath, "utf8"));
@@ -270,6 +291,83 @@ test("the shipped 2/1 system explains 1S-P-2C with the default broad hand filter
   assert.equal(incompatible.frames[0].matches.some((item) => item.toNodeId === "o1S"), false);
 });
 
+test("the standard 2/1 fact layer advances through entry, strain, fit, controls, and completion", () => {
+  const systemPath = path.join(__dirname, "..", "Customization", "standard-two-over-one.json");
+  const system = JSON.parse(fs.readFileSync(systemPath, "utf8"));
+  const engine = new api.UniversalBiddingEngine();
+  engine.setSystem(system);
+  const hand = { minHcp: 12, maxHcp: 21 };
+
+  const entry = engine.evaluate(["1S", "P", "2C"], "N", hand, "NS");
+  assert.equal(entry.facts.progress.twoOverOne.phase, "entry");
+  assert.equal(entry.facts.forcing.game, true);
+
+  const strain = engine.evaluate(["1S", "P", "2C", "P", "2D"], "N", hand, "NS");
+  assert.equal(strain.facts.progress.twoOverOne.phase, "strain-selection");
+
+  const fit = engine.evaluate(["1S", "P", "2C", "P", "2D", "P", "2S"], "N", hand, "NS");
+  assert.equal(fit.facts.progress.twoOverOne.phase, "fit-confirmed");
+  assert.equal(fit.facts.fit.suit, "S");
+
+  const controls = engine.evaluate(["1S", "P", "2C", "P", "2D", "P", "2S", "P", "3H"], "N", hand, "NS");
+  assert.equal(controls.facts.progress.twoOverOne.phase, "control-bidding");
+  assert.equal(controls.facts.slam.control.suit, "H");
+
+  const complete = engine.evaluate(["1S", "P", "2C", "P", "2D", "P", "2S", "P", "3H", "P", "4S"], "N", hand, "NS");
+  assert.equal(complete.facts.progress.twoOverOne.phase, "complete");
+  assert.equal(complete.facts.progress.twoOverOne.gameForceSatisfied, true);
+  assert.equal(complete.facts.forcing.game, false);
+
+  const simpleRaise = engine.evaluate(["1S", "P", "2S"], "N", hand, "NS");
+  assert.equal(simpleRaise.facts.convention.twoOverOne, false);
+  assert.equal(simpleRaise.facts.forcing.game, false);
+});
+
+test("personal FG v0.5 carries facts, required alerts, and symbolic delayed-splinter filters", () => {
+  const systemPath = path.join(__dirname, "..", "Customization", "personal-fgv0-5.json");
+  const system = JSON.parse(fs.readFileSync(systemPath, "utf8"));
+  const ids = new Set();
+  const nodes = [];
+  const visit = (node) => {
+    assert.equal(ids.has(node.id), false, `duplicate node id ${node.id}`);
+    ids.add(node.id);
+    nodes.push(node);
+    for (const child of node.children || []) visit(child);
+  };
+  for (const convention of system.conventions) for (const child of convention.children || []) visit(child);
+  assert.equal(nodes.every((node) => node.meaning && Object.keys(node.facts || {}).length), true);
+
+  const oneNotrump = nodes.find((node) => node.id === "fg1NT");
+  for (const child of oneNotrump.children) {
+    const expectedAlert = !/^[4-7]NT$/.test(child.trigger);
+    assert.equal(child.alert, expectedAlert, `unexpected 1NT response alert for ${child.trigger}`);
+  }
+  assert.equal(nodes.filter((node) => /splinter/i.test(node.id)).every((node) => node.alert), true);
+  assert.equal(nodes.filter((node) => /exclusion/i.test(node.id)).every((node) => node.alert), true);
+  assert.equal(nodes.find((node) => node.id === "fg-rkcb").alert, true);
+
+  const engine = new api.UniversalBiddingEngine();
+  engine.setSystem(system);
+  const sequence = ["1D", "P", "2C", "P", "2H", "P", "3S"];
+  const eligible = engine.evaluate(sequence, "N", {
+    minHcp: 15,
+    maxHcp: 15,
+    minSuit: { H: 3 },
+    maxSuit: { S: 1 },
+  }, "NS");
+  const delayed = eligible.frames[6].matches.find((item) => item.toNodeId === "personal-fgv0-5-delayed-splinter-2-new-higher");
+  assert.equal(Boolean(delayed), true);
+  assert.equal(delayed.alert, true);
+  assert.equal(delayed.facts.shortness.suit, "S");
+
+  const ineligible = engine.evaluate(sequence, "N", {
+    minHcp: 15,
+    maxHcp: 15,
+    maxSuit: { H: 2, S: 1 },
+  }, "NS");
+  assert.equal(ineligible.frames[6].matches.some((item) => item.toNodeId === "personal-fgv0-5-delayed-splinter-2-new-higher"), false);
+});
+
 test("the browser data bundle contains the same learned 2/1 rules", () => {
   const bundlePath = path.join(__dirname, "..", "Customization", "system-data.js");
   const source = fs.readFileSync(bundlePath, "utf8");
@@ -277,7 +375,7 @@ test("the browser data bundle contains the same learned 2/1 rules", () => {
   assert.equal(source.startsWith(prefix), true);
   const bundle = JSON.parse(source.slice(prefix.length, source.lastIndexOf(";")));
   const system = bundle.systems.find((item) => item.systemId === "two-over-one");
-  assert.equal(system.schemaVersion, "1.2");
+  assert.equal(system.schemaVersion, "1.4");
   assert.equal(system.sequenceRules.some((rule) => rule.id === "two-over-one-learned-sequence"), true);
   assert.equal(system.sequenceRules.some((rule) => rule.id === "two-over-one-explicit-fit-blackwood"), true);
 });

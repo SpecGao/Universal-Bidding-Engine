@@ -1,9 +1,9 @@
 {
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "systemId": "two-over-one",
   "systemName": "2/1 Game Forcing",
   "description": "A practical 2/1 Game Forcing map tuned for teaching and automation with explicit phase transitions.",
-  "notes": "Conventions are modeled as bid-triggered transitions. Control-bidding nodes are represented by generated nodes that emit suit-control suggestions.",
+  "notes": "Conventions are modeled as bid-triggered transitions. The persistent fact layer records 2/1 progression from entry through strain selection, fit confirmation, controls, slam pursuit, and completion at game.",
   "sequenceRules": [
     {
       "id": "two-over-one-learned-sequence",
@@ -15,27 +15,48 @@
       "priority": 110
     },
     {
-      "id": "two-over-one-explicit-fit-blackwood",
-      "expression": "*-#X-*-#X-*-4NT",
-      "requiresAgreement": [
-        "X"
-      ],
-      "meaning": "Blackwood / key-card ace ask after both partners explicitly bid the same suit.",
-      "priority": 120
-    },
-    {
-      "id": "two-over-one-facts-two-over-one-entry",
-      "expression": "1M-2X",
+      "id": "two-over-one-facts-entry",
+      "expression": "1X-2Y",
       "where": [
-        "X<M"
+        "Y<X"
       ],
       "requiresAgreement": [],
-      "meaning": "2/1 game force: each partner has shown at least 12 points.",
+      "filters": {
+        "minHcp": 12,
+        "maxHcp": 40
+      },
+      "meaning": "2/1 Phase I entry: responder shows 12+ points and creates a game force.",
       "priority": 940,
       "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "2/1 Phase I entry: responder shows 12+ points and creates a game force.",
+          "points": {
+            "method": "HCP",
+            "min": 12,
+            "max": 40
+          },
+          "suitLengths": []
+        },
+        "convention": {
+          "twoOverOne": true
+        },
         "forcing": {
           "game": true,
+          "round": false,
           "source": "2/1"
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": true,
+            "phase": "entry",
+            "phaseNumber": 1,
+            "openingSuit": "{{X}}",
+            "responseSuit": "{{Y}}",
+            "fitConfirmed": false,
+            "gameForceSatisfied": false
+          }
         },
         "partnership": {
           "points": {
@@ -53,39 +74,421 @@
       }
     },
     {
-      "id": "two-over-one-facts-two-over-one-major-fit",
-      "expression": "1M-2X-2Y-#M",
+      "id": "two-over-one-facts-phase-ii-suit",
+      "expression": "1X-2Y-(?:!=NT)",
       "where": [
-        "X<M"
+        "Y<X"
       ],
-      "requiresAgreement": [
-        "M"
-      ],
-      "meaning": "2/1 major fit confirmed: opener has five and responder has three or more.",
-      "priority": 960,
+      "requiresAgreement": [],
+      "meaning": "2/1 Phase II begins with opener's first suit rebid.",
+      "priority": 950,
       "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "2/1 Phase II begins with opener's first suit rebid.",
+          "points": {
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
         "forcing": {
           "game": true,
           "source": "2/1"
         },
+        "progress": {
+          "twoOverOne": {
+            "active": true,
+            "phase": "strain-selection",
+            "phaseNumber": 2,
+            "gameForceSatisfied": false
+          }
+        }
+      }
+    },
+    {
+      "id": "two-over-one-facts-phase-ii-notrump",
+      "expression": "1X-2Y-(2NT|3NT)",
+      "where": [
+        "Y<X"
+      ],
+      "requiresAgreement": [],
+      "meaning": "2/1 Phase II begins with opener's first notrump rebid.",
+      "priority": 950,
+      "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "2/1 Phase II begins with opener's first notrump rebid.",
+          "points": {
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
+        "forcing": {
+          "game": true,
+          "source": "2/1"
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": true,
+            "phase": "strain-selection",
+            "phaseNumber": 2,
+            "gameForceSatisfied": false
+          }
+        }
+      }
+    },
+    {
+      "id": "two-over-one-facts-fit-opening",
+      "expression": "1X-2Y-?-#X",
+      "where": [
+        "Y<X"
+      ],
+      "requiresAgreement": [
+        "X"
+      ],
+      "meaning": "2/1 Phase II confirms a fit in the opening suit.",
+      "priority": 960,
+      "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "2/1 Phase II confirms a fit in the opening suit.",
+          "points": {
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
         "fit": {
           "confirmed": true,
-          "suit": "{{M}}",
-          "openerLength": 5,
-          "responderLength": 3,
-          "combinedMinimum": 8
+          "suit": "{{X}}"
         },
-        "partnership": {
+        "progress": {
+          "twoOverOne": {
+            "active": true,
+            "phase": "fit-confirmed",
+            "phaseNumber": 2,
+            "fitConfirmed": true,
+            "agreedSuit": "{{X}}",
+            "gameForceSatisfied": false
+          }
+        }
+      }
+    },
+    {
+      "id": "two-over-one-facts-fit-response",
+      "expression": "1X-2Y-#Y",
+      "where": [
+        "Y<X"
+      ],
+      "requiresAgreement": [
+        "Y"
+      ],
+      "meaning": "2/1 Phase II confirms a fit in responder's suit.",
+      "priority": 960,
+      "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "2/1 Phase II confirms a fit in responder's suit.",
           "points": {
-            "opener": {
-              "min": 12
-            },
-            "responder": {
-              "min": 12
-            },
-            "combined": {
-              "min": 24
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
+        "fit": {
+          "confirmed": true,
+          "suit": "{{Y}}"
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": true,
+            "phase": "fit-confirmed",
+            "phaseNumber": 2,
+            "fitConfirmed": true,
+            "agreedSuit": "{{Y}}",
+            "gameForceSatisfied": false
+          }
+        }
+      }
+    },
+    {
+      "id": "two-over-one-facts-fit-second-suit",
+      "expression": "1X-2Y-#Z-#Z",
+      "where": [
+        "Y<X"
+      ],
+      "requiresAgreement": [
+        "Z"
+      ],
+      "meaning": "2/1 Phase II confirms a fit in opener's second suit.",
+      "priority": 960,
+      "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "2/1 Phase II confirms a fit in opener's second suit.",
+          "points": {
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
+        "fit": {
+          "confirmed": true,
+          "suit": "{{Z}}"
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": true,
+            "phase": "fit-confirmed",
+            "phaseNumber": 2,
+            "fitConfirmed": true,
+            "agreedSuit": "{{Z}}",
+            "gameForceSatisfied": false
+          }
+        }
+      }
+    },
+    {
+      "id": "two-over-one-facts-control-opening-fit",
+      "expression": "1X-2Y-?-#X-#Z",
+      "where": [
+        "Y<X"
+      ],
+      "requiresAgreement": [
+        "X"
+      ],
+      "meaning": "2/1 Phase III control bidding after agreement in the opening suit.",
+      "priority": 970,
+      "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "2/1 Phase III control bidding after agreement in the opening suit.",
+          "points": {
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
+        "forcing": {
+          "game": true,
+          "source": "2/1"
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": true,
+            "phase": "control-bidding",
+            "phaseNumber": 3,
+            "fitConfirmed": true,
+            "agreedSuit": "{{X}}",
+            "gameForceSatisfied": false
+          }
+        },
+        "slam": {
+          "interest": true,
+          "control": {
+            "active": true,
+            "suit": "{{Z}}",
+            "round": "first-or-second",
+            "elimination": {
+              "method": "ascending-suit-elimination",
+              "skippedSuitDeniesControl": true
             }
+          }
+        }
+      }
+    },
+    {
+      "id": "two-over-one-facts-control-response-fit",
+      "expression": "1X-2Y-#Y-#Z",
+      "where": [
+        "Y<X"
+      ],
+      "requiresAgreement": [
+        "Y"
+      ],
+      "meaning": "2/1 Phase III control bidding after agreement in responder's suit.",
+      "priority": 970,
+      "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "2/1 Phase III control bidding after agreement in responder's suit.",
+          "points": {
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
+        "forcing": {
+          "game": true,
+          "source": "2/1"
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": true,
+            "phase": "control-bidding",
+            "phaseNumber": 3,
+            "fitConfirmed": true,
+            "agreedSuit": "{{Y}}",
+            "gameForceSatisfied": false
+          }
+        },
+        "slam": {
+          "interest": true,
+          "control": {
+            "active": true,
+            "suit": "{{Z}}",
+            "round": "first-or-second",
+            "elimination": {
+              "method": "ascending-suit-elimination",
+              "skippedSuitDeniesControl": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "two-over-one-facts-control-second-suit-fit",
+      "expression": "1X-2Y-#Z-#Z-#W",
+      "where": [
+        "Y<X"
+      ],
+      "requiresAgreement": [
+        "Z"
+      ],
+      "meaning": "2/1 Phase III control bidding after agreement in opener's second suit.",
+      "priority": 970,
+      "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "2/1 Phase III control bidding after agreement in opener's second suit.",
+          "points": {
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
+        "forcing": {
+          "game": true,
+          "source": "2/1"
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": true,
+            "phase": "control-bidding",
+            "phaseNumber": 3,
+            "fitConfirmed": true,
+            "agreedSuit": "{{Z}}",
+            "gameForceSatisfied": false
+          }
+        },
+        "slam": {
+          "interest": true,
+          "control": {
+            "active": true,
+            "suit": "{{W}}",
+            "round": "first-or-second",
+            "elimination": {
+              "method": "ascending-suit-elimination",
+              "skippedSuitDeniesControl": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "two-over-one-explicit-fit-blackwood",
+      "expression": "*-#X-*-#X-*-4NT",
+      "where": [],
+      "requiresAgreement": [
+        "X"
+      ],
+      "meaning": "Blackwood / key-card ace ask after both partners explicitly bid the same suit.",
+      "priority": 980,
+      "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "Blackwood / key-card ace ask after both partners explicitly bid the same suit.",
+          "points": {
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
+        "convention": {
+          "blackwood": true,
+          "rkcb": true
+        },
+        "slam": {
+          "interest": true,
+          "aceAsk": {
+            "active": true,
+            "method": "rkcb-1430",
+            "interference": "D0P1",
+            "accelerated": false,
+            "type": "keycard",
+            "agreedSuit": "{{X}}"
+          }
+        },
+        "progress": {
+          "twoOverOne": {
+            "phase": "slam-pursuit",
+            "phaseNumber": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "two-over-one-facts-game-force-complete",
+      "expression": "1X-2Y-*-(3NT|4H|4S|5C|5D)",
+      "where": [
+        "Y<X"
+      ],
+      "requiresAgreement": [],
+      "meaning": "The 2/1 game force is satisfied when the partnership reaches a game contract.",
+      "priority": 990,
+      "facts": {
+        "lastBid": {
+          "seat": "{{seat}}",
+          "code": "{{call.code}}",
+          "meaning": "The 2/1 game force is satisfied when the partnership reaches a game contract.",
+          "points": {
+            "method": "HCP",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
+        },
+        "forcing": {
+          "game": false,
+          "round": false,
+          "source": "2/1-complete"
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": false,
+            "phase": "complete",
+            "phaseNumber": 4,
+            "gameForceSatisfied": true
           }
         }
       }
@@ -206,23 +609,24 @@
               "meaning": "Club raise or strong natural support; it is not a 2/1 game-force response because it is not a new lower-ranking suit.",
               "facts": {
                 "convention": {
-                  "twoOverOne": true
+                  "twoOverOne": false
                 },
                 "forcing": {
-                  "game": true,
-                  "source": "2/1"
+                  "game": false,
+                  "round": false
                 },
-                "partnership": {
-                  "points": {
-                    "opener": {
-                      "min": 12
-                    },
-                    "responder": {
-                      "min": 12
-                    },
-                    "combined": {
-                      "min": 24
-                    }
+                "fit": {
+                  "confirmed": true,
+                  "suit": "C",
+                  "responderLength": 4
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": false,
+                    "phase": "not-started",
+                    "phaseNumber": 0,
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
                   }
                 }
               }
@@ -296,23 +700,24 @@
               ],
               "facts": {
                 "convention": {
-                  "twoOverOne": true
+                  "twoOverOne": false
                 },
                 "forcing": {
-                  "game": true,
-                  "source": "2/1"
+                  "game": false,
+                  "round": false
                 },
-                "partnership": {
-                  "points": {
-                    "opener": {
-                      "min": 12
-                    },
-                    "responder": {
-                      "min": 12
-                    },
-                    "combined": {
-                      "min": 24
-                    }
+                "fit": {
+                  "confirmed": true,
+                  "suit": "D",
+                  "responderLength": 4
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": false,
+                    "phase": "not-started",
+                    "phaseNumber": 0,
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
                   }
                 }
               }
@@ -333,7 +738,19 @@
                 },
                 "forcing": {
                   "game": true,
+                  "round": false,
                   "source": "2/1"
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "entry",
+                    "phaseNumber": 1,
+                    "openingSuit": "D",
+                    "responseSuit": "C",
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
+                  }
                 },
                 "partnership": {
                   "points": {
@@ -389,8 +806,16 @@
                   "meaning": "In-between hand with no sure game force.",
                   "facts": {
                     "forcing": {
-                      "game": true,
-                      "source": "system agreement"
+                      "game": false,
+                      "round": true,
+                      "source": "invitation"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
                     }
                   }
                 },
@@ -435,23 +860,24 @@
               ],
               "facts": {
                 "convention": {
-                  "twoOverOne": true
+                  "twoOverOne": false
                 },
                 "forcing": {
-                  "game": true,
-                  "source": "2/1"
+                  "game": false,
+                  "round": false
                 },
-                "partnership": {
-                  "points": {
-                    "opener": {
-                      "min": 12
-                    },
-                    "responder": {
-                      "min": 12
-                    },
-                    "combined": {
-                      "min": 24
-                    }
+                "fit": {
+                  "confirmed": true,
+                  "suit": "H",
+                  "responderLength": 3
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": false,
+                    "phase": "not-started",
+                    "phaseNumber": 0,
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
                   }
                 }
               }
@@ -472,7 +898,19 @@
                 },
                 "forcing": {
                   "game": true,
+                  "round": false,
                   "source": "2/1"
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "entry",
+                    "phaseNumber": 1,
+                    "openingSuit": "H",
+                    "responseSuit": "C",
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
+                  }
                 },
                 "partnership": {
                   "points": {
@@ -505,7 +943,19 @@
                 },
                 "forcing": {
                   "game": true,
+                  "round": false,
                   "source": "2/1"
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "entry",
+                    "phaseNumber": 1,
+                    "openingSuit": "H",
+                    "responseSuit": "D",
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
+                  }
                 },
                 "partnership": {
                   "points": {
@@ -577,15 +1027,23 @@
                       "meaning": "RKCB or 4NT ace-ask family.",
                       "facts": {
                         "convention": {
+                          "blackwood": true,
                           "rkcb": true
                         },
                         "slam": {
+                          "interest": true,
                           "aceAsk": {
                             "active": true,
                             "method": "rkcb-1430",
                             "interference": "D0P1",
                             "accelerated": false,
                             "type": "keycard"
+                          }
+                        },
+                        "progress": {
+                          "twoOverOne": {
+                            "phase": "slam-pursuit",
+                            "phaseNumber": 4
                           }
                         }
                       }
@@ -600,23 +1058,24 @@
               ],
               "facts": {
                 "convention": {
-                  "twoOverOne": true
+                  "twoOverOne": false
                 },
                 "forcing": {
-                  "game": true,
-                  "source": "2/1"
+                  "game": false,
+                  "round": false
                 },
-                "partnership": {
-                  "points": {
-                    "opener": {
-                      "min": 12
-                    },
-                    "responder": {
-                      "min": 12
-                    },
-                    "combined": {
-                      "min": 24
-                    }
+                "fit": {
+                  "confirmed": true,
+                  "suit": "S",
+                  "responderLength": 3
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": false,
+                    "phase": "not-started",
+                    "phaseNumber": 0,
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
                   }
                 }
               }
@@ -637,7 +1096,19 @@
                 },
                 "forcing": {
                   "game": true,
+                  "round": false,
                   "source": "2/1"
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "entry",
+                    "phaseNumber": 1,
+                    "openingSuit": "S",
+                    "responseSuit": "C",
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
+                  }
                 },
                 "partnership": {
                   "points": {
@@ -670,7 +1141,19 @@
                 },
                 "forcing": {
                   "game": true,
+                  "round": false,
                   "source": "2/1"
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "entry",
+                    "phaseNumber": 1,
+                    "openingSuit": "S",
+                    "responseSuit": "D",
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
+                  }
                 },
                 "partnership": {
                   "points": {
@@ -703,7 +1186,19 @@
                 },
                 "forcing": {
                   "game": true,
+                  "round": false,
                   "source": "2/1"
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "entry",
+                    "phaseNumber": 1,
+                    "openingSuit": "S",
+                    "responseSuit": "H",
+                    "fitConfirmed": false,
+                    "gameForceSatisfied": false
+                  }
                 },
                 "partnership": {
                   "points": {
@@ -1260,6 +1755,7 @@
               "meaning": "1 or 4 key cards (RKCB 1430).",
               "facts": {
                 "convention": {
+                  "blackwood": true,
                   "rkcb": true
                 },
                 "slam": {
@@ -1274,8 +1770,8 @@
                     "method": "rkcb-1430",
                     "bid": "5C",
                     "keycards": [
-                      0,
-                      3
+                      1,
+                      4
                     ]
                   }
                 }
@@ -1287,6 +1783,7 @@
               "meaning": "0 or 3 key cards (RKCB 1430).",
               "facts": {
                 "convention": {
+                  "blackwood": true,
                   "rkcb": true
                 },
                 "slam": {
@@ -1301,8 +1798,8 @@
                     "method": "rkcb-1430",
                     "bid": "5D",
                     "keycards": [
-                      1,
-                      4
+                      0,
+                      3
                     ]
                   }
                 }
@@ -1314,6 +1811,7 @@
               "meaning": "2 key cards without the trump queen (RKCB 1430).",
               "facts": {
                 "convention": {
+                  "blackwood": true,
                   "rkcb": true
                 },
                 "slam": {
@@ -1328,9 +1826,9 @@
                     "method": "rkcb-1430",
                     "bid": "5H",
                     "keycards": [
-                      2,
-                      5
-                    ]
+                      2
+                    ],
+                    "trumpQueen": false
                   }
                 }
               }
@@ -1341,6 +1839,7 @@
               "meaning": "2 key cards with the trump queen (RKCB 1430).",
               "facts": {
                 "convention": {
+                  "blackwood": true,
                   "rkcb": true
                 },
                 "slam": {
@@ -1350,6 +1849,14 @@
                     "interference": "D0P1",
                     "accelerated": false,
                     "type": "keycard"
+                  },
+                  "response": {
+                    "method": "rkcb-1430",
+                    "bid": "5S",
+                    "keycards": [
+                      2
+                    ],
+                    "trumpQueen": true
                   }
                 }
               }
@@ -1360,15 +1867,13 @@
               "meaning": "King/queen inquiry for grand-slam attempts.",
               "facts": {
                 "convention": {
+                  "blackwood": true,
                   "rkcb": true
                 },
                 "slam": {
-                  "aceAsk": {
+                  "kingAsk": {
                     "active": true,
-                    "method": "rkcb-1430",
-                    "interference": "D0P1",
-                    "accelerated": false,
-                    "type": "keycard"
+                    "method": "specific-king"
                   }
                 }
               }
@@ -1383,12 +1888,19 @@
               "rkcb": true
             },
             "slam": {
+              "interest": true,
               "aceAsk": {
                 "active": true,
                 "method": "rkcb-1430",
                 "interference": "D0P1",
                 "accelerated": false,
                 "type": "keycard"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "phase": "slam-pursuit",
+                "phaseNumber": 4
               }
             }
           }
@@ -1715,25 +2227,30 @@
   },
   "factSchema": {
     "id": "bridge-bidding-facts",
-    "version": "1.0",
+    "version": "1.1",
     "patchSemantics": "deep-merge",
     "deleteSentinel": {
       "$delete": true
     },
     "templates": [
       "{{M}}",
+      "{{m}}",
       "{{X}}",
       "{{Y}}",
       "{{Z}}",
       "{{W}}",
       "{{call.code}}",
-      "{{call.suit}}"
+      "{{call.level}}",
+      "{{call.strain}}",
+      "{{call.suit}}",
+      "{{seat}}",
+      "{{side}}"
     ]
   },
   "initialFacts": {
     "factLayer": {
       "schema": "bridge-bidding-facts",
-      "version": "1.0",
+      "version": "1.1",
       "merge": "deep-patch"
     },
     "agreement": {
@@ -1780,6 +2297,15 @@
     },
     "fit": {
       "confirmed": false
+    },
+    "progress": {
+      "twoOverOne": {
+        "active": false,
+        "phase": "not-started",
+        "phaseNumber": 0,
+        "fitConfirmed": false,
+        "gameForceSatisfied": false
+      }
     }
   }
 }

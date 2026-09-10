@@ -1209,11 +1209,11 @@ window.BridgeSystemData = {
       }
     },
     {
-      "schemaVersion": "1.3",
+      "schemaVersion": "1.4",
       "systemId": "two-over-one",
       "systemName": "2/1 Game Forcing",
       "description": "A practical 2/1 Game Forcing map tuned for teaching and automation with explicit phase transitions.",
-      "notes": "Conventions are modeled as bid-triggered transitions. Control-bidding nodes are represented by generated nodes that emit suit-control suggestions.",
+      "notes": "Conventions are modeled as bid-triggered transitions. The persistent fact layer records 2/1 progression from entry through strain selection, fit confirmation, controls, slam pursuit, and completion at game.",
       "sequenceRules": [
         {
           "id": "two-over-one-learned-sequence",
@@ -1225,27 +1225,48 @@ window.BridgeSystemData = {
           "priority": 110
         },
         {
-          "id": "two-over-one-explicit-fit-blackwood",
-          "expression": "*-#X-*-#X-*-4NT",
-          "requiresAgreement": [
-            "X"
-          ],
-          "meaning": "Blackwood / key-card ace ask after both partners explicitly bid the same suit.",
-          "priority": 120
-        },
-        {
-          "id": "two-over-one-facts-two-over-one-entry",
-          "expression": "1M-2X",
+          "id": "two-over-one-facts-entry",
+          "expression": "1X-2Y",
           "where": [
-            "X<M"
+            "Y<X"
           ],
           "requiresAgreement": [],
-          "meaning": "2/1 game force: each partner has shown at least 12 points.",
+          "filters": {
+            "minHcp": 12,
+            "maxHcp": 40
+          },
+          "meaning": "2/1 Phase I entry: responder shows 12+ points and creates a game force.",
           "priority": 940,
           "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase I entry: responder shows 12+ points and creates a game force.",
+              "points": {
+                "method": "HCP",
+                "min": 12,
+                "max": 40
+              },
+              "suitLengths": []
+            },
+            "convention": {
+              "twoOverOne": true
+            },
             "forcing": {
               "game": true,
+              "round": false,
               "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "entry",
+                "phaseNumber": 1,
+                "openingSuit": "{{X}}",
+                "responseSuit": "{{Y}}",
+                "fitConfirmed": false,
+                "gameForceSatisfied": false
+              }
             },
             "partnership": {
               "points": {
@@ -1263,39 +1284,421 @@ window.BridgeSystemData = {
           }
         },
         {
-          "id": "two-over-one-facts-two-over-one-major-fit",
-          "expression": "1M-2X-2Y-#M",
+          "id": "two-over-one-facts-phase-ii-suit",
+          "expression": "1X-2Y-(?:!=NT)",
           "where": [
-            "X<M"
+            "Y<X"
           ],
-          "requiresAgreement": [
-            "M"
-          ],
-          "meaning": "2/1 major fit confirmed: opener has five and responder has three or more.",
-          "priority": 960,
+          "requiresAgreement": [],
+          "meaning": "2/1 Phase II begins with opener's first suit rebid.",
+          "priority": 950,
           "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II begins with opener's first suit rebid.",
+              "points": {
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
             "forcing": {
               "game": true,
               "source": "2/1"
             },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "strain-selection",
+                "phaseNumber": 2,
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-facts-phase-ii-notrump",
+          "expression": "1X-2Y-(2NT|3NT)",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [],
+          "meaning": "2/1 Phase II begins with opener's first notrump rebid.",
+          "priority": 950,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II begins with opener's first notrump rebid.",
+              "points": {
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "strain-selection",
+                "phaseNumber": 2,
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-facts-fit-opening",
+          "expression": "1X-2Y-?-#X",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "X"
+          ],
+          "meaning": "2/1 Phase II confirms a fit in the opening suit.",
+          "priority": 960,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II confirms a fit in the opening suit.",
+              "points": {
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
             "fit": {
               "confirmed": true,
-              "suit": "{{M}}",
-              "openerLength": 5,
-              "responderLength": 3,
-              "combinedMinimum": 8
+              "suit": "{{X}}"
             },
-            "partnership": {
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "fit-confirmed",
+                "phaseNumber": 2,
+                "fitConfirmed": true,
+                "agreedSuit": "{{X}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-facts-fit-response",
+          "expression": "1X-2Y-#Y",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "Y"
+          ],
+          "meaning": "2/1 Phase II confirms a fit in responder's suit.",
+          "priority": 960,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II confirms a fit in responder's suit.",
               "points": {
-                "opener": {
-                  "min": 12
-                },
-                "responder": {
-                  "min": 12
-                },
-                "combined": {
-                  "min": 24
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Y}}"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "fit-confirmed",
+                "phaseNumber": 2,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Y}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-facts-fit-second-suit",
+          "expression": "1X-2Y-#Z-#Z",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "Z"
+          ],
+          "meaning": "2/1 Phase II confirms a fit in opener's second suit.",
+          "priority": 960,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II confirms a fit in opener's second suit.",
+              "points": {
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "fit-confirmed",
+                "phaseNumber": 2,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-facts-control-opening-fit",
+          "expression": "1X-2Y-?-#X-#Z",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "X"
+          ],
+          "meaning": "2/1 Phase III control bidding after agreement in the opening suit.",
+          "priority": 970,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase III control bidding after agreement in the opening suit.",
+              "points": {
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{X}}",
+                "gameForceSatisfied": false
+              }
+            },
+            "slam": {
+              "interest": true,
+              "control": {
+                "active": true,
+                "suit": "{{Z}}",
+                "round": "first-or-second",
+                "elimination": {
+                  "method": "ascending-suit-elimination",
+                  "skippedSuitDeniesControl": true
                 }
+              }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-facts-control-response-fit",
+          "expression": "1X-2Y-#Y-#Z",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "Y"
+          ],
+          "meaning": "2/1 Phase III control bidding after agreement in responder's suit.",
+          "priority": 970,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase III control bidding after agreement in responder's suit.",
+              "points": {
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Y}}",
+                "gameForceSatisfied": false
+              }
+            },
+            "slam": {
+              "interest": true,
+              "control": {
+                "active": true,
+                "suit": "{{Z}}",
+                "round": "first-or-second",
+                "elimination": {
+                  "method": "ascending-suit-elimination",
+                  "skippedSuitDeniesControl": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-facts-control-second-suit-fit",
+          "expression": "1X-2Y-#Z-#Z-#W",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "Z"
+          ],
+          "meaning": "2/1 Phase III control bidding after agreement in opener's second suit.",
+          "priority": 970,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase III control bidding after agreement in opener's second suit.",
+              "points": {
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}",
+                "gameForceSatisfied": false
+              }
+            },
+            "slam": {
+              "interest": true,
+              "control": {
+                "active": true,
+                "suit": "{{W}}",
+                "round": "first-or-second",
+                "elimination": {
+                  "method": "ascending-suit-elimination",
+                  "skippedSuitDeniesControl": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-explicit-fit-blackwood",
+          "expression": "*-#X-*-#X-*-4NT",
+          "where": [],
+          "requiresAgreement": [
+            "X"
+          ],
+          "meaning": "Blackwood / key-card ace ask after both partners explicitly bid the same suit.",
+          "priority": 980,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Blackwood / key-card ace ask after both partners explicitly bid the same suit.",
+              "points": {
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "convention": {
+              "blackwood": true,
+              "rkcb": true
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "keycard",
+                "agreedSuit": "{{X}}"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "phase": "slam-pursuit",
+                "phaseNumber": 4
+              }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-facts-game-force-complete",
+          "expression": "1X-2Y-*-(3NT|4H|4S|5C|5D)",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [],
+          "meaning": "The 2/1 game force is satisfied when the partnership reaches a game contract.",
+          "priority": 990,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "The 2/1 game force is satisfied when the partnership reaches a game contract.",
+              "points": {
+                "method": "HCP",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": false,
+              "round": false,
+              "source": "2/1-complete"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": false,
+                "phase": "complete",
+                "phaseNumber": 4,
+                "gameForceSatisfied": true
               }
             }
           }
@@ -1416,23 +1819,24 @@ window.BridgeSystemData = {
                   "meaning": "Club raise or strong natural support; it is not a 2/1 game-force response because it is not a new lower-ranking suit.",
                   "facts": {
                     "convention": {
-                      "twoOverOne": true
+                      "twoOverOne": false
                     },
                     "forcing": {
-                      "game": true,
-                      "source": "2/1"
+                      "game": false,
+                      "round": false
                     },
-                    "partnership": {
-                      "points": {
-                        "opener": {
-                          "min": 12
-                        },
-                        "responder": {
-                          "min": 12
-                        },
-                        "combined": {
-                          "min": 24
-                        }
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "C",
+                      "responderLength": 4
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0,
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
                       }
                     }
                   }
@@ -1506,23 +1910,24 @@ window.BridgeSystemData = {
                   ],
                   "facts": {
                     "convention": {
-                      "twoOverOne": true
+                      "twoOverOne": false
                     },
                     "forcing": {
-                      "game": true,
-                      "source": "2/1"
+                      "game": false,
+                      "round": false
                     },
-                    "partnership": {
-                      "points": {
-                        "opener": {
-                          "min": 12
-                        },
-                        "responder": {
-                          "min": 12
-                        },
-                        "combined": {
-                          "min": 24
-                        }
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "D",
+                      "responderLength": 4
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0,
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
                       }
                     }
                   }
@@ -1543,7 +1948,19 @@ window.BridgeSystemData = {
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "D",
+                        "responseSuit": "C",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -1599,8 +2016,16 @@ window.BridgeSystemData = {
                       "meaning": "In-between hand with no sure game force.",
                       "facts": {
                         "forcing": {
-                          "game": true,
-                          "source": "system agreement"
+                          "game": false,
+                          "round": true,
+                          "source": "invitation"
+                        },
+                        "progress": {
+                          "twoOverOne": {
+                            "active": false,
+                            "phase": "not-started",
+                            "phaseNumber": 0
+                          }
                         }
                       }
                     },
@@ -1645,23 +2070,24 @@ window.BridgeSystemData = {
                   ],
                   "facts": {
                     "convention": {
-                      "twoOverOne": true
+                      "twoOverOne": false
                     },
                     "forcing": {
-                      "game": true,
-                      "source": "2/1"
+                      "game": false,
+                      "round": false
                     },
-                    "partnership": {
-                      "points": {
-                        "opener": {
-                          "min": 12
-                        },
-                        "responder": {
-                          "min": 12
-                        },
-                        "combined": {
-                          "min": 24
-                        }
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "H",
+                      "responderLength": 3
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0,
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
                       }
                     }
                   }
@@ -1682,7 +2108,19 @@ window.BridgeSystemData = {
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "H",
+                        "responseSuit": "C",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -1715,7 +2153,19 @@ window.BridgeSystemData = {
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "H",
+                        "responseSuit": "D",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -1787,15 +2237,23 @@ window.BridgeSystemData = {
                           "meaning": "RKCB or 4NT ace-ask family.",
                           "facts": {
                             "convention": {
+                              "blackwood": true,
                               "rkcb": true
                             },
                             "slam": {
+                              "interest": true,
                               "aceAsk": {
                                 "active": true,
                                 "method": "rkcb-1430",
                                 "interference": "D0P1",
                                 "accelerated": false,
                                 "type": "keycard"
+                              }
+                            },
+                            "progress": {
+                              "twoOverOne": {
+                                "phase": "slam-pursuit",
+                                "phaseNumber": 4
                               }
                             }
                           }
@@ -1810,23 +2268,24 @@ window.BridgeSystemData = {
                   ],
                   "facts": {
                     "convention": {
-                      "twoOverOne": true
+                      "twoOverOne": false
                     },
                     "forcing": {
-                      "game": true,
-                      "source": "2/1"
+                      "game": false,
+                      "round": false
                     },
-                    "partnership": {
-                      "points": {
-                        "opener": {
-                          "min": 12
-                        },
-                        "responder": {
-                          "min": 12
-                        },
-                        "combined": {
-                          "min": 24
-                        }
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S",
+                      "responderLength": 3
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0,
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
                       }
                     }
                   }
@@ -1847,7 +2306,19 @@ window.BridgeSystemData = {
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "S",
+                        "responseSuit": "C",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -1880,7 +2351,19 @@ window.BridgeSystemData = {
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "S",
+                        "responseSuit": "D",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -1913,7 +2396,19 @@ window.BridgeSystemData = {
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "S",
+                        "responseSuit": "H",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -2470,6 +2965,7 @@ window.BridgeSystemData = {
                   "meaning": "1 or 4 key cards (RKCB 1430).",
                   "facts": {
                     "convention": {
+                      "blackwood": true,
                       "rkcb": true
                     },
                     "slam": {
@@ -2484,8 +2980,8 @@ window.BridgeSystemData = {
                         "method": "rkcb-1430",
                         "bid": "5C",
                         "keycards": [
-                          0,
-                          3
+                          1,
+                          4
                         ]
                       }
                     }
@@ -2497,6 +2993,7 @@ window.BridgeSystemData = {
                   "meaning": "0 or 3 key cards (RKCB 1430).",
                   "facts": {
                     "convention": {
+                      "blackwood": true,
                       "rkcb": true
                     },
                     "slam": {
@@ -2511,8 +3008,8 @@ window.BridgeSystemData = {
                         "method": "rkcb-1430",
                         "bid": "5D",
                         "keycards": [
-                          1,
-                          4
+                          0,
+                          3
                         ]
                       }
                     }
@@ -2524,6 +3021,7 @@ window.BridgeSystemData = {
                   "meaning": "2 key cards without the trump queen (RKCB 1430).",
                   "facts": {
                     "convention": {
+                      "blackwood": true,
                       "rkcb": true
                     },
                     "slam": {
@@ -2538,9 +3036,9 @@ window.BridgeSystemData = {
                         "method": "rkcb-1430",
                         "bid": "5H",
                         "keycards": [
-                          2,
-                          5
-                        ]
+                          2
+                        ],
+                        "trumpQueen": false
                       }
                     }
                   }
@@ -2551,6 +3049,7 @@ window.BridgeSystemData = {
                   "meaning": "2 key cards with the trump queen (RKCB 1430).",
                   "facts": {
                     "convention": {
+                      "blackwood": true,
                       "rkcb": true
                     },
                     "slam": {
@@ -2560,6 +3059,14 @@ window.BridgeSystemData = {
                         "interference": "D0P1",
                         "accelerated": false,
                         "type": "keycard"
+                      },
+                      "response": {
+                        "method": "rkcb-1430",
+                        "bid": "5S",
+                        "keycards": [
+                          2
+                        ],
+                        "trumpQueen": true
                       }
                     }
                   }
@@ -2570,15 +3077,13 @@ window.BridgeSystemData = {
                   "meaning": "King/queen inquiry for grand-slam attempts.",
                   "facts": {
                     "convention": {
+                      "blackwood": true,
                       "rkcb": true
                     },
                     "slam": {
-                      "aceAsk": {
+                      "kingAsk": {
                         "active": true,
-                        "method": "rkcb-1430",
-                        "interference": "D0P1",
-                        "accelerated": false,
-                        "type": "keycard"
+                        "method": "specific-king"
                       }
                     }
                   }
@@ -2593,12 +3098,19 @@ window.BridgeSystemData = {
                   "rkcb": true
                 },
                 "slam": {
+                  "interest": true,
                   "aceAsk": {
                     "active": true,
                     "method": "rkcb-1430",
                     "interference": "D0P1",
                     "accelerated": false,
                     "type": "keycard"
+                  }
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "phase": "slam-pursuit",
+                    "phaseNumber": 4
                   }
                 }
               }
@@ -2925,25 +3437,30 @@ window.BridgeSystemData = {
       },
       "factSchema": {
         "id": "bridge-bidding-facts",
-        "version": "1.0",
+        "version": "1.1",
         "patchSemantics": "deep-merge",
         "deleteSentinel": {
           "$delete": true
         },
         "templates": [
           "{{M}}",
+          "{{m}}",
           "{{X}}",
           "{{Y}}",
           "{{Z}}",
           "{{W}}",
           "{{call.code}}",
-          "{{call.suit}}"
+          "{{call.level}}",
+          "{{call.strain}}",
+          "{{call.suit}}",
+          "{{seat}}",
+          "{{side}}"
         ]
       },
       "initialFacts": {
         "factLayer": {
           "schema": "bridge-bidding-facts",
-          "version": "1.0",
+          "version": "1.1",
           "merge": "deep-patch"
         },
         "agreement": {
@@ -2990,6 +3507,15 @@ window.BridgeSystemData = {
         },
         "fit": {
           "confirmed": false
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": false,
+            "phase": "not-started",
+            "phaseNumber": 0,
+            "fitConfirmed": false,
+            "gameForceSatisfied": false
+          }
         }
       }
     },
@@ -5697,11 +6223,11 @@ window.BridgeSystemData = {
       }
     },
     {
-      "schemaVersion": "1.3",
-      "systemId": "personal-fgv0-3",
-      "systemName": "Personal FG 2/1 v0.3",
-      "description": "A structured extraction of the FG 30-minute notes into executable tree format. Persistent fact-state edition sourced from FG Bidding System in 30 minutes (1).xlsx.",
-      "notes": "Nodes were intentionally kept compact where the source diagram was conceptual. Extend each branch in SystemBuilder for exact card-by-card style.",
+      "schemaVersion": "1.4",
+      "systemId": "personal-fg",
+      "systemName": "Personal FG 2/1 v0.5",
+      "description": "FG 2/1 bidding system populated from the 30-minute workbook with executable point, suit-length, alert, and persistent-fact data.",
+      "notes": "Point values follow the workbook's HCP-plus-shape convention. Workbook text is treated as reference data. Phase I enters 2/1, Phase II selects and confirms strain, Phase III shows controls, and the game force completes only at a game contract.",
       "conventions": [
         {
           "id": "fg-opening",
@@ -5710,7 +6236,7 @@ window.BridgeSystemData = {
             {
               "id": "fg1C",
               "trigger": "1C",
-              "meaning": "FG strong club opening: 12+ HCP, 3+ clubs, unbiddable diamonds, no 5-card major.",
+              "meaning": "Natural 1C: 12–20 points, 3+ clubs, at most two diamonds, and no five-card major.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 12,
@@ -5720,64 +6246,47 @@ window.BridgeSystemData = {
                 },
                 "maxSuit": {
                   "C": 13,
-                  "M": 4,
-                  "D": 2
+                  "D": 2,
+                  "H": 4,
+                  "S": 4
                 }
               },
               "children": [
                 {
-                  "id": "fg1C-1D",
-                  "trigger": "1D",
-                  "meaning": "Responder with 4+ diamonds.",
-                  "children": [
-                    {
-                      "id": "fg1C-1D-1NT",
-                      "trigger": "1NT",
-                      "meaning": "Balanced or light continuation; often game-forcing uncertainty exists.",
-                      "filters": {},
-                      "children": [],
-                      "alert": false
-                    },
-                    {
-                      "id": "fg1C-1D-2D",
-                      "trigger": "2D",
-                      "meaning": "Game interest route.",
-                      "filters": {},
-                      "children": [],
-                      "alert": false
-                    }
-                  ],
-                  "filters": {},
-                  "alert": false
-                },
-                {
-                  "id": "fg1C-1H",
-                  "trigger": "1H",
-                  "meaning": "Responder shows hearts.",
-                  "filters": {},
-                  "children": [],
-                  "alert": false
-                },
-                {
-                  "id": "fg1C-1S",
-                  "trigger": "1S",
-                  "meaning": "Responder shows spades.",
-                  "filters": {},
-                  "children": [],
-                  "alert": false
-                },
-                {
                   "id": "fg1C-1NT",
                   "trigger": "1NT",
-                  "meaning": "Responder minimum/no major emphasis.",
-                  "filters": {},
+                  "meaning": "Natural 1NT response: 6–10 points, balanced or short of club support; invitational in this structure.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 10
+                  },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 1NT response: 6–10 points, balanced or short of club support; invitational in this structure.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": []
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "convention": {
+                      "naturalNotrump": true
+                    }
+                  }
                 },
                 {
                   "id": "fg1C-2C",
                   "trigger": "2C",
-                  "meaning": "Artificial forcing continuation in this FG profile.",
+                  "meaning": "Inverted club raise: 12+ points and 4+ clubs; forcing for one round.",
                   "children": [
                     {
                       "id": "fg1C-2C-2D",
@@ -5785,7 +6294,20 @@ window.BridgeSystemData = {
                       "meaning": "Opener confirms shape or distribution.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener confirms shape or distribution.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     },
                     {
                       "id": "fg1C-2C-2H",
@@ -5793,7 +6315,20 @@ window.BridgeSystemData = {
                       "meaning": "Transfer-style response or major support.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Transfer-style response or major support.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     },
                     {
                       "id": "fg1C-2C-2S",
@@ -5801,7 +6336,20 @@ window.BridgeSystemData = {
                       "meaning": "Transfer-style response or major support.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Transfer-style response or major support.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     },
                     {
                       "id": "fg1C-2C-2NT",
@@ -5809,19 +6357,924 @@ window.BridgeSystemData = {
                       "meaning": "Balanced confirmation.",
                       "filters": {},
                       "children": [],
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Balanced confirmation.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
+                    }
+                  ],
+                  "filters": {
+                    "minHcp": 12,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 4
+                    },
+                    "maxSuit": {
+                      "C": 13
+                    }
+                  },
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Inverted club raise: 12+ points and 4+ clubs; forcing for one round.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "invertedMinor": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "inverted minor"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "C",
+                      "responderLength": 4,
+                      "combinedMinimum": 7
+                    }
+                  }
+                },
+                {
+                  "id": "fg1C-1X",
+                  "trigger": "1X",
+                  "meaning": "One-level new-suit response: 6+ points and 4+ cards in the new suit; forcing for one round.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "X": 4
+                    },
+                    "maxSuit": {
+                      "X": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "One-level new-suit response: 6+ points and 4+ cards in the new suit; forcing for one round.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "{{X}}",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "new suit"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "fg1C-1X-1NT",
+                      "trigger": "1NT",
+                      "meaning": "Opener rebids 1NT with 12.5–14 points and no four-card fit for responder's suit.",
+                      "filters": {
+                        "minHcp": 12.5,
+                        "maxHcp": 14,
+                        "maxSuit": {
+                          "X": 3
+                        }
+                      },
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener rebids 1NT with 12.5–14 points and no four-card fit for responder's suit.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 12.5,
+                            "max": 14
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "{{X}}",
+                              "min": 0,
+                              "max": 3
+                            }
+                          ]
+                        },
+                        "convention": {
+                          "naturalNotrump": true
+                        },
+                        "forcing": {
+                          "game": false,
+                          "round": false
+                        }
+                      },
+                      "children": [],
+                      "generated": null,
+                      "alert": false
+                    },
+                    {
+                      "id": "fg1C-1X-P",
+                      "trigger": "P",
+                      "meaning": "Opener passes only with a dead minimum and no constructive rebid.",
+                      "filters": {
+                        "minHcp": 12,
+                        "maxHcp": 12.5
+                      },
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener passes only with a dead minimum and no constructive rebid.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 12,
+                            "max": 12.5
+                          },
+                          "suitLengths": []
+                        },
+                        "forcing": {
+                          "game": false,
+                          "round": false
+                        }
+                      },
+                      "children": [],
+                      "alert": false
+                    },
+                    {
+                      "id": "fg1C-1X-new-suit",
+                      "trigger": "#Y",
+                      "meaning": "Opener rebids a second suit with 15–17 points.",
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "Y": 4
+                        },
+                        "maxSuit": {
+                          "Y": 13
+                        }
+                      },
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener rebids a second suit with 15–17 points.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "{{Y}}",
+                              "min": 4,
+                              "max": 13
+                            }
+                          ]
+                        },
+                        "forcing": {
+                          "game": false,
+                          "round": true,
+                          "source": "new suit rebid"
+                        }
+                      },
+                      "children": [],
+                      "alert": false
+                    },
+                    {
+                      "id": "fg1C-1X-2NT",
+                      "trigger": "2NT",
+                      "meaning": "Opener rebids 2NT with 18–19 points.",
+                      "filters": {
+                        "minHcp": 18,
+                        "maxHcp": 19
+                      },
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener rebids 2NT with 18–19 points.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 18,
+                            "max": 19
+                          },
+                          "suitLengths": []
+                        },
+                        "convention": {
+                          "naturalNotrump": true
+                        }
+                      },
+                      "children": [],
                       "alert": false
                     }
                   ],
-                  "filters": {},
+                  "generated": null,
                   "alert": false
+                },
+                {
+                  "id": "fg1C-3C",
+                  "trigger": "3C",
+                  "meaning": "Weak club raise: 6–11 points and 5+ clubs.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "C": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Weak club raise: 6–11 points and 5+ clubs.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "C",
+                      "responderLength": 5,
+                      "combinedMinimum": 8
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  },
+                  "children": [],
+                  "generated": null,
+                  "alert": false
+                },
+                {
+                  "id": "fg1C-2D-weak-jump",
+                  "trigger": "2D",
+                  "meaning": "Weak jump response: 6–11 points and 6+ diamonds.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "D": 6
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Weak jump response: 6–11 points and 6+ diamonds.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 6,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "weakJump": true
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1C-2H-weak-jump",
+                  "trigger": "2H",
+                  "meaning": "Weak jump response: 6–11 points and 6+ hearts.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "H": 6
+                    },
+                    "maxSuit": {
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Weak jump response: 6–11 points and 6+ hearts.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 6,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "weakJump": true
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1C-2S-weak-jump",
+                  "trigger": "2S",
+                  "meaning": "Weak jump response: 6–11 points and 6+ spades.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "S": 6
+                    },
+                    "maxSuit": {
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Weak jump response: 6–11 points and 6+ spades.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 6,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "weakJump": true
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1C-2NT",
+                  "trigger": "2NT",
+                  "meaning": "Natural 2NT response: 11–12 points, balanced or short of club support; invitational.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 12
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 2NT response: 11–12 points, balanced or short of club support; invitational.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 12
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "naturalNotrump": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1C-splinter-3D",
+                  "trigger": "3D",
+                  "meaning": "3D splinter: 11–14 points, 5+ C, and zero or one D.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "D": 1,
+                      "C": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "3D splinter: 11–14 points, 5+ C, and zero or one D.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "D",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "C"
+                    },
+                    "shortness": {
+                      "suit": "D",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1C-splinter-3H",
+                  "trigger": "3H",
+                  "meaning": "3H splinter: 11–14 points, 5+ C, and zero or one H.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "H": 1,
+                      "C": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "3H splinter: 11–14 points, 5+ C, and zero or one H.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "C"
+                    },
+                    "shortness": {
+                      "suit": "H",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1C-splinter-3S",
+                  "trigger": "3S",
+                  "meaning": "3S splinter: 11–14 points, 5+ C, and zero or one S.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "S": 1,
+                      "C": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "3S splinter: 11–14 points, 5+ C, and zero or one S.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "C"
+                    },
+                    "shortness": {
+                      "suit": "S",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1C-exclusion-4D",
+                  "trigger": "4D",
+                  "meaning": "4D Exclusion RKCB: confirms C, shows a void in D, and asks for key cards outside D.",
+                  "filters": {
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "D": 0,
+                      "C": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4D Exclusion RKCB: confirms C, shows a void in D, and asks for key cards outside D.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "D",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "C"
+                    },
+                    "shortness": {
+                      "suit": "D",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "C",
+                        "excludedSuit": "D",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "C"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1C-exclusion-4H",
+                  "trigger": "4H",
+                  "meaning": "4H Exclusion RKCB: confirms C, shows a void in H, and asks for key cards outside H.",
+                  "filters": {
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "H": 0,
+                      "C": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4H Exclusion RKCB: confirms C, shows a void in H, and asks for key cards outside H.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "C"
+                    },
+                    "shortness": {
+                      "suit": "H",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "C",
+                        "excludedSuit": "H",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "C"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1C-exclusion-4S",
+                  "trigger": "4S",
+                  "meaning": "4S Exclusion RKCB: confirms C, shows a void in S, and asks for key cards outside S.",
+                  "filters": {
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "S": 0,
+                      "C": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4S Exclusion RKCB: confirms C, shows a void in S, and asks for key cards outside S.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "C"
+                    },
+                    "shortness": {
+                      "suit": "S",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "C",
+                        "excludedSuit": "S",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "C"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
                 }
               ],
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1C: 12–20 points, 3+ clubs, at most two diamonds, and no five-card major.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 12,
+                    "max": 20
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 3,
+                      "max": 13
+                    },
+                    {
+                      "suit": "D",
+                      "min": 0,
+                      "max": 2
+                    },
+                    {
+                      "suit": "H",
+                      "min": 0,
+                      "max": 4
+                    },
+                    {
+                      "suit": "S",
+                      "min": 0,
+                      "max": 4
+                    }
+                  ]
+                },
+                "convention": {
+                  "natural": true
+                },
+                "opening": {
+                  "suit": "C"
+                }
+              }
             },
             {
               "id": "fg1D",
               "trigger": "1D",
-              "meaning": "Natural 1D opening.",
+              "meaning": "Natural 1D: 12–20 points and 3+ diamonds.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 12,
@@ -5837,45 +7290,173 @@ window.BridgeSystemData = {
                 {
                   "id": "fg1D-1H",
                   "trigger": "1H",
-                  "meaning": "Heart response; suit support.",
-                  "filters": {},
+                  "meaning": "Natural 1H response: 6–11 points and 4+ hearts.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "H": 4
+                    },
+                    "maxSuit": {
+                      "H": 13
+                    }
+                  },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 1H response: 6–11 points and 4+ hearts.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "forcing": {
+                      "round": true,
+                      "game": false,
+                      "source": "new suit"
+                    }
+                  }
                 },
                 {
                   "id": "fg1D-1S",
                   "trigger": "1S",
-                  "meaning": "Spade response; suit support.",
-                  "filters": {},
+                  "meaning": "Natural 1S response: 6–11 points and 4+ spades.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "S": 4
+                    },
+                    "maxSuit": {
+                      "S": 13
+                    }
+                  },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 1S response: 6–11 points and 4+ spades.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "forcing": {
+                      "round": true,
+                      "game": false,
+                      "source": "new suit"
+                    }
+                  }
                 },
                 {
                   "id": "fg1D-1NT",
                   "trigger": "1NT",
-                  "meaning": "Balanced invite/no big force.",
-                  "filters": {},
+                  "meaning": "Natural 1NT response: 6–11 points without a preferred four-card major; not a 2/1 entry.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "maxSuit": {
+                      "H": 3,
+                      "S": 3
+                    }
+                  },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 1NT response: 6–11 points without a preferred four-card major; not a 2/1 entry.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 3
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 3
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "naturalNotrump": true,
+                      "twoOverOne": false
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  }
                 },
                 {
                   "id": "fg1D-2C-21",
                   "trigger": "2C",
-                  "meaning": "2/1 game force in clubs: highest-priority eligible new-suit response after 1♦.",
+                  "meaning": "Artificial 2/1 entry over 1D: 12+ points; the club suit may be phantom, and the partnership is forced to game.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
                     "maxHcp": 40
                   },
                   "children": [],
-                  "alert": false,
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Artificial 2/1 entry over 1D: 12+ points; the club suit may be phantom, and the partnership is forced to game.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": []
+                    },
                     "convention": {
                       "twoOverOne": true
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "D",
+                        "responseSuit": "C",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -5895,18 +7476,8 @@ window.BridgeSystemData = {
                 {
                   "id": "fg1D-2D",
                   "trigger": "2D",
-                  "meaning": "Diamond support/raise branch, not a 2/1 game-force response.",
-                  "generated": {
-                    "type": "control-bids",
-                    "agreedSuit": "D",
-                    "suits": [
-                      "C",
-                      "H",
-                      "S"
-                    ],
-                    "startLevel": 4,
-                    "description": "Elimination control bidding after a diamond-support control phase."
-                  },
+                  "meaning": "Invitational diamond raise: 9–11 points and 5+ diamonds; not a 2/1 entry.",
+                  "generated": null,
                   "children": [
                     {
                       "id": "fg1D-2D-4NT",
@@ -5915,78 +7486,660 @@ window.BridgeSystemData = {
                       "clearControl": true,
                       "filters": {},
                       "children": [],
-                      "alert": false
-                    }
-                  ],
-                  "filters": {},
-                  "alert": false,
-                  "facts": {
-                    "convention": {
-                      "twoOverOne": true
-                    },
-                    "forcing": {
-                      "game": true,
-                      "source": "2/1"
-                    },
-                    "partnership": {
-                      "points": {
-                        "opener": {
-                          "min": 12
-                        },
-                        "responder": {
-                          "min": 12
-                        },
-                        "combined": {
-                          "min": 24
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Ace/king check after at least one control phase.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
                         }
                       }
                     }
+                  ],
+                  "filters": {
+                    "minHcp": 9,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
+                  },
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Invitational diamond raise: 9–11 points and 5+ diamonds; not a 2/1 entry.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 9,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "twoOverOne": false
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "D",
+                      "responderLength": 5,
+                      "combinedMinimum": 8
+                    }
                   }
-                }
-              ],
-              "alert": false
-            },
-            {
-              "id": "fg1H",
-              "trigger": "1H",
-              "meaning": "5+ card heart opening.",
-              "children": [
+                },
                 {
-                  "id": "fg1H-1NT",
-                  "trigger": "1NT",
-                  "meaning": "Responder minimum (6-9), likely no 4-card support in spades.",
-                  "filters": {},
+                  "id": "fg1D-3D",
+                  "trigger": "3D",
+                  "meaning": "Weak diamond raise: 6–8 points and 5+ diamonds.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 8,
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Weak diamond raise: 6–8 points and 5+ diamonds.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 8
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "D",
+                      "responderLength": 5,
+                      "combinedMinimum": 8
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  },
                   "children": [],
                   "alert": false
                 },
                 {
+                  "id": "fg1D-splinter-4C",
+                  "trigger": "4C",
+                  "meaning": "4C splinter: 11–14 points, 5+ D, and zero or one C.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "C": 1,
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4C splinter: 11–14 points, 5+ D, and zero or one C.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "C",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "D"
+                    },
+                    "shortness": {
+                      "suit": "C",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1D-splinter-3H",
+                  "trigger": "3H",
+                  "meaning": "3H splinter: 11–14 points, 5+ D, and zero or one H.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "H": 1,
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "3H splinter: 11–14 points, 5+ D, and zero or one H.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "D"
+                    },
+                    "shortness": {
+                      "suit": "H",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1D-splinter-3S",
+                  "trigger": "3S",
+                  "meaning": "3S splinter: 11–14 points, 5+ D, and zero or one S.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "S": 1,
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "3S splinter: 11–14 points, 5+ D, and zero or one S.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "D"
+                    },
+                    "shortness": {
+                      "suit": "S",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1D-exclusion-5C",
+                  "trigger": "5C",
+                  "meaning": "5C Exclusion RKCB: confirms D, shows a void in C, and asks for key cards outside C.",
+                  "filters": {
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "C": 0,
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "5C Exclusion RKCB: confirms D, shows a void in C, and asks for key cards outside C.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "C",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "D"
+                    },
+                    "shortness": {
+                      "suit": "C",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "D",
+                        "excludedSuit": "C",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "D"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1D-exclusion-4H",
+                  "trigger": "4H",
+                  "meaning": "4H Exclusion RKCB: confirms D, shows a void in H, and asks for key cards outside H.",
+                  "filters": {
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "H": 0,
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4H Exclusion RKCB: confirms D, shows a void in H, and asks for key cards outside H.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "D"
+                    },
+                    "shortness": {
+                      "suit": "H",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "D",
+                        "excludedSuit": "H",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "D"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1D-exclusion-4S",
+                  "trigger": "4S",
+                  "meaning": "4S Exclusion RKCB: confirms D, shows a void in S, and asks for key cards outside S.",
+                  "filters": {
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "S": 0,
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4S Exclusion RKCB: confirms D, shows a void in S, and asks for key cards outside S.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "D"
+                    },
+                    "shortness": {
+                      "suit": "S",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "D",
+                        "excludedSuit": "S",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "D"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                }
+              ],
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1D: 12–20 points and 3+ diamonds.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 12,
+                    "max": 20
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "D",
+                      "min": 3,
+                      "max": 13
+                    }
+                  ]
+                },
+                "convention": {
+                  "natural": true
+                },
+                "opening": {
+                  "suit": "D"
+                }
+              }
+            },
+            {
+              "id": "fg1H",
+              "trigger": "1H",
+              "meaning": "Natural 1H: 12–21 points and 5+ hearts.",
+              "children": [
+                {
+                  "id": "fg1H-1NT",
+                  "trigger": "1NT",
+                  "meaning": "Natural 1NT response: 6–11 points with fewer than four spades; cannot enter 2/1.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "maxSuit": {
+                      "S": 3
+                    }
+                  },
+                  "children": [],
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 1NT response: 6–11 points with fewer than four spades; cannot enter 2/1.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 3
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "naturalNotrump": true,
+                      "twoOverOne": false
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  }
+                },
+                {
                   "id": "fg1H-2H",
                   "trigger": "2H",
-                  "meaning": "Major-suit raise, not a 2/1 response. A qualifying 2/1 new-suit response has higher priority.",
+                  "meaning": "Simple heart raise: 6–8 points and exactly three hearts; not a 2/1 entry.",
                   "children": [
                     {
                       "id": "fg1H-2H-2NT",
                       "trigger": "2NT",
-                      "meaning": "Invitation phase (incomplete support).",
-                      "filters": {},
+                      "meaning": "Opener's 2NT game try after a simple heart raise; the auction is invitational, not game forcing.",
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17
+                      },
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener's 2NT game try after a simple heart raise; the auction is invitational, not game forcing.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": []
+                        },
+                        "forcing": {
+                          "game": false,
+                          "round": true,
+                          "source": "game try"
+                        }
+                      }
                     },
                     {
                       "id": "fg1H-2H-3H",
                       "trigger": "3H",
-                      "meaning": "Control-phase start in fitted heart sequence.",
-                      "generated": {
-                        "type": "control-bids",
-                        "agreedSuit": "H",
-                        "suits": [
-                          "C",
-                          "D",
-                          "S"
-                        ],
-                        "startLevel": 4,
-                        "description": "Starting from agreed suit, bid first/second controls in unbid suits."
-                      },
+                      "meaning": "Opener invites game by raising the agreed heart fit to 3H; this is not a 2/1 control phase.",
+                      "generated": null,
                       "children": [
                         {
                           "id": "fg1H-2H-3H-4NT",
@@ -5994,20 +8147,37 @@ window.BridgeSystemData = {
                           "meaning": "RKC/4NT (after a round of control-bidding).",
                           "filters": {},
                           "children": [],
-                          "alert": false,
+                          "alert": true,
                           "facts": {
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "RKC/4NT (after a round of control-bidding).",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": null,
+                                "max": null
+                              },
+                              "suitLengths": []
+                            },
                             "convention": {
+                              "blackwood": true,
                               "rkcb": true
                             },
                             "slam": {
-                              "control": {
+                              "interest": true,
+                              "aceAsk": {
                                 "active": true,
-                                "suit": "{{call.suit}}",
-                                "round": "first-or-second",
-                                "elimination": {
-                                  "method": "ascending-suit-elimination",
-                                  "skippedSuitDeniesControl": true
-                                }
+                                "method": "rkcb-1430",
+                                "interference": "D0P1",
+                                "accelerated": false,
+                                "type": "keycard"
+                              }
+                            },
+                            "progress": {
+                              "twoOverOne": {
+                                "phase": "slam-pursuit",
+                                "phaseNumber": 4
                               }
                             }
                           }
@@ -6018,22 +8188,60 @@ window.BridgeSystemData = {
                           "meaning": "King ask after positive ace ask.",
                           "filters": {},
                           "children": [],
-                          "alert": false,
+                          "alert": true,
                           "facts": {
-                            "slam": {
-                              "aceAsk": {
-                                "active": true,
-                                "method": "rkcb-1430",
-                                "interference": "D0P1",
-                                "accelerated": false,
-                                "type": "keycard"
-                              }
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "King ask after positive ace ask.",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": null,
+                                "max": null
+                              },
+                              "suitLengths": []
                             }
                           }
                         }
                       ],
-                      "filters": {},
-                      "alert": false
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "H": 6
+                        },
+                        "maxSuit": {
+                          "H": 13
+                        }
+                      },
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener invites game by raising the agreed heart fit to 3H; this is not a 2/1 control phase.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "H",
+                              "min": 6,
+                              "max": 13
+                            }
+                          ]
+                        },
+                        "forcing": {
+                          "game": false,
+                          "round": false
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "H"
+                        }
+                      }
                     },
                     {
                       "id": "fg1H-2H-3S",
@@ -6041,60 +8249,152 @@ window.BridgeSystemData = {
                       "meaning": "New-suit game try / side control.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "New-suit game try / side control.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     },
                     {
                       "id": "fg1H-2H-4H",
                       "trigger": "4H",
-                      "meaning": "Strong support or direct slam trial.",
-                      "filters": {},
+                      "meaning": "Opener places the contract in 4H when partnership values reach about 25 points.",
+                      "filters": {
+                        "minHcp": 17,
+                        "maxHcp": 21
+                      },
                       "children": [],
-                      "alert": false
-                    }
-                  ],
-                  "filters": {},
-                  "alert": false,
-                  "facts": {
-                    "convention": {
-                      "twoOverOne": true
-                    },
-                    "forcing": {
-                      "game": true,
-                      "source": "2/1"
-                    },
-                    "partnership": {
-                      "points": {
-                        "opener": {
-                          "min": 12
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener places the contract in 4H when partnership values reach about 25 points.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 17,
+                            "max": 21
+                          },
+                          "suitLengths": []
                         },
-                        "responder": {
-                          "min": 12
+                        "forcing": {
+                          "game": false,
+                          "round": false
                         },
-                        "combined": {
-                          "min": 24
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "H"
                         }
                       }
+                    }
+                  ],
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 8,
+                    "minSuit": {
+                      "H": 3
+                    },
+                    "maxSuit": {
+                      "H": 3
+                    }
+                  },
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Simple heart raise: 6–8 points and exactly three hearts; not a 2/1 entry.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 8
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 3,
+                          "max": 3
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "twoOverOne": false
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "H",
+                      "openerLength": 5,
+                      "responderLength": 3,
+                      "combinedMinimum": 8
                     }
                   }
                 },
                 {
                   "id": "fg1H-2C-21",
                   "trigger": "2C",
-                  "meaning": "2/1 game force in clubs: highest-priority eligible new-suit response after 1♥.",
+                  "meaning": "2/1 game-force response in clubs: 12+ points and 5+ clubs.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "C": 13
+                    }
                   },
                   "children": [],
                   "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "2/1 game-force response in clubs: 12+ points and 5+ clubs.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
                     "convention": {
                       "twoOverOne": true
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "H",
+                        "responseSuit": "C",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -6114,21 +8414,56 @@ window.BridgeSystemData = {
                 {
                   "id": "fg1H-2D-21",
                   "trigger": "2D",
-                  "meaning": "2/1 game force in diamonds: highest-priority eligible new-suit response after 1♥.",
+                  "meaning": "2/1 game-force response in diamonds: 12+ points and 5+ diamonds.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
                   },
                   "children": [],
                   "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "2/1 game-force response in diamonds: 12+ points and 5+ diamonds.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
                     "convention": {
                       "twoOverOne": true
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "H",
+                        "responseSuit": "D",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -6144,6 +8479,529 @@ window.BridgeSystemData = {
                       }
                     }
                   }
+                },
+                {
+                  "id": "fg1H-1S",
+                  "trigger": "1S",
+                  "meaning": "Natural 1S response: 6–11 points and 4+ spades.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "S": 4
+                    },
+                    "maxSuit": {
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 1S response: 6–11 points and 4+ spades.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "new suit"
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1H-3H",
+                  "trigger": "3H",
+                  "meaning": "Constructive heart raise: 9–11 points with exactly three hearts, or 4+ hearts with game-going fit strength.",
+                  "filters": {
+                    "minHcp": 9,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "H": 3
+                    },
+                    "maxSuit": {
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Constructive heart raise: 9–11 points with exactly three hearts, or 4+ hearts with game-going fit strength.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 9,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 3,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "H",
+                      "openerLength": 5,
+                      "responderLength": 3,
+                      "combinedMinimum": 8
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1H-splinter-4C",
+                  "trigger": "4C",
+                  "meaning": "4C splinter: 11–14 points, 3+ H, and zero or one C.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "H": 3
+                    },
+                    "maxSuit": {
+                      "C": 1,
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4C splinter: 11–14 points, 3+ H, and zero or one C.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "C",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "H"
+                    },
+                    "shortness": {
+                      "suit": "C",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1H-splinter-4D",
+                  "trigger": "4D",
+                  "meaning": "4D splinter: 11–14 points, 3+ H, and zero or one D.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "H": 3
+                    },
+                    "maxSuit": {
+                      "D": 1,
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4D splinter: 11–14 points, 3+ H, and zero or one D.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "D",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "H"
+                    },
+                    "shortness": {
+                      "suit": "D",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1H-splinter-3S",
+                  "trigger": "3S",
+                  "meaning": "3S splinter: 11–14 points, 3+ H, and zero or one S.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "H": 3
+                    },
+                    "maxSuit": {
+                      "S": 1,
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "3S splinter: 11–14 points, 3+ H, and zero or one S.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "H"
+                    },
+                    "shortness": {
+                      "suit": "S",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1H-exclusion-5C",
+                  "trigger": "5C",
+                  "meaning": "5C Exclusion RKCB: confirms H, shows a void in C, and asks for key cards outside C.",
+                  "filters": {
+                    "minSuit": {
+                      "H": 3
+                    },
+                    "maxSuit": {
+                      "C": 0,
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "5C Exclusion RKCB: confirms H, shows a void in C, and asks for key cards outside C.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "C",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "H"
+                    },
+                    "shortness": {
+                      "suit": "C",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "H",
+                        "excludedSuit": "C",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "H"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1H-exclusion-5D",
+                  "trigger": "5D",
+                  "meaning": "5D Exclusion RKCB: confirms H, shows a void in D, and asks for key cards outside D.",
+                  "filters": {
+                    "minSuit": {
+                      "H": 3
+                    },
+                    "maxSuit": {
+                      "D": 0,
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "5D Exclusion RKCB: confirms H, shows a void in D, and asks for key cards outside D.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "D",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "H"
+                    },
+                    "shortness": {
+                      "suit": "D",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "H",
+                        "excludedSuit": "D",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "H"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1H-exclusion-4S",
+                  "trigger": "4S",
+                  "meaning": "4S Exclusion RKCB: confirms H, shows a void in S, and asks for key cards outside S.",
+                  "filters": {
+                    "minSuit": {
+                      "H": 3
+                    },
+                    "maxSuit": {
+                      "S": 0,
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4S Exclusion RKCB: confirms H, shows a void in S, and asks for key cards outside S.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "H"
+                    },
+                    "shortness": {
+                      "suit": "S",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "H",
+                        "excludedSuit": "S",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "H"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
                 }
               ],
               "filters": {
@@ -6157,49 +9015,118 @@ window.BridgeSystemData = {
                   "H": 13
                 }
               },
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1H: 12–21 points and 5+ hearts.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 12,
+                    "max": 21
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "H",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                },
+                "convention": {
+                  "natural": true
+                },
+                "opening": {
+                  "suit": "H"
+                }
+              }
             },
             {
               "id": "fg1S",
               "trigger": "1S",
-              "meaning": "5+ card spade opening.",
+              "meaning": "Natural 1S: 12–21 points and 5+ spades.",
               "children": [
                 {
                   "id": "fg1S-1NT",
                   "trigger": "1NT",
-                  "meaning": "Responder minimum in balanced style.",
-                  "filters": {},
+                  "meaning": "Natural 1NT response: 6–11 points and fewer than three spades; cannot enter 2/1.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "maxSuit": {
+                      "S": 2
+                    }
+                  },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 1NT response: 6–11 points and fewer than three spades; cannot enter 2/1.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 2
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "naturalNotrump": true,
+                      "twoOverOne": false
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  }
                 },
                 {
                   "id": "fg1S-2S",
                   "trigger": "2S",
-                  "meaning": "Major-suit raise, not a 2/1 response. A qualifying 2/1 new-suit response has higher priority.",
+                  "meaning": "Simple spade raise: 6–8 points and exactly three spades; not a 2/1 entry.",
                   "children": [
                     {
                       "id": "fg1S-2S-2NT",
                       "trigger": "2NT",
-                      "meaning": "Invitational, not yet solid for force.",
-                      "filters": {},
+                      "meaning": "Opener's 2NT game try after a simple spade raise; invitational, not game forcing.",
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17
+                      },
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener's 2NT game try after a simple spade raise; invitational, not game forcing.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": []
+                        },
+                        "forcing": {
+                          "game": false,
+                          "round": true,
+                          "source": "game try"
+                        }
+                      }
                     },
                     {
                       "id": "fg1S-2S-3S",
                       "trigger": "3S",
-                      "meaning": "Strong fit and control-phase candidate.",
-                      "generated": {
-                        "type": "control-bids",
-                        "agreedSuit": "S",
-                        "suits": [
-                          "C",
-                          "D",
-                          "H"
-                        ],
-                        "startLevel": 4,
-                        "description": "Control bidding around spade fit with suit omissions."
-                      },
+                      "meaning": "Opener invites game by raising the agreed spade fit to 3S; this is not a 2/1 control phase.",
+                      "generated": null,
                       "children": [
                         {
                           "id": "fg1S-2S-3S-4NT",
@@ -6207,10 +9134,38 @@ window.BridgeSystemData = {
                           "meaning": "RKC/Key-card query.",
                           "filters": {},
                           "children": [],
-                          "alert": false,
+                          "alert": true,
                           "facts": {
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "RKC/Key-card query.",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": null,
+                                "max": null
+                              },
+                              "suitLengths": []
+                            },
                             "convention": {
+                              "blackwood": true,
                               "rkcb": true
+                            },
+                            "slam": {
+                              "interest": true,
+                              "aceAsk": {
+                                "active": true,
+                                "method": "rkcb-1430",
+                                "interference": "D0P1",
+                                "accelerated": false,
+                                "type": "keycard"
+                              }
+                            },
+                            "progress": {
+                              "twoOverOne": {
+                                "phase": "slam-pursuit",
+                                "phaseNumber": 4
+                              }
                             }
                           }
                         },
@@ -6220,11 +9175,60 @@ window.BridgeSystemData = {
                           "meaning": "Queen ask / king check if partnership uses this.",
                           "filters": {},
                           "children": [],
-                          "alert": false
+                          "alert": true,
+                          "facts": {
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Queen ask / king check if partnership uses this.",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": null,
+                                "max": null
+                              },
+                              "suitLengths": []
+                            }
+                          }
                         }
                       ],
-                      "filters": {},
-                      "alert": false
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "S": 6
+                        },
+                        "maxSuit": {
+                          "S": 13
+                        }
+                      },
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener invites game by raising the agreed spade fit to 3S; this is not a 2/1 control phase.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "S",
+                              "min": 6,
+                              "max": 13
+                            }
+                          ]
+                        },
+                        "forcing": {
+                          "game": false,
+                          "round": false
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "S"
+                        }
+                      }
                     },
                     {
                       "id": "fg1S-2S-3C",
@@ -6232,12 +9236,25 @@ window.BridgeSystemData = {
                       "meaning": "Minor-suit side control and feature bid.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Minor-suit side control and feature bid.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     }
                   ],
                   "filters": {
                     "minHcp": 6,
-                    "maxHcp": 9,
+                    "maxHcp": 8,
                     "minSuit": {
                       "S": 3
                     },
@@ -6247,46 +9264,92 @@ window.BridgeSystemData = {
                   },
                   "alert": false,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Simple spade raise: 6–8 points and exactly three spades; not a 2/1 entry.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 8
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 3,
+                          "max": 3
+                        }
+                      ]
+                    },
                     "convention": {
-                      "twoOverOne": true
+                      "twoOverOne": false
                     },
                     "forcing": {
-                      "game": true,
-                      "source": "2/1"
+                      "game": false,
+                      "round": false
                     },
-                    "partnership": {
-                      "points": {
-                        "opener": {
-                          "min": 12
-                        },
-                        "responder": {
-                          "min": 12
-                        },
-                        "combined": {
-                          "min": 24
-                        }
-                      }
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S",
+                      "openerLength": 5,
+                      "responderLength": 3,
+                      "combinedMinimum": 8
                     }
                   }
                 },
                 {
                   "id": "fg1S-2C-21",
                   "trigger": "2C",
-                  "meaning": "2/1 game force in clubs: highest-priority eligible new-suit response after 1♠.",
+                  "meaning": "2/1 game-force response in clubs: 12+ points and 5+ clubs.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "C": 13
+                    }
                   },
                   "children": [],
-                  "alert": false,
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "2/1 game-force response in clubs: 12+ points and 5+ clubs.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
                     "convention": {
                       "twoOverOne": true
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "S",
+                        "responseSuit": "C",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -6306,21 +9369,56 @@ window.BridgeSystemData = {
                 {
                   "id": "fg1S-2D-21",
                   "trigger": "2D",
-                  "meaning": "2/1 game force in diamonds: highest-priority eligible new-suit response after 1♠.",
+                  "meaning": "2/1 game-force response in diamonds: 12+ points and 5+ diamonds.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
                   },
                   "children": [],
-                  "alert": false,
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "2/1 game-force response in diamonds: 12+ points and 5+ diamonds.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
                     "convention": {
                       "twoOverOne": true
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "S",
+                        "responseSuit": "D",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -6340,21 +9438,56 @@ window.BridgeSystemData = {
                 {
                   "id": "fg1S-2H-21",
                   "trigger": "2H",
-                  "meaning": "2/1 game force in hearts: highest-priority eligible new-suit response after 1♠.",
+                  "meaning": "2/1 game-force response in hearts: 12+ points and 4+ hearts.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "H": 4
+                    },
+                    "maxSuit": {
+                      "H": 13
+                    }
                   },
                   "children": [],
-                  "alert": false,
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "2/1 game-force response in hearts: 12+ points and 4+ hearts.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
                     "convention": {
                       "twoOverOne": true
                     },
                     "forcing": {
                       "game": true,
+                      "round": false,
                       "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "S",
+                        "responseSuit": "H",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
                     },
                     "partnership": {
                       "points": {
@@ -6370,6 +9503,535 @@ window.BridgeSystemData = {
                       }
                     }
                   }
+                },
+                {
+                  "id": "fg1S-3S-four-card",
+                  "trigger": "3S",
+                  "meaning": "Constructive spade raise with 4+ spades; the partnership has at least a nine-card fit.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "S": 4
+                    },
+                    "maxSuit": {
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Constructive spade raise with 4+ spades; the partnership has at least a nine-card fit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S",
+                      "openerLength": 5,
+                      "responderLength": 4,
+                      "combinedMinimum": 9
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1S-3S-invitational",
+                  "trigger": "3S",
+                  "meaning": "Invitational spade raise: 9–11 points and exactly three spades.",
+                  "filters": {
+                    "minHcp": 9,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "S": 3
+                    },
+                    "maxSuit": {
+                      "S": 3
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Invitational spade raise: 9–11 points and exactly three spades.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 9,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 3,
+                          "max": 3
+                        }
+                      ]
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S",
+                      "openerLength": 5,
+                      "responderLength": 3,
+                      "combinedMinimum": 8
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1S-splinter-4C",
+                  "trigger": "4C",
+                  "meaning": "4C splinter: 11–14 points, 3+ S, and zero or one C.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "S": 3
+                    },
+                    "maxSuit": {
+                      "C": 1,
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4C splinter: 11–14 points, 3+ S, and zero or one C.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "C",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S"
+                    },
+                    "shortness": {
+                      "suit": "C",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1S-splinter-4D",
+                  "trigger": "4D",
+                  "meaning": "4D splinter: 11–14 points, 3+ S, and zero or one D.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "S": 3
+                    },
+                    "maxSuit": {
+                      "D": 1,
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4D splinter: 11–14 points, 3+ S, and zero or one D.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "D",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S"
+                    },
+                    "shortness": {
+                      "suit": "D",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1S-splinter-4H",
+                  "trigger": "4H",
+                  "meaning": "4H splinter: 11–14 points, 3+ S, and zero or one H.",
+                  "filters": {
+                    "minHcp": 11,
+                    "maxHcp": 14,
+                    "minSuit": {
+                      "S": 3
+                    },
+                    "maxSuit": {
+                      "H": 1,
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4H splinter: 11–14 points, 3+ S, and zero or one H.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 11,
+                        "max": 14
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 1
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "splinter": true,
+                      "delayedSplinter": false
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "splinter"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S"
+                    },
+                    "shortness": {
+                      "suit": "H",
+                      "min": 0,
+                      "max": 1
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "not-started",
+                        "phaseNumber": 0
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1S-exclusion-5C",
+                  "trigger": "5C",
+                  "meaning": "5C Exclusion RKCB: confirms S, shows a void in C, and asks for key cards outside C.",
+                  "filters": {
+                    "minSuit": {
+                      "S": 3
+                    },
+                    "maxSuit": {
+                      "C": 0,
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "5C Exclusion RKCB: confirms S, shows a void in C, and asks for key cards outside C.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "C",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S"
+                    },
+                    "shortness": {
+                      "suit": "C",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "S",
+                        "excludedSuit": "C",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "S"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1S-exclusion-5D",
+                  "trigger": "5D",
+                  "meaning": "5D Exclusion RKCB: confirms S, shows a void in D, and asks for key cards outside D.",
+                  "filters": {
+                    "minSuit": {
+                      "S": 3
+                    },
+                    "maxSuit": {
+                      "D": 0,
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "5D Exclusion RKCB: confirms S, shows a void in D, and asks for key cards outside D.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "D",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S"
+                    },
+                    "shortness": {
+                      "suit": "D",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "S",
+                        "excludedSuit": "D",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "S"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1S-exclusion-5H",
+                  "trigger": "5H",
+                  "meaning": "5H Exclusion RKCB: confirms S, shows a void in H, and asks for key cards outside H.",
+                  "filters": {
+                    "minSuit": {
+                      "S": 3
+                    },
+                    "maxSuit": {
+                      "H": 0,
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "5H Exclusion RKCB: confirms S, shows a void in H, and asks for key cards outside H.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 3,
+                          "max": 13
+                        },
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 0
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "exclusion": true,
+                      "rkcb": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "exclusion RKCB"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "S"
+                    },
+                    "shortness": {
+                      "suit": "H",
+                      "exact": 0
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "rkcb-1430",
+                        "type": "exclusion",
+                        "agreedSuit": "S",
+                        "excludedSuit": "H",
+                        "interference": "D0P1"
+                      }
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": false,
+                        "phase": "slam-pursuit",
+                        "phaseNumber": 4,
+                        "fitConfirmed": true,
+                        "agreedSuit": "S"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
                 }
               ],
               "filters": {
@@ -6383,16 +10045,47 @@ window.BridgeSystemData = {
                   "S": 13
                 }
               },
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1S: 12–21 points and 5+ spades.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 12,
+                    "max": 21
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "S",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                },
+                "convention": {
+                  "natural": true
+                },
+                "opening": {
+                  "suit": "S"
+                }
+              }
             },
             {
               "id": "fg1NT",
               "trigger": "1NT",
-              "meaning": "Natural no-trump opening (FG family range treated separately in this profile).",
+              "meaning": "Natural 1NT opening: 15–17 points, no singleton or void, and no suit longer than five cards.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 15,
                 "maxHcp": 17,
+                "minSuit": {
+                  "C": 2,
+                  "D": 2,
+                  "H": 2,
+                  "S": 2
+                },
                 "maxSuit": {
                   "C": 5,
                   "D": 5,
@@ -6404,140 +10097,1841 @@ window.BridgeSystemData = {
                 {
                   "id": "fg1NT-2C",
                   "trigger": "2C",
-                  "meaning": "Stayman.",
+                  "meaning": "Stayman: 8–9 points, asks for a four-card major and may be used without one to invite 2NT.",
                   "filters": {
                     "minHcp": 8,
                     "maxHcp": 9
                   },
-                  "children": [],
-                  "alert": false,
+                  "children": [
+                    {
+                      "id": "fg1NT-2C-2D",
+                      "trigger": "2D",
+                      "meaning": "Stayman reply: no four-card major.",
+                      "filters": {
+                        "maxSuit": {
+                          "H": 3,
+                          "S": 3
+                        }
+                      },
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Stayman reply: no four-card major.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "H",
+                              "min": 0,
+                              "max": 3
+                            },
+                            {
+                              "suit": "S",
+                              "min": 0,
+                              "max": 3
+                            }
+                          ]
+                        },
+                        "convention": {
+                          "stayman": true
+                        },
+                        "fit": {
+                          "confirmed": false
+                        }
+                      },
+                      "children": [],
+                      "alert": false
+                    },
+                    {
+                      "id": "fg1NT-2C-2H",
+                      "trigger": "2H",
+                      "meaning": "Stayman reply: 4+ hearts; four-card spades remain possible.",
+                      "filters": {
+                        "minSuit": {
+                          "H": 4
+                        },
+                        "maxSuit": {
+                          "H": 13
+                        }
+                      },
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Stayman reply: 4+ hearts; four-card spades remain possible.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "H",
+                              "min": 4,
+                              "max": 13
+                            }
+                          ]
+                        },
+                        "convention": {
+                          "stayman": true
+                        },
+                        "shownSuit": {
+                          "suit": "H",
+                          "minLength": 4
+                        }
+                      },
+                      "children": [],
+                      "alert": false
+                    },
+                    {
+                      "id": "fg1NT-2C-2S",
+                      "trigger": "2S",
+                      "meaning": "Stayman reply: 4+ spades and fewer than four hearts.",
+                      "filters": {
+                        "minSuit": {
+                          "S": 4
+                        },
+                        "maxSuit": {
+                          "H": 3,
+                          "S": 13
+                        }
+                      },
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Stayman reply: 4+ spades and fewer than four hearts.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "S",
+                              "min": 4,
+                              "max": 13
+                            },
+                            {
+                              "suit": "H",
+                              "min": 0,
+                              "max": 3
+                            }
+                          ]
+                        },
+                        "convention": {
+                          "stayman": true
+                        },
+                        "shownSuit": {
+                          "suit": "S",
+                          "minLength": 4
+                        }
+                      },
+                      "children": [],
+                      "alert": false
+                    }
+                  ],
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Stayman: 8–9 points, asks for a four-card major and may be used without one to invite 2NT.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 8,
+                        "max": 9
+                      },
+                      "suitLengths": []
+                    },
                     "convention": {
                       "stayman": true
+                    },
+                    "inquiry": {
+                      "type": "four-card-major"
                     }
                   }
                 },
                 {
                   "id": "fg1NT-2D",
                   "trigger": "2D",
-                  "meaning": "Transfer into hearts (optional).",
+                  "meaning": "Jacoby transfer to hearts: 5+ hearts.",
                   "filters": {
                     "minSuit": {
                       "H": 5
+                    },
+                    "maxSuit": {
+                      "H": 13
                     }
                   },
-                  "children": [],
-                  "alert": false
+                  "children": [
+                    {
+                      "id": "fg1NT-2D-2H",
+                      "trigger": "2H",
+                      "meaning": "Opener accepts the transfer to hearts.",
+                      "filters": {},
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener accepts the transfer to hearts.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        },
+                        "convention": {
+                          "transfer": true
+                        },
+                        "transfer": {
+                          "targetSuit": "H",
+                          "accepted": true
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "fg1NT-2D-2H-P",
+                          "trigger": "P",
+                          "meaning": "Responder signs off with a minimum transfer hand.",
+                          "filters": {
+                            "minHcp": 0,
+                            "maxHcp": 7,
+                            "minSuit": {
+                              "H": 5
+                            },
+                            "maxSuit": {
+                              "H": 13
+                            }
+                          },
+                          "facts": {
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Responder signs off with a minimum transfer hand.",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": 0,
+                                "max": 7
+                              },
+                              "suitLengths": [
+                                {
+                                  "suit": "H",
+                                  "min": 5,
+                                  "max": 13
+                                }
+                              ]
+                            },
+                            "forcing": {
+                              "game": false,
+                              "round": false
+                            },
+                            "fit": {
+                              "confirmed": true,
+                              "suit": "H"
+                            }
+                          },
+                          "children": [],
+                          "alert": false
+                        },
+                        {
+                          "id": "fg1NT-2D-2H-2NT",
+                          "trigger": "2NT",
+                          "meaning": "Responder invites 3NT with 8–9 points after transferring to hearts.",
+                          "filters": {
+                            "minHcp": 8,
+                            "maxHcp": 9,
+                            "minSuit": {
+                              "H": 5
+                            },
+                            "maxSuit": {
+                              "H": 13
+                            }
+                          },
+                          "facts": {
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Responder invites 3NT with 8–9 points after transferring to hearts.",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": 8,
+                                "max": 9
+                              },
+                              "suitLengths": [
+                                {
+                                  "suit": "H",
+                                  "min": 5,
+                                  "max": 13
+                                }
+                              ]
+                            },
+                            "forcing": {
+                              "game": false,
+                              "round": false
+                            },
+                            "convention": {
+                              "naturalNotrump": true
+                            }
+                          },
+                          "children": [],
+                          "alert": false
+                        },
+                        {
+                          "id": "fg1NT-2D-2H-3NT",
+                          "trigger": "3NT",
+                          "meaning": "Responder shows 10+ points; opener chooses 3NT or 4H.",
+                          "filters": {
+                            "minHcp": 10,
+                            "maxHcp": 40,
+                            "minSuit": {
+                              "H": 5
+                            },
+                            "maxSuit": {
+                              "H": 13
+                            }
+                          },
+                          "facts": {
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Responder shows 10+ points; opener chooses 3NT or 4H.",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": 10,
+                                "max": 40
+                              },
+                              "suitLengths": [
+                                {
+                                  "suit": "H",
+                                  "min": 5,
+                                  "max": 13
+                                }
+                              ]
+                            },
+                            "forcing": {
+                              "game": true,
+                              "source": "transfer continuation"
+                            }
+                          },
+                          "children": [],
+                          "alert": false
+                        }
+                      ],
+                      "alert": false
+                    }
+                  ],
+                  "alert": true,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Jacoby transfer to hearts: 5+ hearts.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "transfer": true
+                    },
+                    "transfer": {
+                      "targetSuit": "H"
+                    }
+                  }
                 },
                 {
                   "id": "fg1NT-2H",
                   "trigger": "2H",
-                  "meaning": "Transfer into spades (optional).",
+                  "meaning": "Jacoby transfer to spades: 5+ spades.",
                   "filters": {
                     "minSuit": {
                       "S": 5
+                    },
+                    "maxSuit": {
+                      "S": 13
                     }
                   },
-                  "children": [],
-                  "alert": false
+                  "children": [
+                    {
+                      "id": "fg1NT-2H-2S",
+                      "trigger": "2S",
+                      "meaning": "Opener accepts the transfer to spades.",
+                      "filters": {},
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener accepts the transfer to spades.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        },
+                        "convention": {
+                          "transfer": true
+                        },
+                        "transfer": {
+                          "targetSuit": "S",
+                          "accepted": true
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "fg1NT-2H-2S-P",
+                          "trigger": "P",
+                          "meaning": "Responder signs off with a minimum transfer hand.",
+                          "filters": {
+                            "minHcp": 0,
+                            "maxHcp": 7,
+                            "minSuit": {
+                              "S": 5
+                            },
+                            "maxSuit": {
+                              "S": 13
+                            }
+                          },
+                          "facts": {
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Responder signs off with a minimum transfer hand.",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": 0,
+                                "max": 7
+                              },
+                              "suitLengths": [
+                                {
+                                  "suit": "S",
+                                  "min": 5,
+                                  "max": 13
+                                }
+                              ]
+                            },
+                            "forcing": {
+                              "game": false,
+                              "round": false
+                            },
+                            "fit": {
+                              "confirmed": true,
+                              "suit": "S"
+                            }
+                          },
+                          "children": [],
+                          "alert": false
+                        },
+                        {
+                          "id": "fg1NT-2H-2S-2NT",
+                          "trigger": "2NT",
+                          "meaning": "Responder invites 3NT with 8–9 points after transferring to spades.",
+                          "filters": {
+                            "minHcp": 8,
+                            "maxHcp": 9,
+                            "minSuit": {
+                              "S": 5
+                            },
+                            "maxSuit": {
+                              "S": 13
+                            }
+                          },
+                          "facts": {
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Responder invites 3NT with 8–9 points after transferring to spades.",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": 8,
+                                "max": 9
+                              },
+                              "suitLengths": [
+                                {
+                                  "suit": "S",
+                                  "min": 5,
+                                  "max": 13
+                                }
+                              ]
+                            },
+                            "forcing": {
+                              "game": false,
+                              "round": false
+                            },
+                            "convention": {
+                              "naturalNotrump": true
+                            }
+                          },
+                          "children": [],
+                          "alert": false
+                        },
+                        {
+                          "id": "fg1NT-2H-2S-3NT",
+                          "trigger": "3NT",
+                          "meaning": "Responder shows 10+ points; opener chooses 3NT or 4S.",
+                          "filters": {
+                            "minHcp": 10,
+                            "maxHcp": 40,
+                            "minSuit": {
+                              "S": 5
+                            },
+                            "maxSuit": {
+                              "S": 13
+                            }
+                          },
+                          "facts": {
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Responder shows 10+ points; opener chooses 3NT or 4S.",
+                              "points": {
+                                "method": "HCP+shape",
+                                "min": 10,
+                                "max": 40
+                              },
+                              "suitLengths": [
+                                {
+                                  "suit": "S",
+                                  "min": 5,
+                                  "max": 13
+                                }
+                              ]
+                            },
+                            "forcing": {
+                              "game": true,
+                              "source": "transfer continuation"
+                            }
+                          },
+                          "children": [],
+                          "alert": false
+                        }
+                      ],
+                      "alert": false
+                    }
+                  ],
+                  "alert": true,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Jacoby transfer to spades: 5+ spades.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "transfer": true
+                    },
+                    "transfer": {
+                      "targetSuit": "S"
+                    }
+                  }
                 },
                 {
                   "id": "fg1NT-2NTC",
                   "trigger": "2NT",
-                  "meaning": "Transfer into clubs.",
+                  "meaning": "Jacoby transfer to clubs: 6+ clubs.",
                   "filters": {
                     "minSuit": {
                       "C": 6
+                    },
+                    "maxSuit": {
+                      "C": 13
                     }
                   },
-                  "children": [],
-                  "alert": false
+                  "children": [
+                    {
+                      "id": "fg1NT-2NT-3C",
+                      "trigger": "3C",
+                      "meaning": "Opener accepts the transfer to clubs.",
+                      "filters": {},
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener accepts the transfer to clubs.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        },
+                        "convention": {
+                          "transfer": true
+                        },
+                        "transfer": {
+                          "targetSuit": "C",
+                          "accepted": true
+                        }
+                      },
+                      "children": [],
+                      "alert": false
+                    }
+                  ],
+                  "alert": true,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Jacoby transfer to clubs: 6+ clubs.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 6,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "transfer": true
+                    },
+                    "transfer": {
+                      "targetSuit": "C"
+                    }
+                  }
                 },
                 {
-                  "id": "node-1",
+                  "id": "fg1NT-2S",
                   "trigger": "2S",
-                  "meaning": "minor stayman, 5-4 in minors looking for 5-4 fits.",
+                  "meaning": "Minor Stayman: 8–9 points with 5–4 or better in the minors, or a very strong 4–4; asks opener to show a four-card minor.",
                   "filters": {
                     "minHcp": 8,
                     "maxHcp": 9,
                     "minSuit": {
                       "C": 4,
                       "D": 4
+                    },
+                    "maxSuit": {
+                      "C": 13,
+                      "D": 13
                     }
                   },
                   "children": [
                     {
-                      "id": "node-2",
+                      "id": "fg1NT-2S-3C",
                       "trigger": "3C",
-                      "meaning": "To play.",
+                      "meaning": "Opener shows 4+ clubs in response to minor Stayman.",
                       "filters": {
                         "minSuit": {
                           "C": 4
+                        },
+                        "maxSuit": {
+                          "C": 13
                         }
                       },
                       "children": [],
                       "generated": null,
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener shows 4+ clubs in response to minor Stayman.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 4,
+                              "max": 13
+                            }
+                          ]
+                        },
+                        "shownSuit": {
+                          "suit": "C",
+                          "minLength": 4
+                        }
+                      }
                     },
                     {
-                      "id": "node-3",
+                      "id": "fg1NT-2S-3D",
                       "trigger": "3D",
-                      "meaning": "To play.",
+                      "meaning": "Opener shows 4+ diamonds in response to minor Stayman.",
                       "filters": {
                         "minSuit": {
                           "D": 4
+                        },
+                        "maxSuit": {
+                          "D": 13
                         }
                       },
                       "children": [],
                       "generated": null,
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener shows 4+ diamonds in response to minor Stayman.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "D",
+                              "min": 4,
+                              "max": 13
+                            }
+                          ]
+                        },
+                        "shownSuit": {
+                          "suit": "D",
+                          "minLength": 4
+                        }
+                      }
                     },
                     {
-                      "id": "node-4",
+                      "id": "fg1NT-2S-2NT",
                       "trigger": "2NT",
-                      "meaning": "No fit, not enough for game.",
+                      "meaning": "Opener shows 15–16 points and no four-card minor fit.",
                       "filters": {
                         "minHcp": 15,
                         "maxHcp": 16,
                         "maxSuit": {
-                          "D": 3,
-                          "C": 3
+                          "C": 3,
+                          "D": 3
                         }
                       },
                       "children": [],
                       "generated": null,
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener shows 15–16 points and no four-card minor fit.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 15,
+                            "max": 16
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 0,
+                              "max": 3
+                            },
+                            {
+                              "suit": "D",
+                              "min": 0,
+                              "max": 3
+                            }
+                          ]
+                        },
+                        "fit": {
+                          "confirmed": false
+                        },
+                        "convention": {
+                          "naturalNotrump": true
+                        }
+                      }
                     },
                     {
-                      "id": "node-5",
+                      "id": "fg1NT-2S-3NT",
                       "trigger": "3NT",
-                      "meaning": "Enough for game.",
+                      "meaning": "Opener shows 17 points and no four-card minor fit; 3NT is to play.",
                       "filters": {
+                        "minHcp": 17,
                         "maxHcp": 17,
-                        "minHcp": 17
+                        "maxSuit": {
+                          "C": 3,
+                          "D": 3
+                        }
                       },
                       "children": [],
                       "generated": null,
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener shows 17 points and no four-card minor fit; 3NT is to play.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": 17,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 0,
+                              "max": 3
+                            },
+                            {
+                              "suit": "D",
+                              "min": 0,
+                              "max": 3
+                            }
+                          ]
+                        },
+                        "fit": {
+                          "confirmed": false
+                        },
+                        "convention": {
+                          "naturalNotrump": true
+                        }
+                      }
                     }
                   ],
                   "generated": null,
-                  "alert": false,
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Minor Stayman: 8–9 points with 5–4 or better in the minors, or a very strong 4–4; asks opener to show a four-card minor.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 8,
+                        "max": 9
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 4,
+                          "max": 13
+                        },
+                        {
+                          "suit": "D",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
                     "convention": {
                       "minorStayman": true,
                       "stayman": true
                     },
-                    "fit": {
-                      "confirmed": true,
-                      "openerLength": 5,
-                      "responderLength": 4,
-                      "combinedMinimum": 9,
-                      "suit": "{{call.suit}}"
+                    "inquiry": {
+                      "type": "four-card-minor"
                     }
                   }
+                },
+                {
+                  "id": "fg1NT-3C",
+                  "trigger": "3C",
+                  "meaning": "Jacoby transfer to diamonds: 6+ diamonds.",
+                  "filters": {
+                    "minSuit": {
+                      "D": 6
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Jacoby transfer to diamonds: 6+ diamonds.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 6,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "transfer": true
+                    },
+                    "transfer": {
+                      "targetSuit": "D"
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1NT-3D",
+                  "trigger": "3D",
+                  "meaning": "13+ points and 5+ clubs with slam interest; may stop in 3NT or 5C without a fit.",
+                  "filters": {
+                    "minHcp": 13,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "C": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "13+ points and 5+ clubs with slam interest; may stop in 3NT or 5C without a fit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 13,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "transfer": true
+                    },
+                    "transfer": {
+                      "targetSuit": "C",
+                      "slamInterest": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "advanced 1NT structure"
+                    },
+                    "slam": {
+                      "interest": true
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1NT-3H",
+                  "trigger": "3H",
+                  "meaning": "13+ points and 5+ diamonds with slam interest; may stop in 3NT or 5D without a fit.",
+                  "filters": {
+                    "minHcp": 13,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "13+ points and 5+ diamonds with slam interest; may stop in 3NT or 5D without a fit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 13,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "transfer": true
+                    },
+                    "transfer": {
+                      "targetSuit": "D",
+                      "slamInterest": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "advanced 1NT structure"
+                    },
+                    "slam": {
+                      "interest": true
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1NT-3S",
+                  "trigger": "3S",
+                  "meaning": "13+ points and at least 5–5 in the minors; game forcing with slam interest.",
+                  "filters": {
+                    "minHcp": 13,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 5,
+                      "D": 5
+                    },
+                    "maxSuit": {
+                      "C": 13,
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "13+ points and at least 5–5 in the minors; game forcing with slam interest.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 13,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "D",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "advanced 1NT structure"
+                    },
+                    "slam": {
+                      "interest": true
+                    },
+                    "shape": {
+                      "suits": [
+                        "C",
+                        "D"
+                      ],
+                      "minimumLengths": [
+                        5,
+                        5
+                      ]
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1NT-3NT",
+                  "trigger": "3NT",
+                  "meaning": "10–14 points, natural and to play.",
+                  "filters": {
+                    "minHcp": 10,
+                    "maxHcp": 14
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "10–14 points, natural and to play.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 10,
+                        "max": 14
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "naturalNotrump": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1NT-4C",
+                  "trigger": "4C",
+                  "meaning": "Gerber ace ask after 1NT; slam interest.",
+                  "filters": {},
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Gerber ace ask after 1NT; slam interest.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "gerber": true
+                    },
+                    "slam": {
+                      "interest": true,
+                      "aceAsk": {
+                        "active": true,
+                        "method": "gerber",
+                        "type": "aces"
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1NT-4D",
+                  "trigger": "4D",
+                  "meaning": "8–11 points and at least 5–5 in the majors; opener chooses 4H or 4S, with no slam interest.",
+                  "filters": {
+                    "minHcp": 8,
+                    "maxHcp": 11,
+                    "minSuit": {
+                      "H": 5,
+                      "S": 5
+                    },
+                    "maxSuit": {
+                      "H": 13,
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "8–11 points and at least 5–5 in the majors; opener chooses 4H or 4S, with no slam interest.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 8,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "S",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "major-choice response"
+                    },
+                    "slam": {
+                      "interest": false
+                    },
+                    "shape": {
+                      "suits": [
+                        "H",
+                        "S"
+                      ],
+                      "minimumLengths": [
+                        5,
+                        5
+                      ]
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1NT-4M",
+                  "trigger": "4M",
+                  "meaning": "15+ points and 6+ cards in the bid major; natural, declarer-oriented, and strongly slam interested.",
+                  "filters": {
+                    "minHcp": 15,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "M": 6
+                    },
+                    "maxSuit": {
+                      "M": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "15+ points and 6+ cards in the bid major; natural, declarer-oriented, and strongly slam interested.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 15,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "{{M}}",
+                          "min": 6,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "natural major slam try"
+                    },
+                    "fit": {
+                      "confirmed": true,
+                      "suit": "{{M}}"
+                    },
+                    "slam": {
+                      "interest": true
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg1NT-4NT",
+                  "trigger": "4NT",
+                  "meaning": "Quantitative invitation to 6NT: 16–17 points.",
+                  "filters": {
+                    "minHcp": 16,
+                    "maxHcp": 17
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Quantitative invitation to 6NT: 16–17 points.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 16,
+                        "max": 17
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "quantitativeNotrump": true
+                    },
+                    "slam": {
+                      "interest": true,
+                      "inviteLevel": 6
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1NT-5NT",
+                  "trigger": "5NT",
+                  "meaning": "Quantitative invitation to 7NT: 20–21 points; opener chooses 6NT or 7NT.",
+                  "filters": {
+                    "minHcp": 20,
+                    "maxHcp": 21
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Quantitative invitation to 7NT: 20–21 points; opener chooses 6NT or 7NT.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 20,
+                        "max": 21
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "quantitativeNotrump": true
+                    },
+                    "slam": {
+                      "interest": true,
+                      "inviteLevel": 7
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1NT-6NT",
+                  "trigger": "6NT",
+                  "meaning": "18–19 points, natural and to play in a small slam.",
+                  "filters": {
+                    "minHcp": 18,
+                    "maxHcp": 19
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "18–19 points, natural and to play in a small slam.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 18,
+                        "max": 19
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "naturalNotrump": true
+                    },
+                    "slam": {
+                      "contractLevel": 6,
+                      "signoff": true
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg1NT-7NT",
+                  "trigger": "7NT",
+                  "meaning": "22+ points, natural and to play; targets at least 37 combined points.",
+                  "filters": {
+                    "minHcp": 22,
+                    "maxHcp": 40
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "22+ points, natural and to play; targets at least 37 combined points.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 22,
+                        "max": 40
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "naturalNotrump": true
+                    },
+                    "slam": {
+                      "contractLevel": 7,
+                      "signoff": true
+                    }
+                  },
+                  "children": [],
+                  "alert": false
                 }
               ],
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1NT opening: 15–17 points, no singleton or void, and no suit longer than five cards.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 15,
+                    "max": 17
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "D",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "H",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "S",
+                      "min": 2,
+                      "max": 5
+                    }
+                  ]
+                },
+                "convention": {
+                  "naturalNotrump": true
+                },
+                "opening": {
+                  "strain": "NT",
+                  "balanced": true
+                }
+              }
+            },
+            {
+              "id": "fg2C-strong",
+              "trigger": "2C",
+              "meaning": "Artificial strong 2C opening: 22+ points; any shape and forced to at least game after a positive response.",
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 22,
+                "maxHcp": 40
+              },
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Artificial strong 2C opening: 22+ points; any shape and forced to at least game after a positive response.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 22,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "convention": {
+                  "strongTwoClub": true
+                },
+                "forcing": {
+                  "round": true,
+                  "game": false
+                }
+              },
+              "children": [
+                {
+                  "id": "fg2C-2D-negative",
+                  "trigger": "2D",
+                  "meaning": "Negative/waiting response: 0–3 points.",
+                  "filters": {
+                    "minHcp": 0,
+                    "maxHcp": 3
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Negative/waiting response: 0–3 points.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 0,
+                        "max": 3
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "strongTwoClub": true,
+                      "negativeResponse": true
+                    },
+                    "forcing": {
+                      "round": true,
+                      "game": false
+                    }
+                  },
+                  "children": [],
+                  "alert": false
+                },
+                {
+                  "id": "fg2C-2H-positive",
+                  "trigger": "2H",
+                  "meaning": "Positive response: 4+ points; game forcing and enters the 2/1 phase structure.",
+                  "filters": {
+                    "minHcp": 4,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "H": 5
+                    },
+                    "maxSuit": {
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Positive response: 4+ points; game forcing and enters the 2/1 phase structure.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 4,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "twoOverOne": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "round": false,
+                      "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "C",
+                        "responseSuit": "H",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
+                    },
+                    "partnership": {
+                      "points": {
+                        "opener": {
+                          "min": 12
+                        },
+                        "responder": {
+                          "min": 12
+                        },
+                        "combined": {
+                          "min": 24
+                        }
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg2C-2S-positive",
+                  "trigger": "2S",
+                  "meaning": "Positive response: 4+ points; game forcing and enters the 2/1 phase structure.",
+                  "filters": {
+                    "minHcp": 4,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "S": 5
+                    },
+                    "maxSuit": {
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Positive response: 4+ points; game forcing and enters the 2/1 phase structure.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 4,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "twoOverOne": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "round": false,
+                      "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "C",
+                        "responseSuit": "S",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
+                    },
+                    "partnership": {
+                      "points": {
+                        "opener": {
+                          "min": 12
+                        },
+                        "responder": {
+                          "min": 12
+                        },
+                        "combined": {
+                          "min": 24
+                        }
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg2C-2NT-positive",
+                  "trigger": "2NT",
+                  "meaning": "Positive balanced response: 4+ points; game forcing and enters the 2/1 phase structure.",
+                  "filters": {
+                    "minHcp": 4,
+                    "maxHcp": 40
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Positive balanced response: 4+ points; game forcing and enters the 2/1 phase structure.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 4,
+                        "max": 40
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "twoOverOne": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "round": false,
+                      "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "C",
+                        "responseSuit": "NT",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
+                    },
+                    "partnership": {
+                      "points": {
+                        "opener": {
+                          "min": 12
+                        },
+                        "responder": {
+                          "min": 12
+                        },
+                        "combined": {
+                          "min": 24
+                        }
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg2C-3C-positive",
+                  "trigger": "3C",
+                  "meaning": "Positive club response: 4+ points and 5+ clubs; game forcing and enters the 2/1 phase structure.",
+                  "filters": {
+                    "minHcp": 4,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "C": 13
+                    }
+                  },
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Positive club response: 4+ points and 5+ clubs; game forcing and enters the 2/1 phase structure.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 4,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    },
+                    "convention": {
+                      "twoOverOne": true
+                    },
+                    "forcing": {
+                      "game": true,
+                      "round": false,
+                      "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "entry",
+                        "phaseNumber": 1,
+                        "openingSuit": "C",
+                        "responseSuit": "C",
+                        "fitConfirmed": false,
+                        "gameForceSatisfied": false
+                      }
+                    },
+                    "partnership": {
+                      "points": {
+                        "opener": {
+                          "min": 12
+                        },
+                        "responder": {
+                          "min": 12
+                        },
+                        "combined": {
+                          "min": 24
+                        }
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                }
+              ],
+              "alert": false
+            },
+            {
+              "id": "fg2NT",
+              "trigger": "2NT",
+              "meaning": "Natural 2NT opening: 20–21 points, balanced, with no singleton or void.",
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 20,
+                "maxHcp": 21,
+                "minSuit": {
+                  "C": 2,
+                  "D": 2,
+                  "H": 2,
+                  "S": 2
+                },
+                "maxSuit": {
+                  "C": 5,
+                  "D": 5,
+                  "H": 5,
+                  "S": 5
+                }
+              },
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 2NT opening: 20–21 points, balanced, with no singleton or void.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 20,
+                    "max": 21
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "D",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "H",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "S",
+                      "min": 2,
+                      "max": 5
+                    }
+                  ]
+                },
+                "convention": {
+                  "naturalNotrump": true
+                },
+                "opening": {
+                  "strain": "NT",
+                  "balanced": true
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg3NT",
+              "trigger": "3NT",
+              "meaning": "Natural 3NT opening: 24–26 points and a completely balanced hand.",
+              "filters": {
+                "auctionRole": "opening",
+                "minHcp": 24,
+                "maxHcp": 26,
+                "minSuit": {
+                  "C": 2,
+                  "D": 2,
+                  "H": 2,
+                  "S": 2
+                },
+                "maxSuit": {
+                  "C": 5,
+                  "D": 5,
+                  "H": 5,
+                  "S": 5
+                }
+              },
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 3NT opening: 24–26 points and a completely balanced hand.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 24,
+                    "max": 26
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "D",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "H",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "S",
+                      "min": 2,
+                      "max": 5
+                    }
+                  ]
+                },
+                "convention": {
+                  "naturalNotrump": true
+                },
+                "opening": {
+                  "strain": "NT",
+                  "balanced": true
+                }
+              },
+              "children": [],
               "alert": false
             }
           ]
@@ -6549,7 +11943,7 @@ window.BridgeSystemData = {
             {
               "id": "fg-enter-phase-ii",
               "trigger": "2NT",
-              "meaning": "Entering Phase II (deciding color / color checks).",
+              "meaning": "2/1 Phase II: opener describes shape and the partnership selects and explicitly confirms the contract strain.",
               "children": [
                 {
                   "id": "fg-ii-2D",
@@ -6557,7 +11951,20 @@ window.BridgeSystemData = {
                   "meaning": "Move toward fit confirmation / feature checks.",
                   "filters": {},
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Move toward fit confirmation / feature checks.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    }
+                  }
                 },
                 {
                   "id": "fg-ii-3D",
@@ -6567,19 +11974,16 @@ window.BridgeSystemData = {
                   "children": [],
                   "alert": false,
                   "facts": {
-                    "convention": {
-                      "cueBid": true
-                    },
-                    "slam": {
-                      "control": {
-                        "active": true,
-                        "suit": "{{call.suit}}",
-                        "round": "first-or-second",
-                        "elimination": {
-                          "method": "ascending-suit-elimination",
-                          "skippedSuitDeniesControl": true
-                        }
-                      }
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Cuebid-style step for fit and hand strength.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
                     }
                   }
                 },
@@ -6589,18 +11993,56 @@ window.BridgeSystemData = {
                   "meaning": "Jump into control context depending on prior agreement.",
                   "filters": {},
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Jump into control context depending on prior agreement.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    }
+                  }
                 }
               ],
               "filters": {
                 "auctionRole": "contextual"
               },
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "2/1 Phase II: opener describes shape and the partnership selects and explicitly confirms the contract strain.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "strain-selection",
+                    "phaseNumber": 2,
+                    "gameForceSatisfied": false
+                  }
+                }
+              }
             },
             {
               "id": "fg-enter-phase-iii",
               "trigger": "3C",
-              "meaning": "Entering control phase / Phase III in FG flow.",
+              "meaning": "2/1 Phase III: after a confirmed fit, bid first- or second-round controls upward; skipping a suit denies control.",
               "generated": {
                 "type": "control-bids",
                 "agreedSuit": "",
@@ -6617,48 +12059,282 @@ window.BridgeSystemData = {
                 {
                   "id": "fg-iii-4C",
                   "trigger": "4C",
-                  "meaning": "Club control route with suit priority.",
+                  "meaning": "C control bid: shows first- or second-round control; skipped lower suits deny control.",
                   "filters": {},
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "C control bid: shows first- or second-round control; skipped lower suits deny control.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "control-bidding",
+                        "phaseNumber": 3,
+                        "fitConfirmed": true,
+                        "agreedSuit": "{{call.suit}}",
+                        "gameForceSatisfied": false
+                      }
+                    },
+                    "slam": {
+                      "interest": true,
+                      "control": {
+                        "active": true,
+                        "suit": "C",
+                        "round": "first-or-second",
+                        "elimination": {
+                          "method": "ascending-suit-elimination",
+                          "skippedSuitDeniesControl": true
+                        }
+                      }
+                    }
+                  }
                 },
                 {
                   "id": "fg-iii-4D",
                   "trigger": "4D",
-                  "meaning": "Diamond control route with suit priority.",
+                  "meaning": "D control bid: shows first- or second-round control; skipped lower suits deny control.",
                   "filters": {},
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "D control bid: shows first- or second-round control; skipped lower suits deny control.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "control-bidding",
+                        "phaseNumber": 3,
+                        "fitConfirmed": true,
+                        "agreedSuit": "{{call.suit}}",
+                        "gameForceSatisfied": false
+                      }
+                    },
+                    "slam": {
+                      "interest": true,
+                      "control": {
+                        "active": true,
+                        "suit": "D",
+                        "round": "first-or-second",
+                        "elimination": {
+                          "method": "ascending-suit-elimination",
+                          "skippedSuitDeniesControl": true
+                        }
+                      }
+                    }
+                  }
                 },
                 {
                   "id": "fg-iii-4H",
                   "trigger": "4H",
-                  "meaning": "Heart control route with suit priority.",
+                  "meaning": "H control bid: shows first- or second-round control; skipped lower suits deny control.",
                   "filters": {},
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "H control bid: shows first- or second-round control; skipped lower suits deny control.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "control-bidding",
+                        "phaseNumber": 3,
+                        "fitConfirmed": true,
+                        "agreedSuit": "{{call.suit}}",
+                        "gameForceSatisfied": false
+                      }
+                    },
+                    "slam": {
+                      "interest": true,
+                      "control": {
+                        "active": true,
+                        "suit": "H",
+                        "round": "first-or-second",
+                        "elimination": {
+                          "method": "ascending-suit-elimination",
+                          "skippedSuitDeniesControl": true
+                        }
+                      }
+                    }
+                  }
                 },
                 {
                   "id": "fg-iii-4S",
                   "trigger": "4S",
-                  "meaning": "Spade control route with suit priority.",
+                  "meaning": "S control bid: shows first- or second-round control; skipped lower suits deny control.",
                   "filters": {},
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "S control bid: shows first- or second-round control; skipped lower suits deny control.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "control-bidding",
+                        "phaseNumber": 3,
+                        "fitConfirmed": true,
+                        "agreedSuit": "{{call.suit}}",
+                        "gameForceSatisfied": false
+                      }
+                    },
+                    "slam": {
+                      "interest": true,
+                      "control": {
+                        "active": true,
+                        "suit": "S",
+                        "round": "first-or-second",
+                        "elimination": {
+                          "method": "ascending-suit-elimination",
+                          "skippedSuitDeniesControl": true
+                        }
+                      }
+                    }
+                  }
                 },
                 {
                   "id": "fg-iii-5C",
                   "trigger": "5C",
-                  "meaning": "Secondary control sequence if phase needs escalation.",
+                  "meaning": "C control bid: shows first- or second-round control; skipped lower suits deny control.",
                   "filters": {},
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "C control bid: shows first- or second-round control; skipped lower suits deny control.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "forcing": {
+                      "game": true,
+                      "source": "2/1"
+                    },
+                    "progress": {
+                      "twoOverOne": {
+                        "active": true,
+                        "phase": "control-bidding",
+                        "phaseNumber": 3,
+                        "fitConfirmed": true,
+                        "agreedSuit": "{{call.suit}}",
+                        "gameForceSatisfied": false
+                      }
+                    },
+                    "slam": {
+                      "interest": true,
+                      "control": {
+                        "active": true,
+                        "suit": "C",
+                        "round": "first-or-second",
+                        "elimination": {
+                          "method": "ascending-suit-elimination",
+                          "skippedSuitDeniesControl": true
+                        }
+                      }
+                    }
+                  }
                 }
               ],
               "filters": {
                 "auctionRole": "contextual"
               },
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "2/1 Phase III: after a confirmed fit, bid first- or second-round controls upward; skipping a suit denies control.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "control-bidding",
+                    "phaseNumber": 3,
+                    "fitConfirmed": true,
+                    "agreedSuit": "{{call.suit}}",
+                    "gameForceSatisfied": false
+                  }
+                },
+                "slam": {
+                  "interest": true,
+                  "control": {
+                    "active": true,
+                    "suit": "{{call.suit}}",
+                    "round": "first-or-second",
+                    "elimination": {
+                      "method": "ascending-suit-elimination",
+                      "skippedSuitDeniesControl": true
+                    }
+                  }
+                }
+              }
             }
           ]
         },
@@ -6669,17 +12345,29 @@ window.BridgeSystemData = {
             {
               "id": "fg-rkcb",
               "trigger": "4NT",
-              "meaning": "RKCB/4NT query, typically after at least one round of controls.",
+              "meaning": "Roman Key Card Blackwood (1430) after an agreed suit, normally after at least one control bid.",
               "children": [
                 {
                   "id": "fg-rkcb-5C",
                   "trigger": "5C",
-                  "meaning": "1 or 4 key cards (RKCB 1430).",
+                  "meaning": "RKCB 1430 response: one or four key cards.",
                   "filters": {},
                   "children": [],
-                  "alert": false,
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "RKCB 1430 response: one or four key cards.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
                     "convention": {
+                      "blackwood": true,
                       "rkcb": true
                     },
                     "slam": {
@@ -6694,8 +12382,8 @@ window.BridgeSystemData = {
                         "method": "rkcb-1430",
                         "bid": "5C",
                         "keycards": [
-                          0,
-                          3
+                          1,
+                          4
                         ]
                       }
                     }
@@ -6704,12 +12392,24 @@ window.BridgeSystemData = {
                 {
                   "id": "fg-rkcb-5D",
                   "trigger": "5D",
-                  "meaning": "0 or 3 key cards (RKCB 1430).",
+                  "meaning": "RKCB 1430 response: zero or three key cards.",
                   "filters": {},
                   "children": [],
-                  "alert": false,
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "RKCB 1430 response: zero or three key cards.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
                     "convention": {
+                      "blackwood": true,
                       "rkcb": true
                     },
                     "slam": {
@@ -6724,8 +12424,8 @@ window.BridgeSystemData = {
                         "method": "rkcb-1430",
                         "bid": "5D",
                         "keycards": [
-                          1,
-                          4
+                          0,
+                          3
                         ]
                       }
                     }
@@ -6734,12 +12434,24 @@ window.BridgeSystemData = {
                 {
                   "id": "fg-rkcb-5H",
                   "trigger": "5H",
-                  "meaning": "2 key cards without the trump queen (RKCB 1430).",
+                  "meaning": "RKCB 1430 response: two key cards without the trump queen.",
                   "filters": {},
                   "children": [],
-                  "alert": false,
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "RKCB 1430 response: two key cards without the trump queen.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
                     "convention": {
+                      "blackwood": true,
                       "rkcb": true
                     },
                     "slam": {
@@ -6754,9 +12466,9 @@ window.BridgeSystemData = {
                         "method": "rkcb-1430",
                         "bid": "5H",
                         "keycards": [
-                          2,
-                          5
-                        ]
+                          2
+                        ],
+                        "trumpQueen": false
                       }
                     }
                   }
@@ -6764,12 +12476,24 @@ window.BridgeSystemData = {
                 {
                   "id": "fg-rkcb-5S",
                   "trigger": "5S",
-                  "meaning": "2 key cards with the trump queen (RKCB 1430).",
+                  "meaning": "RKCB 1430 response: two key cards with the trump queen.",
                   "filters": {},
                   "children": [],
-                  "alert": false,
+                  "alert": true,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "RKCB 1430 response: two key cards with the trump queen.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
                     "convention": {
+                      "blackwood": true,
                       "rkcb": true
                     },
                     "slam": {
@@ -6779,6 +12503,14 @@ window.BridgeSystemData = {
                         "interference": "D0P1",
                         "accelerated": false,
                         "type": "keycard"
+                      },
+                      "response": {
+                        "method": "rkcb-1430",
+                        "bid": "5S",
+                        "keycards": [
+                          2
+                        ],
+                        "trumpQueen": true
                       }
                     }
                   }
@@ -6787,12 +12519,25 @@ window.BridgeSystemData = {
               "filters": {
                 "auctionRole": "contextual"
               },
-              "alert": false,
+              "alert": true,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Roman Key Card Blackwood (1430) after an agreed suit, normally after at least one control bid.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                },
                 "convention": {
+                  "blackwood": true,
                   "rkcb": true
                 },
                 "slam": {
+                  "interest": true,
                   "aceAsk": {
                     "active": true,
                     "method": "rkcb-1430",
@@ -6800,35 +12545,201 @@ window.BridgeSystemData = {
                     "accelerated": false,
                     "type": "keycard"
                   }
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "phase": "slam-pursuit",
+                    "phaseNumber": 4
+                  }
                 }
               }
             },
             {
               "id": "fg-5NT",
               "trigger": "5NT",
-              "meaning": "King/queen inquiry.",
+              "meaning": "King ask after the key-card response; bid the lowest king held and deny skipped kings.",
               "filters": {
                 "auctionRole": "contextual"
               },
-              "children": [],
-              "alert": false
+              "children": [
+                {
+                  "id": "fg-5NT-6C",
+                  "trigger": "6C",
+                  "meaning": "6C: shows the C king and denies kings in skipped lower-ranking suits.",
+                  "filters": {},
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "6C: shows the C king and denies kings in skipped lower-ranking suits.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "slam": {
+                      "kingResponse": {
+                        "suit": "C",
+                        "deniesSkippedKings": true
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg-5NT-6D",
+                  "trigger": "6D",
+                  "meaning": "6D: shows the D king and denies kings in skipped lower-ranking suits.",
+                  "filters": {},
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "6D: shows the D king and denies kings in skipped lower-ranking suits.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "slam": {
+                      "kingResponse": {
+                        "suit": "D",
+                        "deniesSkippedKings": true
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg-5NT-6H",
+                  "trigger": "6H",
+                  "meaning": "6H: shows the H king and denies kings in skipped lower-ranking suits.",
+                  "filters": {},
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "6H: shows the H king and denies kings in skipped lower-ranking suits.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "slam": {
+                      "kingResponse": {
+                        "suit": "H",
+                        "deniesSkippedKings": true
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg-5NT-6S",
+                  "trigger": "6S",
+                  "meaning": "6S: shows the S king and denies kings in skipped lower-ranking suits.",
+                  "filters": {},
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "6S: shows the S king and denies kings in skipped lower-ranking suits.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "slam": {
+                      "kingResponse": {
+                        "suit": "S",
+                        "deniesSkippedKings": true
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                }
+              ],
+              "alert": true,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "King ask after the key-card response; bid the lowest king held and deny skipped kings.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                },
+                "convention": {
+                  "blackwood": true,
+                  "rkcb": true
+                },
+                "slam": {
+                  "kingAsk": {
+                    "active": true,
+                    "method": "specific-king"
+                  }
+                }
+              }
             },
             {
               "id": "fg-exclusion",
               "trigger": "5D",
-              "meaning": "Exclusion RKC style when void is known.",
+              "meaning": "5D Exclusion RKCB: shows a diamond void and asks for key cards outside diamonds.",
               "filters": {
-                "auctionRole": "contextual"
+                "auctionRole": "contextual",
+                "maxSuit": {
+                  "D": 0
+                }
               },
               "children": [],
-              "alert": false,
+              "alert": true,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "5D Exclusion RKCB: shows a diamond void and asks for key cards outside diamonds.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "D",
+                      "min": 0,
+                      "max": 0
+                    }
+                  ]
+                },
                 "convention": {
-                  "rkcb": true,
-                  "exclusion": true
+                  "exclusion": true,
+                  "rkcb": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "exclusion RKCB"
+                },
+                "fit": {
+                  "confirmed": true,
+                  "suit": "{{call.suit}}"
                 },
                 "shortness": {
-                  "suit": "{{call.suit}}",
+                  "suit": "D",
                   "exact": 0
                 },
                 "slam": {
@@ -6837,8 +12748,18 @@ window.BridgeSystemData = {
                     "active": true,
                     "method": "rkcb-1430",
                     "type": "exclusion",
-                    "excludedSuit": "{{call.suit}}",
+                    "agreedSuit": "{{call.suit}}",
+                    "excludedSuit": "D",
                     "interference": "D0P1"
+                  }
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "slam-pursuit",
+                    "phaseNumber": 4,
+                    "fitConfirmed": true,
+                    "agreedSuit": "{{call.suit}}"
                   }
                 }
               }
@@ -6846,23 +12767,167 @@ window.BridgeSystemData = {
             {
               "id": "fg-gerber",
               "trigger": "4C",
-              "meaning": "Gerber request; usually after NT or club-centered auctions.",
+              "meaning": "Gerber ace ask, normally after a notrump auction.",
               "filters": {
                 "auctionRole": "contextual"
               },
-              "children": [],
-              "alert": false,
+              "children": [
+                {
+                  "id": "fg-gerber-4D",
+                  "trigger": "4D",
+                  "meaning": "4D Gerber response: 0 or 4 aces.",
+                  "filters": {},
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4D Gerber response: 0 or 4 aces.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "gerber": true
+                    },
+                    "slam": {
+                      "response": {
+                        "method": "gerber",
+                        "bid": "4D",
+                        "aces": [
+                          0,
+                          4
+                        ]
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg-gerber-4H",
+                  "trigger": "4H",
+                  "meaning": "4H Gerber response: 1 ace.",
+                  "filters": {},
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4H Gerber response: 1 ace.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "gerber": true
+                    },
+                    "slam": {
+                      "response": {
+                        "method": "gerber",
+                        "bid": "4H",
+                        "aces": [
+                          1
+                        ]
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg-gerber-4S",
+                  "trigger": "4S",
+                  "meaning": "4S Gerber response: 2 aces.",
+                  "filters": {},
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4S Gerber response: 2 aces.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "gerber": true
+                    },
+                    "slam": {
+                      "response": {
+                        "method": "gerber",
+                        "bid": "4S",
+                        "aces": [
+                          2
+                        ]
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                },
+                {
+                  "id": "fg-gerber-4NT",
+                  "trigger": "4NT",
+                  "meaning": "4NT Gerber response: 3 aces.",
+                  "filters": {},
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "4NT Gerber response: 3 aces.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    },
+                    "convention": {
+                      "gerber": true
+                    },
+                    "slam": {
+                      "response": {
+                        "method": "gerber",
+                        "bid": "4NT",
+                        "aces": [
+                          3
+                        ]
+                      }
+                    }
+                  },
+                  "children": [],
+                  "alert": true
+                }
+              ],
+              "alert": true,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Gerber ace ask, normally after a notrump auction.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                },
                 "convention": {
                   "gerber": true
                 },
                 "slam": {
+                  "interest": true,
                   "aceAsk": {
                     "active": true,
                     "method": "gerber",
-                    "interference": "D0P1",
-                    "accelerated": false,
-                    "type": "gerber"
+                    "type": "aces"
                   }
                 }
               }
@@ -6876,62 +12941,106 @@ window.BridgeSystemData = {
             {
               "id": "fg-splinter",
               "trigger": "3D",
-              "meaning": "Splinter route candidate: shortness + game force in 2/1 contexts.",
+              "meaning": "Splinter: confirms the agreed suit and shows zero or one diamond; 11–14 directly, or 15+ after entering 2/1.",
               "filters": {
-                "auctionRole": "contextual"
+                "auctionRole": "contextual",
+                "maxSuit": {
+                  "D": 1
+                }
               },
               "children": [],
-              "alert": false,
+              "alert": true,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Splinter: confirms the agreed suit and shows zero or one diamond; 11–14 directly, or 15+ after entering 2/1.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "D",
+                      "min": 0,
+                      "max": 1
+                    }
+                  ]
+                },
                 "convention": {
                   "splinter": true,
-                  "twoOverOne": true
+                  "delayedSplinter": false
                 },
                 "forcing": {
                   "game": true,
-                  "source": "2/1"
-                },
-                "partnership": {
-                  "points": {
-                    "opener": {
-                      "min": 12
-                    },
-                    "responder": {
-                      "min": 12
-                    },
-                    "combined": {
-                      "min": 24
-                    }
-                  }
+                  "source": "splinter"
                 },
                 "fit": {
-                  "confirmed": true
+                  "confirmed": true,
+                  "suit": "{{call.suit}}"
                 },
                 "shortness": {
-                  "suit": "{{call.suit}}",
+                  "suit": "D",
                   "min": 0,
                   "max": 1
                 },
                 "slam": {
                   "interest": true
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": false,
+                    "phase": "not-started",
+                    "phaseNumber": 0
+                  }
                 }
               }
             },
             {
               "id": "fg-exclusion-2-level",
               "trigger": "4D",
-              "meaning": "Exclusion control line when singleton/void is established.",
+              "meaning": "Exclusion RKCB: shows a diamond void and asks for key cards outside diamonds.",
               "filters": {
-                "auctionRole": "contextual"
+                "auctionRole": "contextual",
+                "maxSuit": {
+                  "D": 0
+                }
               },
               "children": [],
-              "alert": false,
+              "alert": true,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Exclusion RKCB: shows a diamond void and asks for key cards outside diamonds.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "D",
+                      "min": 0,
+                      "max": 0
+                    }
+                  ]
+                },
                 "convention": {
-                  "exclusion": true
+                  "exclusion": true,
+                  "rkcb": true
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "exclusion RKCB"
+                },
+                "fit": {
+                  "confirmed": true,
+                  "suit": "{{call.suit}}"
                 },
                 "shortness": {
-                  "suit": "{{call.suit}}",
+                  "suit": "D",
                   "exact": 0
                 },
                 "slam": {
@@ -6940,8 +13049,18 @@ window.BridgeSystemData = {
                     "active": true,
                     "method": "rkcb-1430",
                     "type": "exclusion",
-                    "excludedSuit": "{{call.suit}}",
+                    "agreedSuit": "{{call.suit}}",
+                    "excludedSuit": "D",
                     "interference": "D0P1"
+                  }
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "slam-pursuit",
+                    "phaseNumber": 4,
+                    "fitConfirmed": true,
+                    "agreedSuit": "{{call.suit}}"
                   }
                 }
               }
@@ -6949,20 +13068,43 @@ window.BridgeSystemData = {
             {
               "id": "fg-cuebid",
               "trigger": "4H",
-              "meaning": "Cuebid style; confirm side control and fit strength.",
+              "meaning": "Control bid: confirms fit strength and shows first- or second-round heart control.",
               "filters": {
                 "auctionRole": "contextual"
               },
               "children": [],
               "alert": false,
               "facts": {
-                "convention": {
-                  "cueBid": true
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Control bid: confirms fit strength and shows first- or second-round heart control.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                },
+                "forcing": {
+                  "game": true,
+                  "source": "2/1"
+                },
+                "progress": {
+                  "twoOverOne": {
+                    "active": true,
+                    "phase": "control-bidding",
+                    "phaseNumber": 3,
+                    "fitConfirmed": true,
+                    "agreedSuit": "{{call.suit}}",
+                    "gameForceSatisfied": false
+                  }
                 },
                 "slam": {
+                  "interest": true,
                   "control": {
                     "active": true,
-                    "suit": "{{call.suit}}",
+                    "suit": "H",
                     "round": "first-or-second",
                     "elimination": {
                       "method": "ascending-suit-elimination",
@@ -6975,15 +13117,55 @@ window.BridgeSystemData = {
             {
               "id": "fg-michaels",
               "trigger": "2NT",
-              "meaning": "Michaels cue at 5-5 two-suit discovery point.",
+              "meaning": "Michaels/minor two-suit route: at least 5–5 in clubs and diamonds.",
               "filters": {
-                "auctionRole": "contextual"
+                "auctionRole": "contextual",
+                "minSuit": {
+                  "C": 5,
+                  "D": 5
+                },
+                "maxSuit": {
+                  "C": 13,
+                  "D": 13
+                }
               },
               "children": [],
               "alert": false,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Michaels/minor two-suit route: at least 5–5 in clubs and diamonds.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 5,
+                      "max": 13
+                    },
+                    {
+                      "suit": "D",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                },
                 "convention": {
                   "michaels": true
+                },
+                "shape": {
+                  "suits": [
+                    "C",
+                    "D"
+                  ],
+                  "minimumLengths": [
+                    5,
+                    5
+                  ]
                 }
               }
             }
@@ -6996,56 +13178,144 @@ window.BridgeSystemData = {
             {
               "id": "fg-oc1",
               "trigger": "1C",
-              "meaning": "1-level club overcall (context-dependent).",
+              "meaning": "1C overcall: 8+ points at the one level.",
               "filters": {
-                "auctionRole": "contextual"
+                "auctionRole": "overcall",
+                "minHcp": 8,
+                "maxHcp": 40
               },
               "children": [],
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "1C overcall: 8+ points at the one level.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 8,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "overcall",
+                  "level": 1
+                }
+              }
             },
             {
               "id": "fg-oc1D",
               "trigger": "1D",
-              "meaning": "1-level diamond overcall.",
+              "meaning": "1D overcall: 8+ points at the one level.",
               "filters": {
                 "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "minHcp": 8,
+                "maxHcp": 40
               },
               "children": [],
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "1D overcall: 8+ points at the one level.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 8,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "overcall",
+                  "level": 1
+                }
+              }
             },
             {
               "id": "fg-oc1H",
               "trigger": "1H",
-              "meaning": "1-level heart overcall.",
+              "meaning": "1H overcall: 8+ points at the one level.",
               "filters": {
                 "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "minHcp": 8,
+                "maxHcp": 40
               },
               "children": [],
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "1H overcall: 8+ points at the one level.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 8,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "overcall",
+                  "level": 1
+                }
+              }
             },
             {
               "id": "fg-oc1S",
               "trigger": "1S",
-              "meaning": "1-level spade overcall.",
+              "meaning": "1S overcall: 8+ points at the one level.",
               "filters": {
                 "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "minHcp": 8,
+                "maxHcp": 40
               },
               "children": [],
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "1S overcall: 8+ points at the one level.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 8,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "overcall",
+                  "level": 1
+                }
+              }
             },
             {
               "id": "fg-ocX",
               "trigger": "X",
-              "meaning": "Competitive double.",
+              "meaning": "Takeout double: strong and oriented toward the unbid suits; partnership strength may be considered.",
               "filters": {
-                "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "auctionRole": "overcall"
               },
               "children": [],
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Takeout double: strong and oriented toward the unbid suits; partnership strength may be considered.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "takeout-double"
+                }
+              }
             },
             {
               "id": "fg-ocXX",
@@ -7055,26 +13325,233 @@ window.BridgeSystemData = {
                 "auctionRole": "contextual"
               },
               "children": [],
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Redouble.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                }
+              }
             },
             {
               "id": "fg-oc1NT",
               "trigger": "1NT",
-              "meaning": "NT overcall when holding stopper.",
+              "meaning": "Notrump overcall with a stopper in the opponent's bid suit.",
               "filters": {
                 "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "requires": "stopper"
+              },
+              "children": [],
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Notrump overcall with a stopper in the opponent's bid suit.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "notrump-overcall",
+                  "stopperRequired": true
+                }
+              }
+            },
+            {
+              "id": "fg-overcall2C",
+              "trigger": "2C",
+              "meaning": "2C overcall: 10+ points at the two level.",
+              "filters": {
+                "auctionRole": "overcall",
+                "minHcp": 10,
+                "maxHcp": 40
+              },
+              "children": [],
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "2C overcall: 10+ points at the two level.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 10,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "overcall",
+                  "level": 2
+                }
+              }
+            },
+            {
+              "id": "fg-overcall2D",
+              "trigger": "2D",
+              "meaning": "2D overcall: 10+ points at the two level.",
+              "filters": {
+                "auctionRole": "overcall",
+                "minHcp": 10,
+                "maxHcp": 40
+              },
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "2D overcall: 10+ points at the two level.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 10,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "overcall",
+                  "level": 2
+                }
               },
               "children": [],
               "alert": false
             },
             {
-              "id": "fg-overcall2C",
-              "trigger": "2C",
-              "meaning": "2C overcall (potentially conventional).",
+              "id": "fg-overcall2H",
+              "trigger": "2H",
+              "meaning": "2H overcall: 10+ points at the two level.",
               "filters": {
                 "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "minHcp": 10,
+                "maxHcp": 40
+              },
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "2H overcall: 10+ points at the two level.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 10,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "overcall",
+                  "level": 2
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-overcall2S",
+              "trigger": "2S",
+              "meaning": "2S overcall: 10+ points at the two level.",
+              "filters": {
+                "auctionRole": "overcall",
+                "minHcp": 10,
+                "maxHcp": 40
+              },
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "2S overcall: 10+ points at the two level.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 10,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "overcall",
+                  "level": 2
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-overcall3X",
+              "trigger": "3X",
+              "meaning": "Three-level overcall: 12+ points.",
+              "filters": {
+                "auctionRole": "overcall",
+                "minHcp": 12,
+                "maxHcp": 40
+              },
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Three-level overcall: 12+ points.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 12,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "competition": {
+                  "action": "overcall",
+                  "level": 3
+                }
+              },
+              "children": [],
+              "alert": false
+            },
+            {
+              "id": "fg-weak-jump-overcall",
+              "trigger": "2X",
+              "meaning": "Weak jump overcall: 6–10 points and 6+ cards in the bid suit, when the call is a jump.",
+              "filters": {
+                "auctionRole": "overcall",
+                "minHcp": 6,
+                "maxHcp": 10,
+                "minSuit": {
+                  "X": 6
+                },
+                "maxSuit": {
+                  "X": 13
+                }
+              },
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Weak jump overcall: 6–10 points and 6+ cards in the bid suit, when the call is a jump.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 6,
+                    "max": 10
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "{{X}}",
+                      "min": 6,
+                      "max": 13
+                    }
+                  ]
+                },
+                "convention": {
+                  "weakJump": true
+                },
+                "competition": {
+                  "action": "weak-jump-overcall"
+                }
               },
               "children": [],
               "alert": false
@@ -7089,13 +13566,17 @@ window.BridgeSystemData = {
             {
               "id": "fg-ml-2C",
               "trigger": "2C",
-              "meaning": "Multi-Landy: both majors, typically at least 5-4.",
+              "meaning": "Multi-Landy 2C: at least 5–4 in the majors.",
               "filters": {
                 "auctionRole": "overcall",
                 "opponentOpening": "1NT",
                 "minSuit": {
                   "H": 4,
                   "S": 4
+                },
+                "maxSuit": {
+                  "H": 13,
+                  "S": 13
                 }
               },
               "children": [
@@ -7110,7 +13591,20 @@ window.BridgeSystemData = {
                       "meaning": "Hearts.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Hearts.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     },
                     {
                       "id": "fg-ml-2C-2D-2S",
@@ -7118,7 +13612,20 @@ window.BridgeSystemData = {
                       "meaning": "Spades.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Spades.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     }
                   ],
                   "filters": {
@@ -7129,59 +13636,152 @@ window.BridgeSystemData = {
                   },
                   "alert": false,
                   "facts": {
-                    "fit": {
-                      "confirmed": true
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "No fit in majors.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 3
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 3
+                        }
+                      ]
                     }
                   }
                 },
                 {
-                  "id": "node-1",
+                  "id": "fg-ml-2C-2H",
                   "trigger": "2H",
-                  "meaning": "Fit in hearts",
+                  "meaning": "Advancer selects hearts with 4+ hearts.",
                   "filters": {
                     "minSuit": {
                       "H": 4
+                    },
+                    "maxSuit": {
+                      "H": 13
                     }
                   },
                   "children": [],
                   "generated": null,
                   "alert": false,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Advancer selects hearts with 4+ hearts.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
                     "fit": {
-                      "confirmed": true
+                      "confirmed": true,
+                      "suit": "H",
+                      "advancerLength": 4
                     }
                   }
                 },
                 {
-                  "id": "node-2",
+                  "id": "fg-ml-2C-2S",
                   "trigger": "2S",
-                  "meaning": "Fit in spade",
+                  "meaning": "Advancer selects spades with 4+ spades.",
                   "filters": {
                     "minSuit": {
                       "S": 4
+                    },
+                    "maxSuit": {
+                      "S": 13
                     }
                   },
                   "children": [],
                   "generated": null,
                   "alert": false,
                   "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Advancer selects spades with 4+ spades.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    },
                     "fit": {
-                      "confirmed": true
+                      "confirmed": true,
+                      "suit": "S",
+                      "advancerLength": 4
                     }
                   }
                 }
               ],
               "alert": false,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Multi-Landy 2C: at least 5–4 in the majors.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "H",
+                      "min": 4,
+                      "max": 13
+                    },
+                    {
+                      "suit": "S",
+                      "min": 4,
+                      "max": 13
+                    }
+                  ]
+                },
                 "convention": {
                   "multiLandy": true
+                },
+                "shape": {
+                  "suits": [
+                    "H",
+                    "S"
+                  ],
+                  "combinedMinimum": 9,
+                  "oneSuitMinimum": 5
                 }
               }
             },
             {
               "id": "fg-ml-2D",
               "trigger": "2D",
-              "meaning": "Multi-Landy: one major, usually a six-card suit.",
+              "meaning": "Multi-Landy 2D: a single six-card or longer major.",
               "filters": {
                 "auctionRole": "overcall",
                 "opponentOpening": "1NT"
@@ -7198,29 +13798,72 @@ window.BridgeSystemData = {
                       "meaning": "Spades.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Spades.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     }
                   ],
                   "filters": {},
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Pass or correct: hearts is acceptable; 2S asks for the other major.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    }
+                  }
                 }
               ],
               "alert": false,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Multi-Landy 2D: a single six-card or longer major.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                },
                 "convention": {
                   "multiLandy": true
+                },
+                "shape": {
+                  "oneMajorMinimum": 6
                 }
               }
             },
             {
               "id": "fg-ml-2H",
               "trigger": "2H",
-              "meaning": "Multi-Landy: hearts and a minor.",
+              "meaning": "Multi-Landy 2H: 5+ hearts and 4+ cards in one minor.",
               "filters": {
                 "auctionRole": "overcall",
                 "opponentOpening": "1NT",
                 "minSuit": {
                   "H": 5
+                },
+                "maxSuit": {
+                  "H": 13
                 }
               },
               "children": [
@@ -7235,7 +13878,20 @@ window.BridgeSystemData = {
                       "meaning": "Clubs.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Clubs.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     },
                     {
                       "id": "fg-ml-2H-2NT-3D",
@@ -7243,29 +13899,81 @@ window.BridgeSystemData = {
                       "meaning": "Diamonds.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Diamonds.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     }
                   ],
                   "filters": {},
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Advancer asks for the minor.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    }
+                  }
                 }
               ],
               "alert": false,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Multi-Landy 2H: 5+ hearts and 4+ cards in one minor.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "H",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                },
                 "convention": {
                   "multiLandy": true
+                },
+                "shape": {
+                  "primarySuit": "H",
+                  "primaryMinimum": 5,
+                  "otherSuitClass": "minor",
+                  "otherMinimum": 4
                 }
               }
             },
             {
               "id": "fg-ml-2S",
               "trigger": "2S",
-              "meaning": "Multi-Landy: spades and a minor.",
+              "meaning": "Multi-Landy 2S: 5+ spades and 4+ cards in one minor.",
               "filters": {
                 "auctionRole": "overcall",
                 "opponentOpening": "1NT",
                 "minSuit": {
                   "S": 5
+                },
+                "maxSuit": {
+                  "S": 13
                 }
               },
               "children": [
@@ -7280,7 +13988,20 @@ window.BridgeSystemData = {
                       "meaning": "Clubs.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Clubs.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     },
                     {
                       "id": "fg-ml-2S-2NT-3D",
@@ -7288,30 +14009,83 @@ window.BridgeSystemData = {
                       "meaning": "Diamonds.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Diamonds.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     }
                   ],
                   "filters": {},
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Advancer asks for the minor.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    }
+                  }
                 }
               ],
               "alert": false,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Multi-Landy 2S: 5+ spades and 4+ cards in one minor.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "S",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                },
                 "convention": {
                   "multiLandy": true
+                },
+                "shape": {
+                  "primarySuit": "S",
+                  "primaryMinimum": 5,
+                  "otherSuitClass": "minor",
+                  "otherMinimum": 4
                 }
               }
             },
             {
               "id": "fg-ml-2NT",
               "trigger": "2NT",
-              "meaning": "Multi-Landy: both minors, typically 5-5 or better.",
+              "meaning": "Multi-Landy 2NT: at least 5–5 in the minors.",
               "filters": {
                 "auctionRole": "overcall",
                 "opponentOpening": "1NT",
                 "minSuit": {
                   "C": 5,
                   "D": 5
+                },
+                "maxSuit": {
+                  "C": 13,
+                  "D": 13
                 }
               },
               "children": [
@@ -7326,19 +14100,110 @@ window.BridgeSystemData = {
                       "meaning": "Correct to diamonds.",
                       "filters": {},
                       "children": [],
-                      "alert": false
+                      "alert": false,
+                      "facts": {
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Correct to diamonds.",
+                          "points": {
+                            "method": "HCP+shape",
+                            "min": null,
+                            "max": null
+                          },
+                          "suitLengths": []
+                        }
+                      }
                     }
                   ],
                   "filters": {},
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Advancer selects clubs or gives a pass-or-correct preference.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": null,
+                        "max": null
+                      },
+                      "suitLengths": []
+                    }
+                  }
                 }
               ],
               "alert": false,
               "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Multi-Landy 2NT: at least 5–5 in the minors.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 5,
+                      "max": 13
+                    },
+                    {
+                      "suit": "D",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                },
                 "convention": {
-                  "multiLandy": true
+                  "multiLandy": true,
+                  "michaels": true
+                },
+                "shape": {
+                  "suits": [
+                    "C",
+                    "D"
+                  ],
+                  "minimumLengths": [
+                    5,
+                    5
+                  ]
                 }
               }
+            },
+            {
+              "id": "fg-ml-X",
+              "trigger": "X",
+              "meaning": "Penalty double over 1NT: 15+ points.",
+              "filters": {
+                "auctionRole": "overcall",
+                "opponentOpening": "1NT",
+                "minHcp": 15,
+                "maxHcp": 40
+              },
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Penalty double over 1NT: 15+ points.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": 15,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                },
+                "convention": {
+                  "multiLandy": true
+                },
+                "competition": {
+                  "action": "penalty-double"
+                }
+              },
+              "children": [],
+              "alert": false
             }
           ]
         },
@@ -7395,7 +14260,26 @@ window.BridgeSystemData = {
                     }
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 3C opening: 6–10 HCP and a 7-card club suit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 7,
+                          "max": 7
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "fg-4C",
@@ -7430,11 +14314,43 @@ window.BridgeSystemData = {
                     "auctionRole": "opening"
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 4C opening: 6–10 HCP and a 8+-card club suit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 8,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 }
               ],
               "filters": {},
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Parallel preemptive opening options in club: 3C, 4C. Each is an alternative opening, not a continuation.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                }
+              }
             },
             {
               "id": "fg-weak-diamond-opening",
@@ -7485,7 +14401,26 @@ window.BridgeSystemData = {
                     }
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 2D opening (catalogue alternative): 6–10 HCP and a 6-card D suit. This is an alternative opening, not a continuation after the parent node.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 6,
+                          "max": 6
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "fg-3D",
@@ -7520,7 +14455,26 @@ window.BridgeSystemData = {
                     "auctionRole": "opening"
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 3D opening: 6–10 HCP and a 7-card diamond suit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 7,
+                          "max": 7
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "fg-4D",
@@ -7555,11 +14509,43 @@ window.BridgeSystemData = {
                     }
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 4D opening: 6–10 HCP and a 8+-card diamond suit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 8,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 }
               ],
               "filters": {},
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Parallel preemptive opening options in diamond: 2D, 3D, 4D. Each is an alternative opening, not a continuation.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                }
+              }
             },
             {
               "id": "fg-weak-heart-opening",
@@ -7610,7 +14596,26 @@ window.BridgeSystemData = {
                     }
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 2H opening (catalogue alternative): 6–10 HCP and a 6-card H suit. This is an alternative opening, not a continuation after the parent node.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 6,
+                          "max": 6
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "fg-3H",
@@ -7645,7 +14650,26 @@ window.BridgeSystemData = {
                     "auctionRole": "opening"
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 3H opening: 6–10 HCP and a 7-card heart suit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 7,
+                          "max": 7
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "fg-4H",
@@ -7680,11 +14704,43 @@ window.BridgeSystemData = {
                     }
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 4H opening: 6–10 HCP and a 8+-card heart suit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 8,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 }
               ],
               "filters": {},
-              "alert": false
+              "alert": false,
+              "facts": {
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Parallel preemptive opening options in heart: 2H, 3H, 4H. Each is an alternative opening, not a continuation.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
+                }
+              }
             },
             {
               "id": "fg-weak-spade-opening",
@@ -7735,7 +14791,26 @@ window.BridgeSystemData = {
                     }
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 2S opening (catalogue alternative): 6–10 HCP and a 6-card S suit. This is an alternative opening, not a continuation after the parent node.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 6,
+                          "max": 6
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "fg-3S",
@@ -7770,7 +14845,26 @@ window.BridgeSystemData = {
                     "auctionRole": "opening"
                   },
                   "children": [],
-                  "alert": false
+                  "alert": false,
+                  "facts": {
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 3S opening: 6–10 HCP and a 7-card spade suit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 7,
+                          "max": 7
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "fg-4S",
@@ -7805,202 +14899,45 @@ window.BridgeSystemData = {
                     }
                   },
                   "children": [],
-                  "alert": false
-                }
-              ],
-              "filters": {},
-              "alert": false
-            }
-          ]
-        },
-        {
-          "id": "convention-1788925263125",
-          "name": "Ace and Keycard Asks",
-          "children": [
-            {
-              "id": "node-1",
-              "trigger": "4NT",
-              "meaning": "Roman Keycard Asking for 4 aces and  trump King",
-              "filters": {},
-              "children": [
-                {
-                  "id": "node-2",
-                  "trigger": "5C",
-                  "meaning": "1 or 4 key cards (RKCB 1430).",
-                  "filters": {},
-                  "children": [],
-                  "generated": null,
                   "alert": false,
                   "facts": {
-                    "slam": {
-                      "aceAsk": {
-                        "active": true,
-                        "method": "rkcb-1430",
-                        "interference": "D0P1",
-                        "accelerated": false,
-                        "type": "keycard"
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 4S opening: 6–10 HCP and a 8+-card spade suit.",
+                      "points": {
+                        "method": "HCP+shape",
+                        "min": 6,
+                        "max": 10
                       },
-                      "response": {
-                        "method": "rkcb-1430",
-                        "bid": "5C",
-                        "keycards": [
-                          1,
-                          4
-                        ]
-                      }
-                    }
-                  }
-                },
-                {
-                  "id": "node-3",
-                  "trigger": "5D",
-                  "meaning": "0 or 3 key cards (RKCB 1430).",
-                  "filters": {},
-                  "children": [],
-                  "generated": null,
-                  "alert": false,
-                  "facts": {
-                    "slam": {
-                      "aceAsk": {
-                        "active": true,
-                        "method": "rkcb-1430",
-                        "interference": "D0P1",
-                        "accelerated": false,
-                        "type": "keycard"
-                      },
-                      "response": {
-                        "method": "rkcb-1430",
-                        "bid": "5D",
-                        "keycards": [
-                          3,
-                          0
-                        ]
-                      }
-                    }
-                  }
-                },
-                {
-                  "id": "node-4",
-                  "trigger": "5H",
-                  "meaning": "2 key cards without the trump queen (RKCB 1430).",
-                  "filters": {},
-                  "children": [],
-                  "generated": null,
-                  "alert": false,
-                  "facts": {
-                    "slam": {
-                      "aceAsk": {
-                        "active": true,
-                        "method": "rkcb-1430",
-                        "interference": "D0P1",
-                        "accelerated": false,
-                        "type": "keycard"
-                      },
-                      "response": {
-                        "method": "rkcb-1430",
-                        "bid": "5H",
-                        "keycards": [
-                          2,
-                          5
-                        ]
-                      }
-                    }
-                  }
-                },
-                {
-                  "id": "node-5",
-                  "trigger": "5S",
-                  "meaning": "2 key cards with the trump queen (RKCB 1430).",
-                  "filters": {},
-                  "children": [],
-                  "generated": null,
-                  "alert": false,
-                  "facts": {
-                    "slam": {
-                      "aceAsk": {
-                        "active": true,
-                        "method": "rkcb-1430",
-                        "interference": "D0P1",
-                        "accelerated": false,
-                        "type": "keycard"
-                      },
-                      "response": {
-                        "method": "rkcb-1430",
-                        "bid": "5S",
-                        "keycards": [
-                          2,
-                          5
-                        ]
-                      }
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 8,
+                          "max": 13
+                        }
+                      ]
                     }
                   }
                 }
               ],
-              "generated": null,
+              "filters": {},
               "alert": false,
               "facts": {
-                "convention": {
-                  "rkcb": true
-                },
-                "slam": {
-                  "aceAsk": {
-                    "active": true,
-                    "method": "rkcb-1430",
-                    "interference": "D0P1",
-                    "accelerated": false,
-                    "type": "keycard"
-                  }
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Parallel preemptive opening options in spade: 2S, 3S, 4S. Each is an alternative opening, not a continuation.",
+                  "points": {
+                    "method": "HCP+shape",
+                    "min": null,
+                    "max": null
+                  },
+                  "suitLengths": []
                 }
               }
-            },
-            {
-              "id": "node-6",
-              "trigger": "5NT",
-              "meaning": "King Asks, responder answers the king in ascending order; stop back at trump",
-              "filters": {},
-              "children": [
-                {
-                  "id": "node-7",
-                  "trigger": "6C",
-                  "meaning": "Has Club King",
-                  "filters": {},
-                  "children": [],
-                  "generated": null,
-                  "alert": false
-                },
-                {
-                  "id": "node-8",
-                  "trigger": "6D",
-                  "meaning": "has Diamond King",
-                  "filters": {},
-                  "children": [],
-                  "generated": null,
-                  "alert": false
-                },
-                {
-                  "id": "node-9",
-                  "trigger": "6H",
-                  "meaning": "has Heart King",
-                  "filters": {},
-                  "children": [],
-                  "generated": null,
-                  "alert": false
-                },
-                {
-                  "id": "node-10",
-                  "trigger": "6S",
-                  "meaning": "has Spade King",
-                  "filters": {},
-                  "children": [],
-                  "generated": null,
-                  "alert": false
-                }
-              ],
-              "generated": null,
-              "alert": false
             }
-          ],
-          "notes": ""
+          ]
         }
       ],
       "openingProfile": {
@@ -8027,7 +14964,7 @@ window.BridgeSystemData = {
               "max": 5
             }
           },
-          "shape": "balanced"
+          "shape": "no singleton or void; no six-card suit"
         },
         "1Major": {
           "pointRange": {
@@ -8054,6 +14991,11 @@ window.BridgeSystemData = {
             "suitLengthRange": {
               "min": 3,
               "max": 13
+            },
+            "constraints": {
+              "diamondsMax": 2,
+              "heartsMax": 4,
+              "spadesMax": 4
             }
           },
           "diamonds": {
@@ -8068,16 +15010,62 @@ window.BridgeSystemData = {
           }
         },
         "2NT": {
-          "pointRange": null,
-          "suitLengthRange": null,
-          "treatment": "not a natural opening in this profile"
+          "pointRange": {
+            "min": 20,
+            "max": 21
+          },
+          "suitLengthRange": {
+            "C": {
+              "min": 2,
+              "max": 5
+            },
+            "D": {
+              "min": 2,
+              "max": 5
+            },
+            "H": {
+              "min": 2,
+              "max": 5
+            },
+            "S": {
+              "min": 2,
+              "max": 5
+            }
+          },
+          "treatment": "natural balanced"
+        },
+        "3NT": {
+          "pointRange": {
+            "min": 24,
+            "max": 26
+          },
+          "suitLengthRange": {
+            "C": {
+              "min": 2,
+              "max": 5
+            },
+            "D": {
+              "min": 2,
+              "max": 5
+            },
+            "H": {
+              "min": 2,
+              "max": 5
+            },
+            "S": {
+              "min": 2,
+              "max": 5
+            }
+          },
+          "treatment": "natural, completely balanced"
         },
         "strongOpening": {
-          "bid": "1C",
+          "bid": "2C",
           "pointRange": {
-            "min": 12,
-            "max": 20
-          }
+            "min": 22,
+            "max": 40
+          },
+          "treatment": "artificial strong; 2D shows 0–3, other positive responses force to game"
         },
         "weakTwos": {
           "enabled": true,
@@ -8092,7 +15080,7 @@ window.BridgeSystemData = {
           },
           "suitLengthRange": {
             "min": 6,
-            "max": 13
+            "max": 6
           }
         },
         "weakOpenings": {
@@ -8141,31 +15129,2035 @@ window.BridgeSystemData = {
         }
       },
       "priorityPolicy": {
-        "2/1GameForce": "highest when the configured HCP range qualifies: 1D-2C, 1H-2C/2D, and 1S-2C/2D/2H only",
-        "priority": 100
+        "2/1GameForce": "highest for an uncontested non-jump response in a new, lower-ranking suit: 1D-2C, 1H-2C/2D, and 1S-2C/2D/2H",
+        "progression": "Phase I entry -> Phase II strain selection/explicit fit -> Phase III controls -> slam pursuit or game-force completion",
+        "priority": 1000
       },
+      "sequenceRules": [
+        {
+          "id": "personal-fgv0-5-two-over-one-entry",
+          "expression": "1X-2Y",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minHcp": 12,
+            "maxHcp": 40
+          },
+          "meaning": "2/1 Phase I entry: a lower-ranking new suit at the two level shows 12+ points and forces to game.",
+          "priority": 1000,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase I entry: a lower-ranking new suit at the two level shows 12+ points and forces to game.",
+              "points": {
+                "method": "HCP+shape",
+                "min": 12,
+                "max": 40
+              },
+              "suitLengths": []
+            },
+            "convention": {
+              "twoOverOne": true
+            },
+            "forcing": {
+              "game": true,
+              "round": false,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "entry",
+                "phaseNumber": 1,
+                "openingSuit": "{{X}}",
+                "responseSuit": "{{Y}}",
+                "fitConfirmed": false,
+                "gameForceSatisfied": false
+              }
+            },
+            "partnership": {
+              "points": {
+                "opener": {
+                  "min": 12
+                },
+                "responder": {
+                  "min": 12
+                },
+                "combined": {
+                  "min": 24
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-phase-ii-suit",
+          "expression": "1X-2Y-(?:!=NT)",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [],
+          "meaning": "2/1 Phase II: opener's first suit rebid begins strain selection.",
+          "priority": 1010,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II: opener's first suit rebid begins strain selection.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "strain-selection",
+                "phaseNumber": 2,
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-phase-ii-notrump",
+          "expression": "1X-2Y-(2NT|3NT)",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [],
+          "meaning": "2/1 Phase II: opener's first notrump rebid begins strain selection.",
+          "priority": 1010,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II: opener's first notrump rebid begins strain selection.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "strain-selection",
+                "phaseNumber": 2,
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-fit-opening-suit",
+          "expression": "1X-2Y-?-#X",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "X"
+          ],
+          "meaning": "2/1 Phase II: both partners have confirmed the opening suit.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II: both partners have confirmed the opening suit.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{X}}"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "fit-confirmed",
+                "phaseNumber": 2,
+                "fitConfirmed": true,
+                "agreedSuit": "{{X}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-fit-response-suit",
+          "expression": "1X-2Y-#Y",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "Y"
+          ],
+          "meaning": "2/1 Phase II: opener confirms responder's suit.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II: opener confirms responder's suit.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Y}}"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "fit-confirmed",
+                "phaseNumber": 2,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Y}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-fit-opener-second-suit",
+          "expression": "1X-2Y-#Z-#Z",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "Z"
+          ],
+          "meaning": "2/1 Phase II: responder confirms opener's second suit.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase II: responder confirms opener's second suit.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "fit-confirmed",
+                "phaseNumber": 2,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-control-after-opening-fit",
+          "expression": "1X-2Y-?-#X-#Z",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "X"
+          ],
+          "meaning": "2/1 Phase III: control bidding starts after the opening suit is agreed.",
+          "priority": 1030,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase III: control bidding starts after the opening suit is agreed.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{X}}",
+                "gameForceSatisfied": false
+              }
+            },
+            "slam": {
+              "interest": true,
+              "control": {
+                "active": true,
+                "suit": "{{Z}}",
+                "round": "first-or-second",
+                "elimination": {
+                  "method": "ascending-suit-elimination",
+                  "skippedSuitDeniesControl": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-control-after-response-fit",
+          "expression": "1X-2Y-#Y-#Z",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "Y"
+          ],
+          "meaning": "2/1 Phase III: control bidding starts after responder's suit is agreed.",
+          "priority": 1030,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase III: control bidding starts after responder's suit is agreed.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Y}}",
+                "gameForceSatisfied": false
+              }
+            },
+            "slam": {
+              "interest": true,
+              "control": {
+                "active": true,
+                "suit": "{{Z}}",
+                "round": "first-or-second",
+                "elimination": {
+                  "method": "ascending-suit-elimination",
+                  "skippedSuitDeniesControl": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-control-after-second-suit-fit",
+          "expression": "1X-2Y-#Z-#Z-#W",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [
+            "Z"
+          ],
+          "meaning": "2/1 Phase III: control bidding starts after opener's second suit is agreed.",
+          "priority": 1030,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "2/1 Phase III: control bidding starts after opener's second suit is agreed.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}",
+                "gameForceSatisfied": false
+              }
+            },
+            "slam": {
+              "interest": true,
+              "control": {
+                "active": true,
+                "suit": "{{W}}",
+                "round": "first-or-second",
+                "elimination": {
+                  "method": "ascending-suit-elimination",
+                  "skippedSuitDeniesControl": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-delayed-splinter-2-new-higher",
+          "expression": "1X-2Y-2Z-3W",
+          "where": [
+            "Y<X",
+            "W>Z"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minHcp": 15,
+            "maxHcp": 40,
+            "minSuit": {
+              "Z": 3
+            },
+            "maxSuit": {
+              "W": 1,
+              "Z": 13
+            }
+          },
+          "meaning": "Delayed splinter after entering 2/1: confirms {{Z}} and shows zero or one {{W}}.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Delayed splinter after entering 2/1: confirms {{Z}} and shows zero or one {{W}}.",
+              "points": {
+                "method": "HCP+shape",
+                "min": 15,
+                "max": 40
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Z}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{W}}",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "convention": {
+              "splinter": true,
+              "delayedSplinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "delayed splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "shortness": {
+              "suit": "{{W}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-delayed-splinter-2-new-lower",
+          "expression": "1X-2Y-2Z-4W",
+          "where": [
+            "Y<X",
+            "W<Z"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minHcp": 15,
+            "maxHcp": 40,
+            "minSuit": {
+              "Z": 3
+            },
+            "maxSuit": {
+              "W": 1,
+              "Z": 13
+            }
+          },
+          "meaning": "Delayed splinter after entering 2/1: confirms {{Z}} and shows zero or one {{W}}.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Delayed splinter after entering 2/1: confirms {{Z}} and shows zero or one {{W}}.",
+              "points": {
+                "method": "HCP+shape",
+                "min": 15,
+                "max": 40
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Z}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{W}}",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "convention": {
+              "splinter": true,
+              "delayedSplinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "delayed splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "shortness": {
+              "suit": "{{W}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-delayed-splinter-2-opening-higher",
+          "expression": "1X-2Y-2X-3Z",
+          "where": [
+            "Y<X",
+            "Z>X"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minHcp": 15,
+            "maxHcp": 40,
+            "minSuit": {
+              "X": 3
+            },
+            "maxSuit": {
+              "Z": 1,
+              "X": 13
+            }
+          },
+          "meaning": "Delayed splinter after entering 2/1: confirms {{X}} and shows zero or one {{Z}}.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Delayed splinter after entering 2/1: confirms {{X}} and shows zero or one {{Z}}.",
+              "points": {
+                "method": "HCP+shape",
+                "min": 15,
+                "max": 40
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{X}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{Z}}",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "convention": {
+              "splinter": true,
+              "delayedSplinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "delayed splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{X}}"
+            },
+            "shortness": {
+              "suit": "{{Z}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{X}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-delayed-splinter-2-opening-lower",
+          "expression": "1X-2Y-2X-4Z",
+          "where": [
+            "Y<X",
+            "Z<X"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minHcp": 15,
+            "maxHcp": 40,
+            "minSuit": {
+              "X": 3
+            },
+            "maxSuit": {
+              "Z": 1,
+              "X": 13
+            }
+          },
+          "meaning": "Delayed splinter after entering 2/1: confirms {{X}} and shows zero or one {{Z}}.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Delayed splinter after entering 2/1: confirms {{X}} and shows zero or one {{Z}}.",
+              "points": {
+                "method": "HCP+shape",
+                "min": 15,
+                "max": 40
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{X}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{Z}}",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "convention": {
+              "splinter": true,
+              "delayedSplinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "delayed splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{X}}"
+            },
+            "shortness": {
+              "suit": "{{Z}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{X}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-delayed-splinter-3-response-higher",
+          "expression": "1X-2Y-3Y-4Z",
+          "where": [
+            "Y<X",
+            "Z>Y"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minHcp": 15,
+            "maxHcp": 40,
+            "minSuit": {
+              "Y": 3
+            },
+            "maxSuit": {
+              "Z": 1,
+              "Y": 13
+            }
+          },
+          "meaning": "Delayed splinter after entering 2/1: confirms {{Y}} and shows zero or one {{Z}}.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Delayed splinter after entering 2/1: confirms {{Y}} and shows zero or one {{Z}}.",
+              "points": {
+                "method": "HCP+shape",
+                "min": 15,
+                "max": 40
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Y}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{Z}}",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "convention": {
+              "splinter": true,
+              "delayedSplinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "delayed splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Y}}"
+            },
+            "shortness": {
+              "suit": "{{Z}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Y}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-delayed-splinter-3-response-lower",
+          "expression": "1X-2Y-3Y-5Z",
+          "where": [
+            "Y<X",
+            "Z<Y"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minHcp": 15,
+            "maxHcp": 40,
+            "minSuit": {
+              "Y": 3
+            },
+            "maxSuit": {
+              "Z": 1,
+              "Y": 13
+            }
+          },
+          "meaning": "Delayed splinter after entering 2/1: confirms {{Y}} and shows zero or one {{Z}}.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Delayed splinter after entering 2/1: confirms {{Y}} and shows zero or one {{Z}}.",
+              "points": {
+                "method": "HCP+shape",
+                "min": 15,
+                "max": 40
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Y}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{Z}}",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "convention": {
+              "splinter": true,
+              "delayedSplinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "delayed splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Y}}"
+            },
+            "shortness": {
+              "suit": "{{Z}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Y}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-delayed-splinter-3-new-higher",
+          "expression": "1X-2Y-3Z-4W",
+          "where": [
+            "Y<X",
+            "W>Z"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minHcp": 15,
+            "maxHcp": 40,
+            "minSuit": {
+              "Z": 3
+            },
+            "maxSuit": {
+              "W": 1,
+              "Z": 13
+            }
+          },
+          "meaning": "Delayed splinter after entering 2/1: confirms {{Z}} and shows zero or one {{W}}.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Delayed splinter after entering 2/1: confirms {{Z}} and shows zero or one {{W}}.",
+              "points": {
+                "method": "HCP+shape",
+                "min": 15,
+                "max": 40
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Z}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{W}}",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "convention": {
+              "splinter": true,
+              "delayedSplinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "delayed splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "shortness": {
+              "suit": "{{W}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-delayed-splinter-3-new-lower",
+          "expression": "1X-2Y-3Z-5W",
+          "where": [
+            "Y<X",
+            "W<Z"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minHcp": 15,
+            "maxHcp": 40,
+            "minSuit": {
+              "Z": 3
+            },
+            "maxSuit": {
+              "W": 1,
+              "Z": 13
+            }
+          },
+          "meaning": "Delayed splinter after entering 2/1: confirms {{Z}} and shows zero or one {{W}}.",
+          "priority": 1020,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Delayed splinter after entering 2/1: confirms {{Z}} and shows zero or one {{W}}.",
+              "points": {
+                "method": "HCP+shape",
+                "min": 15,
+                "max": 40
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Z}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{W}}",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "convention": {
+              "splinter": true,
+              "delayedSplinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "delayed splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "shortness": {
+              "suit": "{{W}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "control-bidding",
+                "phaseNumber": 3,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}",
+                "gameForceSatisfied": false
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-exclusion-2-new-higher",
+          "expression": "1X-2Y-2Z-4W",
+          "where": [
+            "Y<X",
+            "W>Z"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minSuit": {
+              "Z": 3
+            },
+            "maxSuit": {
+              "W": 0,
+              "Z": 13
+            }
+          },
+          "meaning": "Exclusion RKCB during 2/1: confirms {{Z}}, shows a void in {{W}}, and excludes that suit from the key-card count.",
+          "priority": 1040,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Exclusion RKCB during 2/1: confirms {{Z}}, shows a void in {{W}}, and excludes that suit from the key-card count.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Z}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{W}}",
+                  "min": 0,
+                  "max": 0
+                }
+              ]
+            },
+            "convention": {
+              "exclusion": true,
+              "rkcb": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "exclusion RKCB"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "shortness": {
+              "suit": "{{W}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "agreedSuit": "{{Z}}",
+                "excludedSuit": "{{W}}",
+                "interference": "D0P1"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}"
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-exclusion-2-new-lower",
+          "expression": "1X-2Y-2Z-5W",
+          "where": [
+            "Y<X",
+            "W<Z"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minSuit": {
+              "Z": 3
+            },
+            "maxSuit": {
+              "W": 0,
+              "Z": 13
+            }
+          },
+          "meaning": "Exclusion RKCB during 2/1: confirms {{Z}}, shows a void in {{W}}, and excludes that suit from the key-card count.",
+          "priority": 1040,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Exclusion RKCB during 2/1: confirms {{Z}}, shows a void in {{W}}, and excludes that suit from the key-card count.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Z}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{W}}",
+                  "min": 0,
+                  "max": 0
+                }
+              ]
+            },
+            "convention": {
+              "exclusion": true,
+              "rkcb": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "exclusion RKCB"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "shortness": {
+              "suit": "{{W}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "agreedSuit": "{{Z}}",
+                "excludedSuit": "{{W}}",
+                "interference": "D0P1"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}"
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-exclusion-2-opening-higher",
+          "expression": "1X-2Y-2X-4Z",
+          "where": [
+            "Y<X",
+            "Z>X"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minSuit": {
+              "X": 3
+            },
+            "maxSuit": {
+              "Z": 0,
+              "X": 13
+            }
+          },
+          "meaning": "Exclusion RKCB during 2/1: confirms {{X}}, shows a void in {{Z}}, and excludes that suit from the key-card count.",
+          "priority": 1040,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Exclusion RKCB during 2/1: confirms {{X}}, shows a void in {{Z}}, and excludes that suit from the key-card count.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{X}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{Z}}",
+                  "min": 0,
+                  "max": 0
+                }
+              ]
+            },
+            "convention": {
+              "exclusion": true,
+              "rkcb": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "exclusion RKCB"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{X}}"
+            },
+            "shortness": {
+              "suit": "{{Z}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "agreedSuit": "{{X}}",
+                "excludedSuit": "{{Z}}",
+                "interference": "D0P1"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "{{X}}"
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-exclusion-2-opening-lower",
+          "expression": "1X-2Y-2X-5Z",
+          "where": [
+            "Y<X",
+            "Z<X"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minSuit": {
+              "X": 3
+            },
+            "maxSuit": {
+              "Z": 0,
+              "X": 13
+            }
+          },
+          "meaning": "Exclusion RKCB during 2/1: confirms {{X}}, shows a void in {{Z}}, and excludes that suit from the key-card count.",
+          "priority": 1040,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Exclusion RKCB during 2/1: confirms {{X}}, shows a void in {{Z}}, and excludes that suit from the key-card count.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{X}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{Z}}",
+                  "min": 0,
+                  "max": 0
+                }
+              ]
+            },
+            "convention": {
+              "exclusion": true,
+              "rkcb": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "exclusion RKCB"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{X}}"
+            },
+            "shortness": {
+              "suit": "{{Z}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "agreedSuit": "{{X}}",
+                "excludedSuit": "{{Z}}",
+                "interference": "D0P1"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "{{X}}"
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-exclusion-3-response-higher",
+          "expression": "1X-2Y-3Y-5Z",
+          "where": [
+            "Y<X",
+            "Z>Y"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minSuit": {
+              "Y": 3
+            },
+            "maxSuit": {
+              "Z": 0,
+              "Y": 13
+            }
+          },
+          "meaning": "Exclusion RKCB during 2/1: confirms {{Y}}, shows a void in {{Z}}, and excludes that suit from the key-card count.",
+          "priority": 1040,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Exclusion RKCB during 2/1: confirms {{Y}}, shows a void in {{Z}}, and excludes that suit from the key-card count.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Y}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{Z}}",
+                  "min": 0,
+                  "max": 0
+                }
+              ]
+            },
+            "convention": {
+              "exclusion": true,
+              "rkcb": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "exclusion RKCB"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Y}}"
+            },
+            "shortness": {
+              "suit": "{{Z}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "agreedSuit": "{{Y}}",
+                "excludedSuit": "{{Z}}",
+                "interference": "D0P1"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Y}}"
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-exclusion-3-response-lower",
+          "expression": "1X-2Y-3Y-6Z",
+          "where": [
+            "Y<X",
+            "Z<Y"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minSuit": {
+              "Y": 3
+            },
+            "maxSuit": {
+              "Z": 0,
+              "Y": 13
+            }
+          },
+          "meaning": "Exclusion RKCB during 2/1: confirms {{Y}}, shows a void in {{Z}}, and excludes that suit from the key-card count.",
+          "priority": 1040,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Exclusion RKCB during 2/1: confirms {{Y}}, shows a void in {{Z}}, and excludes that suit from the key-card count.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Y}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{Z}}",
+                  "min": 0,
+                  "max": 0
+                }
+              ]
+            },
+            "convention": {
+              "exclusion": true,
+              "rkcb": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "exclusion RKCB"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Y}}"
+            },
+            "shortness": {
+              "suit": "{{Z}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "agreedSuit": "{{Y}}",
+                "excludedSuit": "{{Z}}",
+                "interference": "D0P1"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Y}}"
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-exclusion-3-new-higher",
+          "expression": "1X-2Y-3Z-5W",
+          "where": [
+            "Y<X",
+            "W>Z"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minSuit": {
+              "Z": 3
+            },
+            "maxSuit": {
+              "W": 0,
+              "Z": 13
+            }
+          },
+          "meaning": "Exclusion RKCB during 2/1: confirms {{Z}}, shows a void in {{W}}, and excludes that suit from the key-card count.",
+          "priority": 1040,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Exclusion RKCB during 2/1: confirms {{Z}}, shows a void in {{W}}, and excludes that suit from the key-card count.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Z}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{W}}",
+                  "min": 0,
+                  "max": 0
+                }
+              ]
+            },
+            "convention": {
+              "exclusion": true,
+              "rkcb": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "exclusion RKCB"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "shortness": {
+              "suit": "{{W}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "agreedSuit": "{{Z}}",
+                "excludedSuit": "{{W}}",
+                "interference": "D0P1"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}"
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-exclusion-3-new-lower",
+          "expression": "1X-2Y-3Z-6W",
+          "where": [
+            "Y<X",
+            "W<Z"
+          ],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "minSuit": {
+              "Z": 3
+            },
+            "maxSuit": {
+              "W": 0,
+              "Z": 13
+            }
+          },
+          "meaning": "Exclusion RKCB during 2/1: confirms {{Z}}, shows a void in {{W}}, and excludes that suit from the key-card count.",
+          "priority": 1040,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Exclusion RKCB during 2/1: confirms {{Z}}, shows a void in {{W}}, and excludes that suit from the key-card count.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": [
+                {
+                  "suit": "{{Z}}",
+                  "min": 3,
+                  "max": 13
+                },
+                {
+                  "suit": "{{W}}",
+                  "min": 0,
+                  "max": 0
+                }
+              ]
+            },
+            "convention": {
+              "exclusion": true,
+              "rkcb": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "exclusion RKCB"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "{{Z}}"
+            },
+            "shortness": {
+              "suit": "{{W}}",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "agreedSuit": "{{Z}}",
+                "excludedSuit": "{{W}}",
+                "interference": "D0P1"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "{{Z}}"
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-accelerated-rkcb",
+          "expression": "1H-2C-2D-2H-2S-2NT",
+          "where": [],
+          "requiresAgreement": [
+            "H"
+          ],
+          "alert": true,
+          "meaning": "Accelerated RKCB after a confirmed heart fit and at least one control bid.",
+          "priority": 1050,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Accelerated RKCB after a confirmed heart fit and at least one control bid.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": true,
+              "source": "2/1"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "H",
+                "gameForceSatisfied": false
+              }
+            },
+            "slam": {
+              "interest": true,
+              "control": {
+                "active": true,
+                "suit": "S",
+                "round": "first-or-second",
+                "elimination": {
+                  "method": "ascending-suit-elimination",
+                  "skippedSuitDeniesControl": true
+                }
+              },
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1",
+                "accelerated": true,
+                "type": "keycard",
+                "agreedSuit": "H"
+              }
+            },
+            "convention": {
+              "blackwood": true,
+              "rkcb": true
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-example-exclusion-rkcb",
+          "expression": "1D-2C-2H-3S-4C-5D",
+          "where": [],
+          "requiresAgreement": [],
+          "alert": true,
+          "filters": {
+            "maxSuit": {
+              "D": 0
+            }
+          },
+          "meaning": "Exclusion RKCB in diamonds after the heart fit and control bid.",
+          "priority": 1060,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Exclusion RKCB in diamonds after the heart fit and control bid.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": [
+                {
+                  "suit": "D",
+                  "min": 0,
+                  "max": 0
+                }
+              ]
+            },
+            "convention": {
+              "exclusion": true,
+              "rkcb": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "exclusion RKCB"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "H"
+            },
+            "shortness": {
+              "suit": "D",
+              "exact": 0
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "type": "exclusion",
+                "agreedSuit": "H",
+                "excludedSuit": "D",
+                "interference": "D0P1"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": true,
+                "phase": "slam-pursuit",
+                "phaseNumber": 4,
+                "fitConfirmed": true,
+                "agreedSuit": "H"
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-fourth-suit-stopper",
+          "expression": "1D-2C-2H-2S-3C",
+          "where": [],
+          "requiresAgreement": [],
+          "alert": true,
+          "meaning": "Fourth-suit inquiry asks for a club stopper before notrump.",
+          "priority": 1015,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Fourth-suit inquiry asks for a club stopper before notrump.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "round": true
+            },
+            "inquiry": {
+              "type": "stopper",
+              "suit": "C"
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-explicit-fit-blackwood",
+          "expression": "*-#X-*-#X-*-4NT",
+          "where": [],
+          "requiresAgreement": [
+            "X"
+          ],
+          "alert": true,
+          "meaning": "Blackwood/RKCB after both partners explicitly bid the agreed suit.",
+          "priority": 1070,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Blackwood/RKCB after both partners explicitly bid the agreed suit.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "convention": {
+              "blackwood": true,
+              "rkcb": true
+            },
+            "slam": {
+              "interest": true,
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1",
+                "accelerated": false,
+                "type": "keycard",
+                "agreedSuit": "{{X}}"
+              }
+            },
+            "progress": {
+              "twoOverOne": {
+                "phase": "slam-pursuit",
+                "phaseNumber": 4
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-game-force-complete",
+          "expression": "1X-2Y-*-(3NT|4H|4S|5C|5D)",
+          "where": [
+            "Y<X"
+          ],
+          "requiresAgreement": [],
+          "meaning": "The 2/1 game force is satisfied when the partnership reaches a game contract.",
+          "priority": 1080,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "The 2/1 game force is satisfied when the partnership reaches a game contract.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "forcing": {
+              "game": false,
+              "round": false,
+              "source": "2/1-complete"
+            },
+            "progress": {
+              "twoOverOne": {
+                "active": false,
+                "phase": "complete",
+                "phaseNumber": 4,
+                "gameForceSatisfied": true
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-d0p1-pass",
+          "expression": "4NT-^#X-P",
+          "where": [],
+          "requiresAgreement": [],
+          "matchSuffix": true,
+          "alert": true,
+          "meaning": "D0P1 after interference: pass shows one or four key cards.",
+          "priority": 1100,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "D0P1 after interference: pass shows one or four key cards.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1"
+              },
+              "response": {
+                "convention": "D0P1",
+                "action": "pass",
+                "step": 1,
+                "keycards": [
+                  1,
+                  4
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": "personal-fgv0-5-d0p1-double",
+          "expression": "4NT-^#X-X",
+          "where": [],
+          "requiresAgreement": [],
+          "matchSuffix": true,
+          "alert": true,
+          "meaning": "D0P1 after interference: double shows zero or three key cards.",
+          "priority": 1100,
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "D0P1 after interference: double shows zero or three key cards.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "slam": {
+              "aceAsk": {
+                "active": true,
+                "method": "rkcb-1430",
+                "interference": "D0P1"
+              },
+              "response": {
+                "convention": "D0P1",
+                "action": "double",
+                "step": 2,
+                "keycards": [
+                  0,
+                  3
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "version": "0.5",
+      "sourceWorkbook": "FG Bidding System in 30 minutes (1).xlsx",
       "factSchema": {
         "id": "bridge-bidding-facts",
-        "version": "1.0",
+        "version": "1.1",
         "patchSemantics": "deep-merge",
         "deleteSentinel": {
           "$delete": true
         },
         "templates": [
           "{{M}}",
+          "{{m}}",
           "{{X}}",
           "{{Y}}",
           "{{Z}}",
           "{{W}}",
           "{{call.code}}",
-          "{{call.suit}}"
+          "{{call.level}}",
+          "{{call.strain}}",
+          "{{call.suit}}",
+          "{{seat}}",
+          "{{side}}"
         ]
       },
       "initialFacts": {
         "factLayer": {
           "schema": "bridge-bidding-facts",
-          "version": "1.0",
+          "version": "1.1",
           "merge": "deep-patch"
+        },
+        "lastBid": {
+          "seat": null,
+          "code": null,
+          "meaning": null,
+          "points": {
+            "method": "HCP+shape",
+            "min": null,
+            "max": null
+          },
+          "suitLengths": []
         },
         "agreement": {
           "aceAsk": {
@@ -8211,283 +17203,27 @@ window.BridgeSystemData = {
         },
         "fit": {
           "confirmed": false
+        },
+        "progress": {
+          "twoOverOne": {
+            "active": false,
+            "phase": "not-started",
+            "phaseNumber": 0,
+            "fitConfirmed": false,
+            "gameForceSatisfied": false
+          }
         }
       },
-      "version": "0.3",
-      "sourceWorkbook": "FG Bidding System in 30 minutes (1).xlsx",
-      "sequenceRules": [
-        {
-          "id": "personal-fgv0-3-facts-two-over-one-entry",
-          "expression": "1M-2X",
-          "where": [
-            "X<M"
-          ],
-          "requiresAgreement": [],
-          "meaning": "2/1 game force: each partner has shown at least 12 points.",
-          "priority": 940,
-          "facts": {
-            "forcing": {
-              "game": true,
-              "source": "2/1"
-            },
-            "partnership": {
-              "points": {
-                "opener": {
-                  "min": 12
-                },
-                "responder": {
-                  "min": 12
-                },
-                "combined": {
-                  "min": 24
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "personal-fgv0-3-facts-two-over-one-major-fit",
-          "expression": "1M-2X-2Y-#M",
-          "where": [
-            "X<M"
-          ],
-          "requiresAgreement": [
-            "M"
-          ],
-          "meaning": "2/1 major fit confirmed: opener has five and responder has three or more.",
-          "priority": 960,
-          "facts": {
-            "forcing": {
-              "game": true,
-              "source": "2/1"
-            },
-            "fit": {
-              "confirmed": true,
-              "suit": "{{M}}",
-              "openerLength": 5,
-              "responderLength": 3,
-              "combinedMinimum": 8
-            },
-            "partnership": {
-              "points": {
-                "opener": {
-                  "min": 12
-                },
-                "responder": {
-                  "min": 12
-                },
-                "combined": {
-                  "min": 24
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "personal-fgv0-3-facts-control-phase",
-          "expression": "1H-2C-2D-2H-2S",
-          "where": [],
-          "requiresAgreement": [
-            "H"
-          ],
-          "meaning": "2/1 phase III: spades is a first- or second-round control; skipped suits deny control.",
-          "priority": 980,
-          "alert": true,
-          "facts": {
-            "forcing": {
-              "game": true,
-              "source": "2/1"
-            },
-            "fit": {
-              "confirmed": true,
-              "suit": "H",
-              "openerLength": 5,
-              "responderLength": 3,
-              "combinedMinimum": 8
-            },
-            "slam": {
-              "control": {
-                "active": true,
-                "suit": "S",
-                "round": "first-or-second",
-                "elimination": {
-                  "method": "ascending-suit-elimination",
-                  "skippedSuitDeniesControl": true
-                }
-              }
-            },
-            "partnership": {
-              "points": {
-                "opener": {
-                  "min": 12
-                },
-                "responder": {
-                  "min": 12
-                },
-                "combined": {
-                  "min": 24
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "personal-fgv0-3-facts-accelerated-rkcb",
-          "expression": "1H-2C-2D-2H-2S-2NT",
-          "where": [],
-          "requiresAgreement": [
-            "H"
-          ],
-          "meaning": "Accelerated RKCB after a confirmed heart fit and one control bid.",
-          "priority": 1000,
-          "alert": true,
-          "facts": {
-            "slam": {
-              "interest": true,
-              "aceAsk": {
-                "active": true,
-                "method": "rkcb-1430",
-                "type": "keycard",
-                "accelerated": true,
-                "agreedSuit": "H",
-                "interference": "D0P1"
-              }
-            }
-          }
-        },
-        {
-          "id": "personal-fgv0-3-facts-splinter",
-          "expression": "1D-2C-2H-3S",
-          "where": [],
-          "requiresAgreement": [],
-          "meaning": "2/1 splinter: heart support with zero or one spade.",
-          "priority": 990,
-          "alert": true,
-          "facts": {
-            "forcing": {
-              "game": true,
-              "source": "2/1"
-            },
-            "fit": {
-              "confirmed": true,
-              "suit": "H",
-              "responderLength": 3,
-              "combinedMinimum": 8
-            },
-            "shortness": {
-              "suit": "S",
-              "min": 0,
-              "max": 1
-            },
-            "slam": {
-              "interest": true
-            }
-          }
-        },
-        {
-          "id": "personal-fgv0-3-facts-exclusion-rkcb",
-          "expression": "1D-2C-2H-3S-4C-5D",
-          "where": [],
-          "requiresAgreement": [],
-          "meaning": "Exclusion RKCB in diamonds, asking for key cards outside the diamond void.",
-          "priority": 1010,
-          "alert": true,
-          "facts": {
-            "fit": {
-              "confirmed": true,
-              "suit": "H"
-            },
-            "shortness": {
-              "suit": "D",
-              "exact": 0
-            },
-            "slam": {
-              "aceAsk": {
-                "active": true,
-                "method": "rkcb-1430",
-                "type": "exclusion",
-                "agreedSuit": "H",
-                "excludedSuit": "D",
-                "interference": "D0P1"
-              }
-            }
-          }
-        },
-        {
-          "id": "personal-fgv0-3-facts-fourth-suit-stopper",
-          "expression": "1D-2C-2H-2S-3C",
-          "where": [],
-          "requiresAgreement": [],
-          "meaning": "Fourth-suit inquiry asks for a club stopper before notrump.",
-          "priority": 970,
-          "alert": true,
-          "facts": {
-            "forcing": {
-              "round": true
-            },
-            "inquiry": {
-              "type": "stopper",
-              "suit": "C"
-            }
-          }
-        },
-        {
-          "id": "personal-fgv0-3-d0p1-pass",
-          "expression": "4NT-^#X-P",
-          "where": [],
-          "requiresAgreement": [],
-          "matchSuffix": true,
-          "alert": true,
-          "meaning": "D0P1 after interference: pass shows one or four key cards.",
-          "priority": 1100,
-          "facts": {
-            "slam": {
-              "aceAsk": {
-                "active": true,
-                "method": "rkcb-1430",
-                "interference": "D0P1"
-              },
-              "response": {
-                "convention": "D0P1",
-                "action": "pass",
-                "step": 1,
-                "keycards": [
-                  1,
-                  4
-                ]
-              }
-            }
-          }
-        },
-        {
-          "id": "personal-fgv0-3-d0p1-double",
-          "expression": "4NT-^#X-X",
-          "where": [],
-          "requiresAgreement": [],
-          "matchSuffix": true,
-          "alert": true,
-          "meaning": "D0P1 after interference: double shows zero or three key cards.",
-          "priority": 1100,
-          "facts": {
-            "slam": {
-              "aceAsk": {
-                "active": true,
-                "method": "rkcb-1430",
-                "interference": "D0P1"
-              },
-              "response": {
-                "convention": "D0P1",
-                "action": "double",
-                "step": 2,
-                "keycards": [
-                  0,
-                  3
-                ]
-              }
-            }
-          }
-        }
-      ]
+      "alertPolicy": {
+        "categories": [
+          "2/1 entry",
+          "splinter",
+          "delayed splinter",
+          "Blackwood/RKCB",
+          "Exclusion RKCB"
+        ],
+        "oneNotrumpResponses": "Alert every direct response to 1NT except 4NT, 5NT, 6NT, and 7NT."
+      }
     }
   ]
 };

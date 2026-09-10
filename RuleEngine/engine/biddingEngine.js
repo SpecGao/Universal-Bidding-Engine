@@ -917,7 +917,23 @@
     return Number.isNaN(parsed) ? defaultVal : parsed;
   }
 
-  function passesFilters(transitionFilters, handFilter, seat, systemSeat) {
+  function suitConstraintFor(map, suit, bindings, mode, fallback) {
+    let value = fallback;
+    let matched = false;
+    for (const [token, rawValue] of Object.entries(map || {})) {
+      const resolvedSuit = resolveSuitToken(token, bindings || {});
+      if (resolvedSuit !== suit) continue;
+      const numeric = Number(rawValue);
+      if (Number.isNaN(numeric)) continue;
+      value = !matched
+        ? numeric
+        : mode === "min" ? Math.max(value, numeric) : Math.min(value, numeric);
+      matched = true;
+    }
+    return value;
+  }
+
+  function passesFilters(transitionFilters, handFilter, seat, systemSeat, symbolBindings) {
     const f = transitionFilters || {};
     if (!handFilter) handFilter = handFilterDefaults();
 
@@ -931,13 +947,13 @@
     for (const suit of ["C", "D", "H", "S"]) {
       const handMin = Number(handFilter.minSuit?.[suit] || 0);
       const handMax = Number(handFilter.maxSuit?.[suit] == null ? 13 : handFilter.maxSuit[suit]);
-      const ruleMin = Number(f.minSuit?.[suit] || 0);
-      const ruleMax = Number(f.maxSuit?.[suit] == null ? 13 : f.maxSuit[suit]);
+      const ruleMin = suitConstraintFor(f.minSuit, suit, symbolBindings, "min", 0);
+      const ruleMax = suitConstraintFor(f.maxSuit, suit, symbolBindings, "max", 13);
       if (handMax < ruleMin || handMin > ruleMax) return false;
     }
     if (f.controlsMustHave) {
-      for (const suit of Object.keys(f.controlsMustHave)) {
-        const required = Number(f.controlsMustHave[suit] || 0);
+      for (const suit of ["C", "D", "H", "S"]) {
+        const required = suitConstraintFor(f.controlsMustHave, suit, symbolBindings, "min", 0);
         if (Number(handFilter.controls[suit] || 0) < required) return false;
       }
     }
@@ -1348,8 +1364,8 @@
       return true;
     }
 
-    _sequenceRulePasses(rule, handFilter, seat, auctionCalls, callIndex) {
-      if (!passesFilters(rule.filters, handFilter, seat, seat)) return false;
+    _sequenceRulePasses(rule, handFilter, seat, auctionCalls, callIndex, symbolBindings) {
+      if (!passesFilters(rule.filters, handFilter, seat, seat, symbolBindings)) return false;
       const role = rule.filters && rule.filters.auctionRole;
       if (role && role !== "contextual" && !matchesAuctionRole(rule.filters, auctionCalls, callIndex)) return false;
       return true;
@@ -1383,6 +1399,7 @@
             acceptedMatch = result.matches.find((match) => (
               match.endIndex === callSet.length - 1
               && this._sequenceAgreementPasses(rule, match.bindings, auctionCalls, dealer, side, index)
+              && this._sequenceRulePasses(rule, handFilter, frame.seat, auctionCalls, index, match.bindings)
             ));
             if (acceptedMatch) break;
           }
@@ -1443,6 +1460,14 @@
               dealer,
               side,
               auctionCalls.length - 1
+            )
+            && this._sequenceRulePasses(
+              rule,
+              handFilter,
+              nextSeat,
+              auctionCalls,
+              auctionCalls.length,
+              bindings
             )
           ));
           if (!acceptedBindings.length) continue;
@@ -1507,7 +1532,7 @@
           if (!matchesAuctionRole(child.filters, auctionCalls, callIndex)) {
             continue;
           }
-          if (!passesFilters(child.filters, handFilter, seat, seat)) {
+          if (!passesFilters(child.filters, handFilter, seat, seat, learnedBindings)) {
             continue;
           }
 
@@ -1574,7 +1599,6 @@
         for (const child of nodeChildren) {
           if (!child.trigger) continue;
           if (!matchesAuctionRole(child.filters, auctionCalls, auctionCalls.length)) continue;
-          if (!passesFilters(child.filters, handFilter, nextSeat, nextSeat)) continue;
           for (const legalCode of legalCalls) {
             const learnedBindings = matchTreeTrigger(
               child.trigger,
@@ -1582,6 +1606,7 @@
               path.context && path.context.symbolBindings
             );
             if (!learnedBindings) continue;
+            if (!passesFilters(child.filters, handFilter, nextSeat, nextSeat, learnedBindings)) continue;
             const suggestionContext = cloneContext(path.context);
             suggestionContext.symbolBindings = learnedBindings;
             const factDelta = resolveFacts(child.facts, suggestionContext, { call: parseBid(legalCode), seat: nextSeat });

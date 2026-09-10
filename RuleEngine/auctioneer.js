@@ -537,7 +537,7 @@
 
   async function loadSystemIndex() {
     try {
-      const response = await fetch("Customization/system-index.json");
+      const response = await fetch("Customization/loadable/system-index.json");
       if (!response.ok) throw new Error("index fetch failed");
       const list = await response.json();
       state.systems = list.systems || [];
