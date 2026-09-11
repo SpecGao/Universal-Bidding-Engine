@@ -1209,11 +1209,11 @@ window.BridgeSystemData = {
       }
     },
     {
-      "schemaVersion": "1.4",
+      "schemaVersion": "1.5",
       "systemId": "two-over-one",
       "systemName": "2/1 Game Forcing",
-      "description": "A practical 2/1 Game Forcing map tuned for teaching and automation with explicit phase transitions.",
-      "notes": "Conventions are modeled as bid-triggered transitions. The persistent fact layer records 2/1 progression from entry through strain selection, fit confirmation, controls, slam pursuit, and completion at game.",
+      "description": "A practical, documented 2/1 Game Forcing system using five-card majors, a 15–17 1NT, forcing 1NT responses to major openings, inverted minor-style raises, and explicit auction-progress facts.",
+      "notes": "Ranges are HCP unless an explanation says otherwise. Core agreements follow Bridge World Standard 2017 and ACBL teaching references; judgment, vulnerability, seat, and partnership style can alter marginal opening and preempt decisions. Artificial or contextual calls explicitly carry an unrestricted 0–40 HCP range and no natural suit-length promise.",
       "sequenceRules": [
         {
           "id": "two-over-one-learned-sequence",
@@ -1221,8 +1221,18 @@ window.BridgeSystemData = {
           "where": [
             "Y<X"
           ],
-          "meaning": "2/1 game forcing: a non-jump two-level response in a new, lower-ranking suit.",
-          "priority": 110
+          "meaning": "2/1 game forcing: an uncontested, unpassed-hand non-jump response in a new lower-ranking suit, showing 12+ HCP and normally 4+ cards (1♠–2♥ promises 5+ hearts).",
+          "priority": 110,
+          "filters": {
+            "minHcp": 12,
+            "maxHcp": 40,
+            "minSuit": {
+              "Y": 4
+            },
+            "maxSuit": {
+              "Y": 13
+            }
+          }
         },
         {
           "id": "two-over-one-facts-entry",
@@ -1233,21 +1243,33 @@ window.BridgeSystemData = {
           "requiresAgreement": [],
           "filters": {
             "minHcp": 12,
-            "maxHcp": 40
+            "maxHcp": 40,
+            "minSuit": {
+              "Y": 4
+            },
+            "maxSuit": {
+              "Y": 13
+            }
           },
-          "meaning": "2/1 Phase I entry: responder shows 12+ points and creates a game force.",
+          "meaning": "2/1 game forcing: an uncontested, unpassed-hand non-jump response in a new lower-ranking suit, showing 12+ HCP and normally 4+ cards (1♠–2♥ promises 5+ hearts).",
           "priority": 940,
           "facts": {
             "lastBid": {
               "seat": "{{seat}}",
               "code": "{{call.code}}",
-              "meaning": "2/1 Phase I entry: responder shows 12+ points and creates a game force.",
+              "meaning": "2/1 game forcing: an uncontested, unpassed-hand non-jump response in a new lower-ranking suit, showing 12+ HCP and normally 4+ cards (1♠–2♥ promises 5+ hearts).",
               "points": {
                 "method": "HCP",
                 "min": 12,
                 "max": 40
               },
-              "suitLengths": []
+              "suitLengths": [
+                {
+                  "suit": "{{Y}}",
+                  "min": 4,
+                  "max": 13
+                }
+              ]
             },
             "convention": {
               "twoOverOne": true
@@ -1364,6 +1386,21 @@ window.BridgeSystemData = {
           ],
           "meaning": "2/1 Phase II confirms a fit in the opening suit.",
           "priority": 960,
+          "generated": {
+            "type": "control-bids",
+            "agreedSuit": "{{X}}",
+            "suits": [
+              "C",
+              "D",
+              "H",
+              "S"
+            ],
+            "style": "first-or-second-round",
+            "inferSkipped": true,
+            "source": "2/1 explicit agreement in the opening suit",
+            "description": "After the opening suit is agreed, side-suit calls may show controls for slam exploration.",
+            "meaningTemplate": "{{bid}} shows {{styleText}} control in {{suitName}} with {{agreedSuitName}} agreed as trumps.{{skipText}}"
+          },
           "facts": {
             "lastBid": {
               "seat": "{{seat}}",
@@ -1403,6 +1440,21 @@ window.BridgeSystemData = {
           ],
           "meaning": "2/1 Phase II confirms a fit in responder's suit.",
           "priority": 960,
+          "generated": {
+            "type": "control-bids",
+            "agreedSuit": "{{Y}}",
+            "suits": [
+              "C",
+              "D",
+              "H",
+              "S"
+            ],
+            "style": "first-or-second-round",
+            "inferSkipped": true,
+            "source": "2/1 explicit agreement in responder's suit",
+            "description": "After responder's suit is agreed, side-suit calls may show controls for slam exploration.",
+            "meaningTemplate": "{{bid}} shows {{styleText}} control in {{suitName}} with {{agreedSuitName}} agreed as trumps.{{skipText}}"
+          },
           "facts": {
             "lastBid": {
               "seat": "{{seat}}",
@@ -1442,6 +1494,21 @@ window.BridgeSystemData = {
           ],
           "meaning": "2/1 Phase II confirms a fit in opener's second suit.",
           "priority": 960,
+          "generated": {
+            "type": "control-bids",
+            "agreedSuit": "{{Z}}",
+            "suits": [
+              "C",
+              "D",
+              "H",
+              "S"
+            ],
+            "style": "first-or-second-round",
+            "inferSkipped": true,
+            "source": "2/1 explicit agreement in opener's second suit",
+            "description": "After opener's second suit is agreed, side-suit calls may show controls for slam exploration.",
+            "meaningTemplate": "{{bid}} shows {{styleText}} control in {{suitName}} with {{agreedSuitName}} agreed as trumps.{{skipText}}"
+          },
           "facts": {
             "lastBid": {
               "seat": "{{seat}}",
@@ -1467,6 +1534,132 @@ window.BridgeSystemData = {
                 "agreedSuit": "{{Z}}",
                 "gameForceSatisfied": false
               }
+            }
+          }
+        },
+        {
+          "id": "two-over-one-sample-splinter-heart-fit",
+          "expression": "1H-(3S|4C|4D)",
+          "meaning": "Splinter raise: hearts are agreed; responder shows game-forcing support and zero or one card in the bid suit. Control bidding is now available.",
+          "priority": 965,
+          "alert": true,
+          "generated": {
+            "type": "control-bids",
+            "agreedSuit": "H",
+            "suits": [
+              "C",
+              "D",
+              "H",
+              "S"
+            ],
+            "style": "first-or-second-round",
+            "inferSkipped": true,
+            "source": "splinter raise",
+            "knownControls": [
+              {
+                "suit": "{{call.suit}}",
+                "seat": "{{seat}}",
+                "round": "first-or-second-round",
+                "source": "splinter shortness",
+                "code": "{{call.code}}"
+              }
+            ],
+            "description": "The splinter suit is already known to be controlled; subsequent side-suit bids show controls upward.",
+            "meaningTemplate": "{{bid}} shows {{styleText}} control in {{suitName}} with {{agreedSuitName}} agreed as trumps.{{skipText}}"
+          },
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Splinter raise: hearts are agreed; responder shows game-forcing support and zero or one card in the bid suit.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "convention": {
+              "splinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "H"
+            },
+            "shortness": {
+              "suit": "{{call.suit}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
+            }
+          }
+        },
+        {
+          "id": "two-over-one-sample-splinter-spade-fit",
+          "expression": "1S-(4C|4D|4H)",
+          "meaning": "Splinter raise: spades are agreed; responder shows game-forcing support and zero or one card in the bid suit. Control bidding is now available.",
+          "priority": 965,
+          "alert": true,
+          "generated": {
+            "type": "control-bids",
+            "agreedSuit": "S",
+            "suits": [
+              "C",
+              "D",
+              "H",
+              "S"
+            ],
+            "style": "first-or-second-round",
+            "inferSkipped": true,
+            "source": "splinter raise",
+            "knownControls": [
+              {
+                "suit": "{{call.suit}}",
+                "seat": "{{seat}}",
+                "round": "first-or-second-round",
+                "source": "splinter shortness",
+                "code": "{{call.code}}"
+              }
+            ],
+            "description": "The splinter suit is already known to be controlled; subsequent side-suit bids show controls upward.",
+            "meaningTemplate": "{{bid}} shows {{styleText}} control in {{suitName}} with {{agreedSuitName}} agreed as trumps.{{skipText}}"
+          },
+          "facts": {
+            "lastBid": {
+              "seat": "{{seat}}",
+              "code": "{{call.code}}",
+              "meaning": "Splinter raise: spades are agreed; responder shows game-forcing support and zero or one card in the bid suit.",
+              "points": {
+                "method": "HCP+shape",
+                "min": null,
+                "max": null
+              },
+              "suitLengths": []
+            },
+            "convention": {
+              "splinter": true
+            },
+            "forcing": {
+              "game": true,
+              "source": "splinter"
+            },
+            "fit": {
+              "confirmed": true,
+              "suit": "S"
+            },
+            "shortness": {
+              "suit": "{{call.suit}}",
+              "min": 0,
+              "max": 1
+            },
+            "slam": {
+              "interest": true
             }
           }
         },
@@ -1632,6 +1825,7 @@ window.BridgeSystemData = {
           ],
           "meaning": "Blackwood / key-card ace ask after both partners explicitly bid the same suit.",
           "priority": 980,
+          "clearControl": true,
           "facts": {
             "lastBid": {
               "seat": "{{seat}}",
@@ -1676,6 +1870,7 @@ window.BridgeSystemData = {
           "requiresAgreement": [],
           "meaning": "The 2/1 game force is satisfied when the partnership reaches a game contract.",
           "priority": 990,
+          "clearControl": true,
           "facts": {
             "lastBid": {
               "seat": "{{seat}}",
@@ -1768,7 +1963,7 @@ window.BridgeSystemData = {
             {
               "id": "o1C",
               "trigger": "1C",
-              "meaning": "Natural 1♣: 12–21 aHCP and 3+ clubs (better-minor treatment).",
+              "meaning": "Natural 1♣ opening: 12+ points (normally 12–21 HCP) and 3+ clubs. Open 1♣ with 3–3 minors; with longer unequal minors, open the longer minor.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 12,
@@ -1784,51 +1979,325 @@ window.BridgeSystemData = {
                 {
                   "id": "o1C-1D",
                   "trigger": "1D",
-                  "meaning": "Responder 4+ diamonds response (possibly weak-to-mid range).",
+                  "meaning": "1♦ response: 6+ HCP and 4+ diamonds; natural and forcing for one round by an unpassed responder.",
                   "children": [
                     {
                       "id": "o1C-1D-1NT",
                       "trigger": "1NT",
-                      "meaning": "Light balanced hand (usually no game-forcing interest)."
+                      "meaning": "Opener's 1NT rebid: 12–14 HCP and a balanced hand, denying a four-card major that could have been bid at the one level.",
+                      "filters": {
+                        "minHcp": 12,
+                        "maxHcp": 14,
+                        "minSuit": {
+                          "C": 3,
+                          "D": 2,
+                          "H": 2,
+                          "S": 2
+                        },
+                        "maxSuit": {
+                          "C": 5,
+                          "D": 5,
+                          "H": 3,
+                          "S": 3
+                        }
+                      },
+                      "facts": {
+                        "rebid": {
+                          "naturalNotrump": true,
+                          "balanced": true
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener's 1NT rebid: 12–14 HCP and a balanced hand, denying a four-card major that could have been bid at the one level.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 12,
+                            "max": 14
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 3,
+                              "max": 5
+                            },
+                            {
+                              "suit": "D",
+                              "min": 2,
+                              "max": 5
+                            },
+                            {
+                              "suit": "H",
+                              "min": 2,
+                              "max": 3
+                            },
+                            {
+                              "suit": "S",
+                              "min": 2,
+                              "max": 3
+                            }
+                          ]
+                        }
+                      }
                     },
                     {
                       "id": "o1C-1D-2D",
                       "trigger": "2D",
-                      "meaning": "Strong response to a club opening; may be forcing depending on point count."
+                      "meaning": "Opener's simple diamond raise: usually 12–15 HCP, 3+ clubs from the opening, and 4+ diamond support; non-forcing.",
+                      "filters": {
+                        "minHcp": 12,
+                        "maxHcp": 15,
+                        "minSuit": {
+                          "C": 3,
+                          "D": 4
+                        },
+                        "maxSuit": {
+                          "C": 13,
+                          "D": 13
+                        }
+                      },
+                      "facts": {
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "D",
+                          "openerLength": 4
+                        },
+                        "forcing": {
+                          "game": false,
+                          "round": false
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Opener's simple diamond raise: usually 12–15 HCP, 3+ clubs from the opening, and 4+ diamond support; non-forcing.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 12,
+                            "max": 15
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 3,
+                              "max": 13
+                            },
+                            {
+                              "suit": "D",
+                              "min": 4,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      }
                     }
-                  ]
+                  ],
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "D": 4
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
+                  },
+                  "facts": {
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "one-over-one"
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "D"
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♦ response: 6+ HCP and 4+ diamonds; natural and forcing for one round by an unpassed responder.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "o1C-1H",
                   "trigger": "1H",
-                  "meaning": "4+ hearts, usually not strong."
+                  "meaning": "1♥ response: 6+ HCP and 4+ hearts; natural and forcing for one round by an unpassed responder.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "H": 4
+                    },
+                    "maxSuit": {
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "one-over-one"
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "H"
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♥ response: 6+ HCP and 4+ hearts; natural and forcing for one round by an unpassed responder.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "o1C-1S",
                   "trigger": "1S",
-                  "meaning": "4+ spades, usually not forcing."
+                  "meaning": "1♠ response: 6+ HCP and 4+ spades; natural and forcing for one round by an unpassed responder.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "S": 4
+                    },
+                    "maxSuit": {
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "one-over-one"
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "S"
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♠ response: 6+ HCP and 4+ spades; natural and forcing for one round by an unpassed responder.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "o1C-1NT",
                   "trigger": "1NT",
-                  "meaning": "Natural balanced response to a 1C opening."
-                },
-                {
-                  "id": "o1C-2C",
-                  "trigger": "2C",
-                  "meaning": "Club raise or strong natural support; it is not a 2/1 game-force response because it is not a new lower-ranking suit.",
-                  "facts": {
-                    "convention": {
-                      "twoOverOne": false
+                  "meaning": "Natural 1NT response to 1♣: 6–10 HCP, balanced, non-forcing, and normally denying a four-card major.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 10,
+                    "minSuit": {
+                      "C": 2,
+                      "D": 2,
+                      "H": 2,
+                      "S": 2
                     },
+                    "maxSuit": {
+                      "C": 5,
+                      "D": 5,
+                      "H": 3,
+                      "S": 3
+                    }
+                  },
+                  "facts": {
                     "forcing": {
                       "game": false,
                       "round": false
                     },
+                    "response": {
+                      "naturalNotrump": true,
+                      "balanced": true
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 1NT response to 1♣: 6–10 HCP, balanced, non-forcing, and normally denying a four-card major.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 2,
+                          "max": 5
+                        },
+                        {
+                          "suit": "D",
+                          "min": 2,
+                          "max": 5
+                        },
+                        {
+                          "suit": "H",
+                          "min": 2,
+                          "max": 3
+                        },
+                        {
+                          "suit": "S",
+                          "min": 2,
+                          "max": 3
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "o1C-2C",
+                  "trigger": "2C",
+                  "meaning": "Inverted club raise: 10+ HCP, 5+ clubs, no four-card major, and forcing at least through 3♣; it is a raise, not a 2/1 new-suit game force.",
+                  "facts": {
+                    "convention": {
+                      "twoOverOne": false,
+                      "invertedMinor": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "throughLevel": "3C",
+                      "source": "inverted minor"
+                    },
                     "fit": {
                       "confirmed": true,
                       "suit": "C",
-                      "responderLength": 4
+                      "responderLength": 5
                     },
                     "progress": {
                       "twoOverOne": {
@@ -1838,15 +2307,78 @@ window.BridgeSystemData = {
                         "fitConfirmed": false,
                         "gameForceSatisfied": false
                       }
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Inverted club raise: 10+ HCP, 5+ clubs, no four-card major, and forcing at least through 3♣; it is a raise, not a 2/1 new-suit game force.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 10,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 5,
+                          "max": 13
+                        },
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 3
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 3
+                        }
+                      ]
+                    }
+                  },
+                  "filters": {
+                    "minHcp": 10,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 5
+                    },
+                    "maxSuit": {
+                      "C": 13,
+                      "H": 3,
+                      "S": 3
                     }
                   }
                 }
-              ]
+              ],
+              "facts": {
+                "opening": {
+                  "natural": true,
+                  "strain": "C",
+                  "betterMinor": true
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1♣ opening: 12+ points (normally 12–21 HCP) and 3+ clubs. Open 1♣ with 3–3 minors; with longer unequal minors, open the longer minor.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 12,
+                    "max": 21
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 3,
+                      "max": 13
+                    }
+                  ]
+                }
+              }
             },
             {
               "id": "o1D",
               "trigger": "1D",
-              "meaning": "Natural 1♦: 12–21 aHCP and 3+ diamonds (better-minor treatment).",
+              "meaning": "Natural 1♦ opening: 12+ points (normally 12–21 HCP) and 3+ diamonds. It normally shows 4+ diamonds, but may be three cards in a 4–4–3–2 hand with both majors.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 12,
@@ -1862,22 +2394,156 @@ window.BridgeSystemData = {
                 {
                   "id": "o1D-1H",
                   "trigger": "1H",
-                  "meaning": "4+ hearts."
+                  "meaning": "1♥ response: 6+ HCP and 4+ hearts; natural and forcing for one round by an unpassed responder.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "H": 4
+                    },
+                    "maxSuit": {
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "one-over-one"
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "H"
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♥ response: 6+ HCP and 4+ hearts; natural and forcing for one round by an unpassed responder.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "o1D-1S",
                   "trigger": "1S",
-                  "meaning": "4+ spades."
+                  "meaning": "1♠ response: 6+ HCP and 4+ spades; natural and forcing for one round by an unpassed responder.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "S": 4
+                    },
+                    "maxSuit": {
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "one-over-one"
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "S"
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♠ response: 6+ HCP and 4+ spades; natural and forcing for one round by an unpassed responder.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "o1D-1NT",
                   "trigger": "1NT",
-                  "meaning": "Balanced hand, non-forcing in many partnerships."
+                  "meaning": "Natural 1NT response to 1♦: 6–10 HCP, balanced, non-forcing, and normally denying a four-card major.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 10,
+                    "minSuit": {
+                      "C": 2,
+                      "D": 2,
+                      "H": 2,
+                      "S": 2
+                    },
+                    "maxSuit": {
+                      "C": 5,
+                      "D": 5,
+                      "H": 3,
+                      "S": 3
+                    }
+                  },
+                  "facts": {
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "response": {
+                      "naturalNotrump": true,
+                      "balanced": true
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Natural 1NT response to 1♦: 6–10 HCP, balanced, non-forcing, and normally denying a four-card major.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 2,
+                          "max": 5
+                        },
+                        {
+                          "suit": "D",
+                          "min": 2,
+                          "max": 5
+                        },
+                        {
+                          "suit": "H",
+                          "min": 2,
+                          "max": 3
+                        },
+                        {
+                          "suit": "S",
+                          "min": 2,
+                          "max": 3
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "o1D-2D",
                   "trigger": "2D",
-                  "meaning": "Diamond raise or support sequence; it is not a 2/1 game-force response.",
+                  "meaning": "Inverted diamond raise: 10+ HCP, 4+ diamonds, no four-card major, and forcing at least through 3♦; it is a raise, not a 2/1 new-suit game force.",
                   "generated": {
                     "type": "control-bids",
                     "agreedSuit": "D",
@@ -1893,28 +2559,157 @@ window.BridgeSystemData = {
                     {
                       "id": "o1D-2D-3C",
                       "trigger": "3C",
-                      "meaning": "Feature suit rebid in diamonds context.",
+                      "meaning": "After an inverted diamond raise, 3♣ shows club values or a club stopper while keeping 3NT in view; it does not promise natural club length.",
                       "children": [
                         {
                           "id": "o1D-2D-3C-4NT",
                           "trigger": "4NT",
-                          "meaning": "Key-card query. Respond in 5C/5D/5H/5S or as your partnership variant."
+                          "meaning": "Roman Key Card Blackwood in the agreed diamond fit; responder has slam-going values, and 4NT asks for key cards rather than showing a natural notrump range.",
+                          "filters": {
+                            "minHcp": 15,
+                            "maxHcp": 40,
+                            "minSuit": {
+                              "D": 4
+                            },
+                            "maxSuit": {
+                              "D": 13
+                            }
+                          },
+                          "facts": {
+                            "convention": {
+                              "blackwood": true,
+                              "rkcb": true
+                            },
+                            "fit": {
+                              "confirmed": true,
+                              "suit": "D"
+                            },
+                            "slam": {
+                              "interest": true,
+                              "aceAsk": {
+                                "active": true,
+                                "method": "rkcb-1430"
+                              }
+                            },
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Roman Key Card Blackwood in the agreed diamond fit; responder has slam-going values, and 4NT asks for key cards rather than showing a natural notrump range.",
+                              "points": {
+                                "method": "HCP",
+                                "min": 15,
+                                "max": 40
+                              },
+                              "suitLengths": [
+                                {
+                                  "suit": "D",
+                                  "min": 4,
+                                  "max": 13
+                                }
+                              ]
+                            }
+                          }
                         }
-                      ]
+                      ],
+                      "filters": {
+                        "minHcp": 12,
+                        "maxHcp": 21,
+                        "minSuit": {
+                          "D": 3
+                        },
+                        "maxSuit": {
+                          "D": 13
+                        }
+                      },
+                      "facts": {
+                        "forcing": {
+                          "game": false,
+                          "round": true,
+                          "source": "inverted minor continuation"
+                        },
+                        "stopper": {
+                          "suit": "C",
+                          "shown": true
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "After an inverted diamond raise, 3♣ shows club values or a club stopper while keeping 3NT in view; it does not promise natural club length.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 12,
+                            "max": 21
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "D",
+                              "min": 3,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      }
                     },
                     {
                       "id": "o1D-2D-4NT",
                       "trigger": "4NT",
-                      "meaning": "Ace/king check path after control or pre-control sequence."
+                      "meaning": "Roman Key Card Blackwood by opener with an agreed diamond fit and slam interest; 4NT is an ace/key-card ask, not a natural notrump bid.",
+                      "filters": {
+                        "minHcp": 18,
+                        "maxHcp": 21,
+                        "minSuit": {
+                          "D": 3
+                        },
+                        "maxSuit": {
+                          "D": 13
+                        }
+                      },
+                      "facts": {
+                        "convention": {
+                          "blackwood": true,
+                          "rkcb": true
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "D"
+                        },
+                        "slam": {
+                          "interest": true,
+                          "aceAsk": {
+                            "active": true,
+                            "method": "rkcb-1430"
+                          }
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Roman Key Card Blackwood by opener with an agreed diamond fit and slam interest; 4NT is an ace/key-card ask, not a natural notrump bid.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 18,
+                            "max": 21
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "D",
+                              "min": 3,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      }
                     }
                   ],
                   "facts": {
                     "convention": {
-                      "twoOverOne": false
+                      "twoOverOne": false,
+                      "invertedMinor": true
                     },
                     "forcing": {
                       "game": false,
-                      "round": false
+                      "round": true,
+                      "throughLevel": "3D",
+                      "source": "inverted minor"
                     },
                     "fit": {
                       "confirmed": true,
@@ -1929,6 +2724,45 @@ window.BridgeSystemData = {
                         "fitConfirmed": false,
                         "gameForceSatisfied": false
                       }
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Inverted diamond raise: 10+ HCP, 4+ diamonds, no four-card major, and forcing at least through 3♦; it is a raise, not a 2/1 new-suit game force.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 10,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 4,
+                          "max": 13
+                        },
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 3
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 3
+                        }
+                      ]
+                    }
+                  },
+                  "filters": {
+                    "minHcp": 10,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "D": 4
+                    },
+                    "maxSuit": {
+                      "D": 13,
+                      "H": 3,
+                      "S": 3
                     }
                   }
                 },
@@ -1936,11 +2770,17 @@ window.BridgeSystemData = {
                   "id": "o1D-2C-21",
                   "trigger": "2C",
                   "children": [],
-                  "meaning": "2/1 game force in clubs: after an uncontested 1♦ opening, this non-jump new-suit response has highest priority when eligible.",
+                  "meaning": "1♦–2♣: 12+ HCP and 4+ clubs; an uncontested, unpassed-hand 2/1 response that forces to game.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 4
+                    },
+                    "maxSuit": {
+                      "C": 13
+                    }
                   },
                   "facts": {
                     "convention": {
@@ -1974,15 +2814,61 @@ window.BridgeSystemData = {
                           "min": 24
                         }
                       }
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "C",
+                      "minimumLength": 4
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♦–2♣: 12+ HCP and 4+ clubs; an uncontested, unpassed-hand 2/1 response that forces to game.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
                     }
                   }
                 }
-              ]
+              ],
+              "facts": {
+                "opening": {
+                  "natural": true,
+                  "strain": "D",
+                  "betterMinor": true
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1♦ opening: 12+ points (normally 12–21 HCP) and 3+ diamonds. It normally shows 4+ diamonds, but may be three cards in a 4–4–3–2 hand with both majors.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 12,
+                    "max": 21
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "D",
+                      "min": 3,
+                      "max": 13
+                    }
+                  ]
+                }
+              }
             },
             {
               "id": "o1H",
               "trigger": "1H",
-              "meaning": "Natural 1♥: 12–21 aHCP and 5+ hearts.",
+              "meaning": "Natural 1♥ opening: 12+ points and 5+ hearts (normally 12–21 HCP); use judgment with distributional borderline hands.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 12,
@@ -1998,27 +2884,106 @@ window.BridgeSystemData = {
                 {
                   "id": "o1H-1NT",
                   "trigger": "1NT",
-                  "meaning": "6–9 aHCP, no 4-card spade support."
+                  "meaning": "Forcing 1NT response to 1♥: 6–12 HCP, forcing one round by an unpassed hand, and normally denying four spades; it may conceal three-card heart support with invitational values.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 12,
+                    "minSuit": {},
+                    "maxSuit": {
+                      "H": 3,
+                      "S": 3
+                    }
+                  },
+                  "facts": {
+                    "convention": {
+                      "forcingOneNotrump": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "forcing 1NT"
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Forcing 1NT response to 1♥: 6–12 HCP, forcing one round by an unpassed hand, and normally denying four spades; it may conceal three-card heart support with invitational values.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 12
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 0,
+                          "max": 3
+                        },
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 3
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "o1H-1S",
                   "trigger": "1S",
-                  "meaning": "4+ spades; response not usually forcing."
+                  "meaning": "1♠ response: 6+ HCP and 4+ spades; natural and forcing for one round by an unpassed responder.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "S": 4
+                    },
+                    "maxSuit": {
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "one-over-one"
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "S"
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♠ response: 6+ HCP and 4+ spades; natural and forcing for one round by an unpassed responder.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "o1H-2H",
                   "trigger": "2H",
-                  "meaning": "Heart raise or support sequence; it is not a 2/1 game-force response.",
+                  "meaning": "Simple heart raise: 6–9 HCP and 3+ hearts; constructive but non-forcing and not a 2/1 response.",
                   "children": [
                     {
                       "id": "o1H-2H-2NT",
                       "trigger": "2NT",
-                      "meaning": "In-between hand with no sure game force.",
+                      "meaning": "2NT is a general game try after the simple heart raise: usually 15–17 HCP with 5+ hearts, forcing one round but not to game.",
                       "facts": {
                         "forcing": {
                           "game": false,
                           "round": true,
-                          "source": "invitation"
+                          "source": "major-suit game try"
                         },
                         "progress": {
                           "twoOverOne": {
@@ -2026,46 +2991,305 @@ window.BridgeSystemData = {
                             "phase": "not-started",
                             "phaseNumber": 0
                           }
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "H"
+                        },
+                        "gameTry": {
+                          "type": "general"
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "2NT is a general game try after the simple heart raise: usually 15–17 HCP with 5+ hearts, forcing one round but not to game.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "H",
+                              "min": 5,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      },
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "H": 5
+                        },
+                        "maxSuit": {
+                          "H": 13
                         }
                       }
                     },
                     {
                       "id": "o1H-2H-3H",
                       "trigger": "3H",
-                      "meaning": "Game-forcing continuation where control-phase can start for heart fit bidding.",
-                      "generated": {
-                        "type": "control-bids",
-                        "agreedSuit": "H",
-                        "suits": [
-                          "C",
-                          "D",
-                          "S"
-                        ],
-                        "startLevel": 4,
-                        "description": "Use control bids in any unagreed suit: cheapest at current control level, next control levels as needed."
-                      },
+                      "meaning": "Preemptive heart reraise after a simple raise: typically 12–14 HCP and 6+ hearts; non-forcing and not a control-bid sequence.",
+                      "generated": null,
                       "children": [
                         {
                           "id": "o1H-2H-3H-4NT",
                           "trigger": "4NT",
-                          "meaning": "Ace/king control check after at least one control attempt."
+                          "meaning": "Contextual RKCB after a preemptive 3♥ reraise; responder needs a maximum, exceptional controls, or substantial distributional extras. This is not a routine standard auction.",
+                          "filters": {
+                            "minHcp": 9,
+                            "maxHcp": 12,
+                            "minSuit": {
+                              "H": 3
+                            },
+                            "maxSuit": {
+                              "H": 13
+                            }
+                          },
+                          "facts": {
+                            "convention": {
+                              "blackwood": true,
+                              "rkcb": true
+                            },
+                            "fit": {
+                              "confirmed": true,
+                              "suit": "H"
+                            },
+                            "slam": {
+                              "interest": true,
+                              "aceAsk": {
+                                "active": true,
+                                "method": "rkcb-1430"
+                              }
+                            },
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Contextual RKCB after a preemptive 3♥ reraise; responder needs a maximum, exceptional controls, or substantial distributional extras. This is not a routine standard auction.",
+                              "points": {
+                                "method": "HCP",
+                                "min": 9,
+                                "max": 12
+                              },
+                              "suitLengths": [
+                                {
+                                  "suit": "H",
+                                  "min": 3,
+                                  "max": 13
+                                }
+                              ]
+                            }
+                          }
                         }
-                      ]
+                      ],
+                      "filters": {
+                        "minHcp": 12,
+                        "maxHcp": 14,
+                        "minSuit": {
+                          "H": 6
+                        },
+                        "maxSuit": {
+                          "H": 13
+                        }
+                      },
+                      "facts": {
+                        "forcing": {
+                          "game": false,
+                          "round": false
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "H"
+                        },
+                        "raise": {
+                          "type": "preemptive"
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Preemptive heart reraise after a simple raise: typically 12–14 HCP and 6+ hearts; non-forcing and not a control-bid sequence.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 12,
+                            "max": 14
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "H",
+                              "min": 6,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      }
                     },
                     {
                       "id": "o1H-2H-3S",
                       "trigger": "3S",
-                      "meaning": "New suit forcing to 3H phase; often shows slam interest."
+                      "meaning": "3♠ is a natural or help-suit game try: usually 15–17 HCP, 5+ hearts, and 4+ spades, forcing one round below game.",
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "H": 5,
+                          "S": 4
+                        },
+                        "maxSuit": {
+                          "H": 13,
+                          "S": 13
+                        }
+                      },
+                      "facts": {
+                        "forcing": {
+                          "game": false,
+                          "round": true,
+                          "source": "help-suit game try"
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "H"
+                        },
+                        "gameTry": {
+                          "type": "help-suit",
+                          "suit": "S"
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "3♠ is a natural or help-suit game try: usually 15–17 HCP, 5+ hearts, and 4+ spades, forcing one round below game.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "H",
+                              "min": 5,
+                              "max": 13
+                            },
+                            {
+                              "suit": "S",
+                              "min": 4,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      }
                     },
                     {
                       "id": "o1H-2H-4H",
                       "trigger": "4H",
-                      "meaning": "Strong slam-leaning continuation."
+                      "meaning": "Game signoff in hearts: normally 18–21 HCP or equivalent playing strength with 5+ hearts; it does not by itself invite slam.",
+                      "filters": {
+                        "minHcp": 18,
+                        "maxHcp": 21,
+                        "minSuit": {
+                          "H": 5
+                        },
+                        "maxSuit": {
+                          "H": 13
+                        }
+                      },
+                      "facts": {
+                        "forcing": {
+                          "game": false,
+                          "round": false
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "H"
+                        },
+                        "signoff": {
+                          "contract": "4H"
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Game signoff in hearts: normally 18–21 HCP or equivalent playing strength with 5+ hearts; it does not by itself invite slam.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 18,
+                            "max": 21
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "H",
+                              "min": 5,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      }
                     },
                     {
                       "id": "o1H-2H-3NT",
                       "trigger": "3NT",
-                      "meaning": "Sign-off/no further force path."
+                      "meaning": "Natural choice-of-game offer: about 18–19 HCP, a balanced hand, and five hearts; responder may choose 3NT or 4♥.",
+                      "filters": {
+                        "minHcp": 18,
+                        "maxHcp": 19,
+                        "minSuit": {
+                          "C": 2,
+                          "D": 2,
+                          "H": 5,
+                          "S": 2
+                        },
+                        "maxSuit": {
+                          "C": 5,
+                          "D": 5,
+                          "H": 5,
+                          "S": 5
+                        }
+                      },
+                      "facts": {
+                        "forcing": {
+                          "game": true,
+                          "round": false
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "H"
+                        },
+                        "rebid": {
+                          "naturalNotrump": true,
+                          "balanced": true
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Natural choice-of-game offer: about 18–19 HCP, a balanced hand, and five hearts; responder may choose 3NT or 4♥.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 18,
+                            "max": 19
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 2,
+                              "max": 5
+                            },
+                            {
+                              "suit": "D",
+                              "min": 2,
+                              "max": 5
+                            },
+                            {
+                              "suit": "H",
+                              "min": 5,
+                              "max": 5
+                            },
+                            {
+                              "suit": "S",
+                              "min": 2,
+                              "max": 5
+                            }
+                          ]
+                        }
+                      }
                     }
                   ],
                   "facts": {
@@ -2089,17 +3313,50 @@ window.BridgeSystemData = {
                         "fitConfirmed": false,
                         "gameForceSatisfied": false
                       }
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Simple heart raise: 6–9 HCP and 3+ hearts; constructive but non-forcing and not a 2/1 response.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 9
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 3,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  },
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 9,
+                    "minSuit": {
+                      "H": 3
+                    },
+                    "maxSuit": {
+                      "H": 13
                     }
                   }
                 },
                 {
                   "id": "o1H-2C",
                   "trigger": "2C",
-                  "meaning": "2/1 game force in clubs: after an uncontested 1♥ opening, this non-jump new-suit response has highest priority when eligible.",
+                  "meaning": "1♥–2♣: 12+ HCP and 4+ clubs; an uncontested, unpassed-hand 2/1 response that forces to game.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 4
+                    },
+                    "maxSuit": {
+                      "C": 13
+                    }
                   },
                   "children": [],
                   "facts": {
@@ -2134,6 +3391,28 @@ window.BridgeSystemData = {
                           "min": 24
                         }
                       }
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "C",
+                      "minimumLength": 4
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♥–2♣: 12+ HCP and 4+ clubs; an uncontested, unpassed-hand 2/1 response that forces to game.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
                     }
                   }
                 },
@@ -2141,11 +3420,17 @@ window.BridgeSystemData = {
                   "id": "o1H-2D-21",
                   "trigger": "2D",
                   "children": [],
-                  "meaning": "2/1 game force in diamonds: after an uncontested 1♥ opening, this non-jump new-suit response has highest priority when eligible.",
+                  "meaning": "1♥–2♦: 12+ HCP and 4+ diamonds; an uncontested, unpassed-hand 2/1 response that forces to game.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "D": 4
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
                   },
                   "facts": {
                     "convention": {
@@ -2179,15 +3464,61 @@ window.BridgeSystemData = {
                           "min": 24
                         }
                       }
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "D",
+                      "minimumLength": 4
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♥–2♦: 12+ HCP and 4+ diamonds; an uncontested, unpassed-hand 2/1 response that forces to game.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
                     }
                   }
                 }
-              ]
+              ],
+              "facts": {
+                "opening": {
+                  "natural": true,
+                  "strain": "H",
+                  "fiveCardMajor": true
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1♥ opening: 12+ points and 5+ hearts (normally 12–21 HCP); use judgment with distributional borderline hands.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 12,
+                    "max": 21
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "H",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                }
+              }
             },
             {
               "id": "o1S",
               "trigger": "1S",
-              "meaning": "Natural 1♠: 12+ points and 5+ spades (normally 12–21 aHCP).",
+              "meaning": "Natural 1♠ opening: 12+ points and 5+ spades (normally 12–21 HCP); use judgment with distributional borderline hands.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 12,
@@ -2203,38 +3534,104 @@ window.BridgeSystemData = {
                 {
                   "id": "o1S-1NT",
                   "trigger": "1NT",
-                  "meaning": "6–9 aHCP, no heart support."
+                  "meaning": "Forcing 1NT response to 1♠: 6–12 HCP and forcing one round by an unpassed hand; it may contain a long suit that is not strong enough for a game-forcing 2/1 response.",
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 12,
+                    "minSuit": {},
+                    "maxSuit": {
+                      "S": 3
+                    }
+                  },
+                  "facts": {
+                    "convention": {
+                      "forcingOneNotrump": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "forcing 1NT"
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Forcing 1NT response to 1♠: 6–12 HCP and forcing one round by an unpassed hand; it may contain a long suit that is not strong enough for a game-forcing 2/1 response.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 12
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 0,
+                          "max": 3
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "o1S-2S",
                   "trigger": "2S",
-                  "meaning": "Spade raise or support sequence; it is not a 2/1 game-force response.",
+                  "meaning": "Simple spade raise: 6–9 HCP and 3+ spades; constructive but non-forcing and not a 2/1 response.",
                   "children": [
                     {
                       "id": "o1S-2S-2NT",
                       "trigger": "2NT",
-                      "meaning": "Minimum game-forcing-invitation variation."
+                      "meaning": "2NT is a general game try after the simple spade raise: usually 15–17 HCP with 5+ spades, forcing one round but not to game.",
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "S": 5
+                        },
+                        "maxSuit": {
+                          "S": 13
+                        }
+                      },
+                      "facts": {
+                        "forcing": {
+                          "game": false,
+                          "round": true,
+                          "source": "major-suit game try"
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "S"
+                        },
+                        "gameTry": {
+                          "type": "general"
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "2NT is a general game try after the simple spade raise: usually 15–17 HCP with 5+ spades, forcing one round but not to game.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "S",
+                              "min": 5,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      }
                     },
                     {
                       "id": "o1S-2S-3S",
                       "trigger": "3S",
-                      "meaning": "Control phase candidate and fit-oriented continuation.",
-                      "generated": {
-                        "type": "control-bids",
-                        "agreedSuit": "S",
-                        "suits": [
-                          "C",
-                          "D",
-                          "H"
-                        ],
-                        "startLevel": 4,
-                        "description": "Use control bidding in 4th suit and beyond after agreed spade fit."
-                      },
+                      "meaning": "Preemptive spade reraise after a simple raise: typically 12–14 HCP and 6+ spades; non-forcing and not a control-bid sequence.",
+                      "generated": null,
                       "children": [
                         {
                           "id": "o1S-2S-3S-4NT",
                           "trigger": "4NT",
-                          "meaning": "RKCB or 4NT ace-ask family.",
+                          "meaning": "Contextual RKCB after a preemptive 3♠ reraise; responder needs a maximum, exceptional controls, or substantial distributional extras. This is not a routine standard auction.",
                           "facts": {
                             "convention": {
                               "blackwood": true,
@@ -2255,15 +3652,135 @@ window.BridgeSystemData = {
                                 "phase": "slam-pursuit",
                                 "phaseNumber": 4
                               }
+                            },
+                            "fit": {
+                              "confirmed": true,
+                              "suit": "S"
+                            },
+                            "lastBid": {
+                              "seat": "{{seat}}",
+                              "code": "{{call.code}}",
+                              "meaning": "Contextual RKCB after a preemptive 3♠ reraise; responder needs a maximum, exceptional controls, or substantial distributional extras. This is not a routine standard auction.",
+                              "points": {
+                                "method": "HCP",
+                                "min": 9,
+                                "max": 12
+                              },
+                              "suitLengths": [
+                                {
+                                  "suit": "S",
+                                  "min": 3,
+                                  "max": 13
+                                }
+                              ]
+                            }
+                          },
+                          "filters": {
+                            "minHcp": 9,
+                            "maxHcp": 12,
+                            "minSuit": {
+                              "S": 3
+                            },
+                            "maxSuit": {
+                              "S": 13
                             }
                           }
                         }
-                      ]
+                      ],
+                      "filters": {
+                        "minHcp": 12,
+                        "maxHcp": 14,
+                        "minSuit": {
+                          "S": 6
+                        },
+                        "maxSuit": {
+                          "S": 13
+                        }
+                      },
+                      "facts": {
+                        "forcing": {
+                          "game": false,
+                          "round": false
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "S"
+                        },
+                        "raise": {
+                          "type": "preemptive"
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Preemptive spade reraise after a simple raise: typically 12–14 HCP and 6+ spades; non-forcing and not a control-bid sequence.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 12,
+                            "max": 14
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "S",
+                              "min": 6,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      }
                     },
                     {
                       "id": "o1S-2S-3C",
                       "trigger": "3C",
-                      "meaning": "Minor-suit game try / feature."
+                      "meaning": "3♣ is a natural or help-suit game try: usually 15–17 HCP, 5+ spades, and 4+ clubs, forcing one round below game.",
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "C": 4,
+                          "S": 5
+                        },
+                        "maxSuit": {
+                          "C": 13,
+                          "S": 13
+                        }
+                      },
+                      "facts": {
+                        "forcing": {
+                          "game": false,
+                          "round": true,
+                          "source": "help-suit game try"
+                        },
+                        "fit": {
+                          "confirmed": true,
+                          "suit": "S"
+                        },
+                        "gameTry": {
+                          "type": "help-suit",
+                          "suit": "C"
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "3♣ is a natural or help-suit game try: usually 15–17 HCP, 5+ spades, and 4+ clubs, forcing one round below game.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 4,
+                              "max": 13
+                            },
+                            {
+                              "suit": "S",
+                              "min": 5,
+                              "max": 13
+                            }
+                          ]
+                        }
+                      }
                     }
                   ],
                   "facts": {
@@ -2287,17 +3804,50 @@ window.BridgeSystemData = {
                         "fitConfirmed": false,
                         "gameForceSatisfied": false
                       }
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Simple spade raise: 6–9 HCP and 3+ spades; constructive but non-forcing and not a 2/1 response.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 9
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 3,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  },
+                  "filters": {
+                    "minHcp": 6,
+                    "maxHcp": 9,
+                    "minSuit": {
+                      "S": 3
+                    },
+                    "maxSuit": {
+                      "S": 13
                     }
                   }
                 },
                 {
                   "id": "o1S-2C",
                   "trigger": "2C",
-                  "meaning": "2/1 game force in clubs: after an uncontested 1♠ opening, this non-jump new-suit response has highest priority when eligible.",
+                  "meaning": "1♠–2♣: 12+ HCP and 4+ clubs; an uncontested, unpassed-hand 2/1 response that forces to game.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "C": 4
+                    },
+                    "maxSuit": {
+                      "C": 13
+                    }
                   },
                   "children": [],
                   "facts": {
@@ -2332,6 +3882,28 @@ window.BridgeSystemData = {
                           "min": 24
                         }
                       }
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "C",
+                      "minimumLength": 4
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♠–2♣: 12+ HCP and 4+ clubs; an uncontested, unpassed-hand 2/1 response that forces to game.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
                     }
                   }
                 },
@@ -2339,11 +3911,17 @@ window.BridgeSystemData = {
                   "id": "o1S-2D-21",
                   "trigger": "2D",
                   "children": [],
-                  "meaning": "2/1 game force in diamonds: after an uncontested 1♠ opening, this non-jump new-suit response has highest priority when eligible.",
+                  "meaning": "1♠–2♦: 12+ HCP and 4+ diamonds; an uncontested, unpassed-hand 2/1 response that forces to game.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "D": 4
+                    },
+                    "maxSuit": {
+                      "D": 13
+                    }
                   },
                   "facts": {
                     "convention": {
@@ -2377,6 +3955,28 @@ window.BridgeSystemData = {
                           "min": 24
                         }
                       }
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "D",
+                      "minimumLength": 4
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♠–2♦: 12+ HCP and 4+ diamonds; an uncontested, unpassed-hand 2/1 response that forces to game.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
                     }
                   }
                 },
@@ -2384,11 +3984,17 @@ window.BridgeSystemData = {
                   "id": "o1S-2H-21",
                   "trigger": "2H",
                   "children": [],
-                  "meaning": "2/1 game force in hearts: after an uncontested 1♠ opening, this non-jump new-suit response has highest priority when eligible.",
+                  "meaning": "1♠–2♥: 12+ HCP and 5+ hearts; an uncontested, unpassed-hand 2/1 response that forces to game.",
                   "priority": 100,
                   "filters": {
                     "minHcp": 12,
-                    "maxHcp": 40
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "H": 5
+                    },
+                    "maxSuit": {
+                      "H": 13
+                    }
                   },
                   "facts": {
                     "convention": {
@@ -2422,15 +4028,61 @@ window.BridgeSystemData = {
                           "min": 24
                         }
                       }
+                    },
+                    "response": {
+                      "natural": true,
+                      "suit": "H",
+                      "minimumLength": 5
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "1♠–2♥: 12+ HCP and 5+ hearts; an uncontested, unpassed-hand 2/1 response that forces to game.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 12,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
                     }
                   }
                 }
-              ]
+              ],
+              "facts": {
+                "opening": {
+                  "natural": true,
+                  "strain": "S",
+                  "fiveCardMajor": true
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1♠ opening: 12+ points and 5+ spades (normally 12–21 HCP); use judgment with distributional borderline hands.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 12,
+                    "max": 21
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "S",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                }
+              }
             },
             {
               "id": "o1NT",
               "trigger": "1NT",
-              "meaning": "Natural 1NT: 15–17 aHCP, balanced (4333, 4432, or 5332), with no six-card suit.",
+              "meaning": "Natural 1NT opening: 15–17 HCP and balanced, normally 4–3–3–3, 4–4–3–2, or 5–3–3–2; no singleton, void, or six-card suit.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 15,
@@ -2440,67 +4092,497 @@ window.BridgeSystemData = {
                   "D": 5,
                   "H": 5,
                   "S": 5
+                },
+                "minSuit": {
+                  "C": 2,
+                  "D": 2,
+                  "H": 2,
+                  "S": 2
                 }
               },
               "children": [
                 {
                   "id": "nt2C",
                   "trigger": "2C",
-                  "meaning": "Stayman.",
+                  "meaning": "Stayman: normally 8+ HCP with at least one four-card major, asking opener to show a four-card major; artificial and forcing for one round.",
                   "facts": {
                     "convention": {
                       "stayman": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "Stayman"
+                    },
+                    "shapeAsk": {
+                      "majors": true,
+                      "minimumLength": 4
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Stayman: normally 8+ HCP with at least one four-card major, asking opener to show a four-card major; artificial and forcing for one round.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 8,
+                        "max": 40
+                      },
+                      "suitLengths": [],
+                      "suitLengthAlternatives": [
+                        {
+                          "suit": "H",
+                          "min": 4,
+                          "max": 13
+                        },
+                        {
+                          "suit": "S",
+                          "min": 4,
+                          "max": 13
+                        }
+                      ]
                     }
-                  }
-                },
-                {
-                  "id": "nt2C-2D",
-                  "trigger": "2D",
-                  "meaning": "No 4-card major."
-                },
-                {
-                  "id": "nt2C-2H",
-                  "trigger": "2H",
-                  "meaning": "Show 4+ hearts."
-                },
-                {
-                  "id": "nt2C-2S",
-                  "trigger": "2S",
-                  "meaning": "Show 4+ spades."
+                  },
+                  "filters": {
+                    "minHcp": 8,
+                    "maxHcp": 40,
+                    "suitLengthAlternatives": [
+                      {
+                        "suit": "H",
+                        "min": 4,
+                        "max": 13
+                      },
+                      {
+                        "suit": "S",
+                        "min": 4,
+                        "max": 13
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "id": "nt2C-2D",
+                      "trigger": "2D",
+                      "meaning": "Stayman response: 15–17 HCP, balanced, and no four-card major.",
+                      "children": [],
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "C": 2,
+                          "D": 2,
+                          "H": 2,
+                          "S": 2
+                        },
+                        "maxSuit": {
+                          "C": 5,
+                          "D": 5,
+                          "H": 3,
+                          "S": 3
+                        }
+                      },
+                      "facts": {
+                        "convention": {
+                          "stayman": true
+                        },
+                        "response": {
+                          "deniesFourCardMajor": true
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Stayman response: 15–17 HCP, balanced, and no four-card major.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 2,
+                              "max": 5
+                            },
+                            {
+                              "suit": "D",
+                              "min": 2,
+                              "max": 5
+                            },
+                            {
+                              "suit": "H",
+                              "min": 2,
+                              "max": 3
+                            },
+                            {
+                              "suit": "S",
+                              "min": 2,
+                              "max": 3
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "nt2C-2H",
+                      "trigger": "2H",
+                      "meaning": "Stayman response: 15–17 HCP, balanced, and 4+ hearts; with both majors, this system shows hearts first.",
+                      "children": [],
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "C": 2,
+                          "D": 2,
+                          "H": 4,
+                          "S": 2
+                        },
+                        "maxSuit": {
+                          "C": 5,
+                          "D": 5,
+                          "H": 5,
+                          "S": 5
+                        }
+                      },
+                      "facts": {
+                        "convention": {
+                          "stayman": true
+                        },
+                        "response": {
+                          "showsMajor": "H",
+                          "minimumLength": 4
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Stayman response: 15–17 HCP, balanced, and 4+ hearts; with both majors, this system shows hearts first.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 2,
+                              "max": 5
+                            },
+                            {
+                              "suit": "D",
+                              "min": 2,
+                              "max": 5
+                            },
+                            {
+                              "suit": "H",
+                              "min": 4,
+                              "max": 5
+                            },
+                            {
+                              "suit": "S",
+                              "min": 2,
+                              "max": 5
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "nt2C-2S",
+                      "trigger": "2S",
+                      "meaning": "Stayman response: 15–17 HCP, balanced, 4+ spades, and fewer than four hearts.",
+                      "children": [],
+                      "filters": {
+                        "minHcp": 15,
+                        "maxHcp": 17,
+                        "minSuit": {
+                          "C": 2,
+                          "D": 2,
+                          "H": 2,
+                          "S": 4
+                        },
+                        "maxSuit": {
+                          "C": 5,
+                          "D": 5,
+                          "H": 3,
+                          "S": 5
+                        }
+                      },
+                      "facts": {
+                        "convention": {
+                          "stayman": true
+                        },
+                        "response": {
+                          "showsMajor": "S",
+                          "minimumLength": 4,
+                          "deniesFourHearts": true
+                        },
+                        "lastBid": {
+                          "seat": "{{seat}}",
+                          "code": "{{call.code}}",
+                          "meaning": "Stayman response: 15–17 HCP, balanced, 4+ spades, and fewer than four hearts.",
+                          "points": {
+                            "method": "HCP",
+                            "min": 15,
+                            "max": 17
+                          },
+                          "suitLengths": [
+                            {
+                              "suit": "C",
+                              "min": 2,
+                              "max": 5
+                            },
+                            {
+                              "suit": "D",
+                              "min": 2,
+                              "max": 5
+                            },
+                            {
+                              "suit": "H",
+                              "min": 2,
+                              "max": 3
+                            },
+                            {
+                              "suit": "S",
+                              "min": 4,
+                              "max": 5
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "id": "nt2D",
                   "trigger": "2D",
-                  "meaning": "Transfer to hearts (if partnership uses transfer structure)."
+                  "meaning": "Jacoby transfer to hearts: 0+ HCP and 5+ hearts; artificial and forcing opener to bid 2♥ under normal conditions.",
+                  "filters": {
+                    "minHcp": 0,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "H": 5
+                    },
+                    "maxSuit": {
+                      "H": 13
+                    }
+                  },
+                  "facts": {
+                    "convention": {
+                      "transfer": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "Jacoby transfer"
+                    },
+                    "transfer": {
+                      "targetSuit": "H",
+                      "minimumLength": 5
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Jacoby transfer to hearts: 0+ HCP and 5+ hearts; artificial and forcing opener to bid 2♥ under normal conditions.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 0,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "nt2H",
                   "trigger": "2H",
-                  "meaning": "Transfer to spades (if partnership uses transfer structure)."
+                  "meaning": "Jacoby transfer to spades: 0+ HCP and 5+ spades; artificial and forcing opener to bid 2♠ under normal conditions.",
+                  "filters": {
+                    "minHcp": 0,
+                    "maxHcp": 40,
+                    "minSuit": {
+                      "S": 5
+                    },
+                    "maxSuit": {
+                      "S": 13
+                    }
+                  },
+                  "facts": {
+                    "convention": {
+                      "transfer": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": true,
+                      "source": "Jacoby transfer"
+                    },
+                    "transfer": {
+                      "targetSuit": "S",
+                      "minimumLength": 5
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Jacoby transfer to spades: 0+ HCP and 5+ spades; artificial and forcing opener to bid 2♠ under normal conditions.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 0,
+                        "max": 40
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 5,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 }
-              ]
+              ],
+              "facts": {
+                "opening": {
+                  "strain": "NT",
+                  "natural": true,
+                  "balanced": true
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 1NT opening: 15–17 HCP and balanced, normally 4–3–3–3, 4–4–3–2, or 5–3–3–2; no singleton, void, or six-card suit.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 15,
+                    "max": 17
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "D",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "H",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "S",
+                      "min": 2,
+                      "max": 5
+                    }
+                  ]
+                }
+              }
             },
             {
               "id": "twoone-2C",
               "trigger": "2C",
-              "meaning": "Artificial strong 2♣: 22+ aHCP, any shape (or equivalent playing-trick strength).",
+              "meaning": "Strong artificial 2♣ opening: normally 22+ HCP if balanced, or an unbalanced hand with equivalent game-going playing strength; no club length is promised.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 22,
-                "maxHcp": 40
+                "maxHcp": 40,
+                "minSuit": {},
+                "maxSuit": {}
               },
-              "children": []
+              "children": [],
+              "facts": {
+                "convention": {
+                  "strongTwoClubs": true,
+                  "artificial": true
+                },
+                "forcing": {
+                  "game": false,
+                  "round": true,
+                  "source": "strong 2C"
+                },
+                "opening": {
+                  "strain": "C",
+                  "natural": false
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Strong artificial 2♣ opening: normally 22+ HCP if balanced, or an unbalanced hand with equivalent game-going playing strength; no club length is promised.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 22,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                }
+              }
             },
             {
               "id": "twoone-2NT",
               "trigger": "2NT",
-              "meaning": "Natural 2NT: balanced 20–21 aHCP (4333, 4432, or 5332).",
+              "meaning": "Natural 2NT opening: 20–21 HCP and balanced, normally 4–3–3–3, 4–4–3–2, or 5–3–3–2.",
               "filters": {
                 "auctionRole": "opening",
                 "minHcp": 20,
-                "maxHcp": 21
+                "maxHcp": 21,
+                "minSuit": {
+                  "C": 2,
+                  "D": 2,
+                  "H": 2,
+                  "S": 2
+                },
+                "maxSuit": {
+                  "C": 5,
+                  "D": 5,
+                  "H": 5,
+                  "S": 5
+                }
               },
-              "children": []
+              "children": [],
+              "facts": {
+                "opening": {
+                  "strain": "NT",
+                  "natural": true,
+                  "balanced": true
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural 2NT opening: 20–21 HCP and balanced, normally 4–3–3–3, 4–4–3–2, or 5–3–3–2.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 20,
+                    "max": 21
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "D",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "H",
+                      "min": 2,
+                      "max": 5
+                    },
+                    {
+                      "suit": "S",
+                      "min": 2,
+                      "max": 5
+                    }
+                  ]
+                }
+              }
             },
             {
               "id": "twoone-weak-club-opening",
@@ -2521,7 +4603,7 @@ window.BridgeSystemData = {
                 {
                   "id": "twoone-3C",
                   "trigger": "3C",
-                  "meaning": "Preemptive 3C opening: 6–10 aHCP and a 7-card club suit.",
+                  "meaning": "Preemptive 3♣ opening: 6–10 HCP and exactly seven clubs in this system's level-by-length ladder; vulnerability and suit quality matter.",
                   "displayRole": "opener",
                   "weakOpening": {
                     "catalogueAlternative": true,
@@ -2550,12 +4632,39 @@ window.BridgeSystemData = {
                       "C": 7
                     }
                   },
-                  "children": []
+                  "children": [],
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "C"
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 3♣ opening: 6–10 HCP and exactly seven clubs in this system's level-by-length ladder; vulnerability and suit quality matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 7,
+                          "max": 7
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "twoone-4C",
                   "trigger": "4C",
-                  "meaning": "Preemptive 4C opening: 6–10 aHCP and a 8+-card club suit.",
+                  "meaning": "Preemptive 4♣ opening: 6–10 HCP and 8+ clubs in this system's level-by-length ladder; vulnerability and playing strength matter.",
                   "displayRole": "opener",
                   "weakOpening": {
                     "catalogueAlternative": true,
@@ -2584,9 +4693,41 @@ window.BridgeSystemData = {
                     },
                     "auctionRole": "opening"
                   },
-                  "children": []
+                  "children": [],
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "C"
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 4♣ opening: 6–10 HCP and 8+ clubs in this system's level-by-length ladder; vulnerability and playing strength matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "C",
+                          "min": 8,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 }
-              ]
+              ],
+              "reference": {
+                "structuralContainer": true,
+                "pointRange": "not applicable",
+                "suitLength": "not applicable"
+              }
             },
             {
               "id": "twoone-weak-diamond-opening",
@@ -2607,11 +4748,11 @@ window.BridgeSystemData = {
                 {
                   "id": "twoone-2D",
                   "trigger": "2D",
-                  "meaning": "Weak two in D: 6–10 aHCP and a sound six-card suit.",
+                  "meaning": "Weak 2D opening: typically 5–11 HCP and exactly six diamonds; suit quality, seat, and vulnerability matter.",
                   "filters": {
                     "auctionRole": "opening",
-                    "minHcp": 6,
-                    "maxHcp": 10,
+                    "minHcp": 5,
+                    "maxHcp": 11,
                     "minSuit": {
                       "D": 6
                     },
@@ -2636,12 +4777,42 @@ window.BridgeSystemData = {
                     "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
                     "parentLayout": "parallel suit opening options",
                     "parentGroupId": "twoone-weak-diamond-opening"
+                  },
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "D"
+                    },
+                    "suitQuality": {
+                      "disciplined": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Weak 2D opening: typically 5–11 HCP and exactly six diamonds; suit quality, seat, and vulnerability matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 5,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 6,
+                          "max": 6
+                        }
+                      ]
+                    }
                   }
                 },
                 {
                   "id": "twoone-3D",
                   "trigger": "3D",
-                  "meaning": "Preemptive 3D opening: 6–10 aHCP and a 7-card diamond suit.",
+                  "meaning": "Preemptive 3D opening: 6–10 HCP and exactly seven diamonds in this system's level-by-length ladder; vulnerability and suit quality matter.",
                   "displayRole": "opener",
                   "weakOpening": {
                     "catalogueAlternative": true,
@@ -2670,12 +4841,39 @@ window.BridgeSystemData = {
                     },
                     "auctionRole": "opening"
                   },
-                  "children": []
+                  "children": [],
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "D"
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 3D opening: 6–10 HCP and exactly seven diamonds in this system's level-by-length ladder; vulnerability and suit quality matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 7,
+                          "max": 7
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "twoone-4D",
                   "trigger": "4D",
-                  "meaning": "Preemptive 4D opening: 6–10 aHCP and a 8+-card diamond suit.",
+                  "meaning": "Preemptive 4D opening: 6–10 HCP and 8+ diamonds in this system's level-by-length ladder; vulnerability and playing strength matter.",
                   "displayRole": "opener",
                   "weakOpening": {
                     "catalogueAlternative": true,
@@ -2704,9 +4902,41 @@ window.BridgeSystemData = {
                     },
                     "auctionRole": "opening"
                   },
-                  "children": []
+                  "children": [],
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "D"
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 4D opening: 6–10 HCP and 8+ diamonds in this system's level-by-length ladder; vulnerability and playing strength matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "D",
+                          "min": 8,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 }
-              ]
+              ],
+              "reference": {
+                "structuralContainer": true,
+                "pointRange": "not applicable",
+                "suitLength": "not applicable"
+              }
             },
             {
               "id": "twoone-weak-heart-opening",
@@ -2727,11 +4957,11 @@ window.BridgeSystemData = {
                 {
                   "id": "twoone-2H",
                   "trigger": "2H",
-                  "meaning": "Weak two in H: 6–10 aHCP and a sound six-card suit.",
+                  "meaning": "Weak 2H opening: typically 5–11 HCP and exactly six hearts; suit quality, seat, and vulnerability matter.",
                   "filters": {
                     "auctionRole": "opening",
-                    "minHcp": 6,
-                    "maxHcp": 10,
+                    "minHcp": 5,
+                    "maxHcp": 11,
                     "minSuit": {
                       "H": 6
                     },
@@ -2756,12 +4986,42 @@ window.BridgeSystemData = {
                     "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
                     "parentLayout": "parallel suit opening options",
                     "parentGroupId": "twoone-weak-heart-opening"
+                  },
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "H"
+                    },
+                    "suitQuality": {
+                      "disciplined": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Weak 2H opening: typically 5–11 HCP and exactly six hearts; suit quality, seat, and vulnerability matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 5,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 6,
+                          "max": 6
+                        }
+                      ]
+                    }
                   }
                 },
                 {
                   "id": "twoone-3H",
                   "trigger": "3H",
-                  "meaning": "Preemptive 3H opening: 6–10 aHCP and a 7-card heart suit.",
+                  "meaning": "Preemptive 3H opening: 6–10 HCP and exactly seven hearts in this system's level-by-length ladder; vulnerability and suit quality matter.",
                   "displayRole": "opener",
                   "weakOpening": {
                     "catalogueAlternative": true,
@@ -2790,12 +5050,39 @@ window.BridgeSystemData = {
                     },
                     "auctionRole": "opening"
                   },
-                  "children": []
+                  "children": [],
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "H"
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 3H opening: 6–10 HCP and exactly seven hearts in this system's level-by-length ladder; vulnerability and suit quality matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 7,
+                          "max": 7
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "twoone-4H",
                   "trigger": "4H",
-                  "meaning": "Preemptive 4H opening: 6–10 aHCP and a 8+-card heart suit.",
+                  "meaning": "Preemptive 4H opening: 6–10 HCP and 8+ hearts in this system's level-by-length ladder; vulnerability and playing strength matter.",
                   "displayRole": "opener",
                   "weakOpening": {
                     "catalogueAlternative": true,
@@ -2824,9 +5111,41 @@ window.BridgeSystemData = {
                     },
                     "auctionRole": "opening"
                   },
-                  "children": []
+                  "children": [],
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "H"
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 4H opening: 6–10 HCP and 8+ hearts in this system's level-by-length ladder; vulnerability and playing strength matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "H",
+                          "min": 8,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 }
-              ]
+              ],
+              "reference": {
+                "structuralContainer": true,
+                "pointRange": "not applicable",
+                "suitLength": "not applicable"
+              }
             },
             {
               "id": "twoone-weak-spade-opening",
@@ -2847,11 +5166,11 @@ window.BridgeSystemData = {
                 {
                   "id": "twoone-2S",
                   "trigger": "2S",
-                  "meaning": "Weak two in S: 6–10 aHCP and a sound six-card suit.",
+                  "meaning": "Weak 2S opening: typically 5–11 HCP and exactly six spades; suit quality, seat, and vulnerability matter.",
                   "filters": {
                     "auctionRole": "opening",
-                    "minHcp": 6,
-                    "maxHcp": 10,
+                    "minHcp": 5,
+                    "maxHcp": 11,
                     "minSuit": {
                       "S": 6
                     },
@@ -2876,12 +5195,42 @@ window.BridgeSystemData = {
                     "levelRule": "bid level = longest suit length - 4 (catalogued through level 4)",
                     "parentLayout": "parallel suit opening options",
                     "parentGroupId": "twoone-weak-spade-opening"
+                  },
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "S"
+                    },
+                    "suitQuality": {
+                      "disciplined": true
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Weak 2S opening: typically 5–11 HCP and exactly six spades; suit quality, seat, and vulnerability matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 5,
+                        "max": 11
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 6,
+                          "max": 6
+                        }
+                      ]
+                    }
                   }
                 },
                 {
                   "id": "twoone-3S",
                   "trigger": "3S",
-                  "meaning": "Preemptive 3S opening: 6–10 aHCP and a 7-card spade suit.",
+                  "meaning": "Preemptive 3S opening: 6–10 HCP and exactly seven spades in this system's level-by-length ladder; vulnerability and suit quality matter.",
                   "displayRole": "opener",
                   "weakOpening": {
                     "catalogueAlternative": true,
@@ -2910,12 +5259,39 @@ window.BridgeSystemData = {
                     },
                     "auctionRole": "opening"
                   },
-                  "children": []
+                  "children": [],
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "S"
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 3S opening: 6–10 HCP and exactly seven spades in this system's level-by-length ladder; vulnerability and suit quality matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 7,
+                          "max": 7
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "id": "twoone-4S",
                   "trigger": "4S",
-                  "meaning": "Preemptive 4S opening: 6–10 aHCP and a 8+-card spade suit.",
+                  "meaning": "Preemptive 4S opening: 6–10 HCP and 8+ spades in this system's level-by-length ladder; vulnerability and playing strength matter.",
                   "displayRole": "opener",
                   "weakOpening": {
                     "catalogueAlternative": true,
@@ -2944,9 +5320,41 @@ window.BridgeSystemData = {
                     },
                     "auctionRole": "opening"
                   },
-                  "children": []
+                  "children": [],
+                  "facts": {
+                    "opening": {
+                      "preemptive": true,
+                      "strain": "S"
+                    },
+                    "forcing": {
+                      "game": false,
+                      "round": false
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Preemptive 4S opening: 6–10 HCP and 8+ spades in this system's level-by-length ladder; vulnerability and playing strength matter.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 6,
+                        "max": 10
+                      },
+                      "suitLengths": [
+                        {
+                          "suit": "S",
+                          "min": 8,
+                          "max": 13
+                        }
+                      ]
+                    }
+                  }
                 }
-              ]
+              ],
+              "reference": {
+                "structuralContainer": true,
+                "pointRange": "not applicable",
+                "suitLength": "not applicable"
+              }
             }
           ]
         },
@@ -2957,12 +5365,12 @@ window.BridgeSystemData = {
             {
               "id": "rkcb-4nt",
               "trigger": "4NT",
-              "meaning": "Roman Key Card/Blackwood query after agreed suit context.",
+              "meaning": "Roman Key Card Blackwood (1430) after a trump suit is agreed: 4NT asks for the four aces plus the trump king; it has no independent HCP or natural suit-length range.",
               "children": [
                 {
                   "id": "rkcb-5C",
                   "trigger": "5C",
-                  "meaning": "1 or 4 key cards (RKCB 1430).",
+                  "meaning": "RKCB 1430 response: 1 or 4 key cards; the bid has no independent HCP or club-length promise.",
                   "facts": {
                     "convention": {
                       "blackwood": true,
@@ -2984,13 +5392,28 @@ window.BridgeSystemData = {
                           4
                         ]
                       }
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "RKCB 1430 response: 1 or 4 key cards; the bid has no independent HCP or club-length promise.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 0,
+                        "max": 40
+                      },
+                      "suitLengths": []
                     }
+                  },
+                  "filters": {
+                    "minHcp": 0,
+                    "maxHcp": 40
                   }
                 },
                 {
                   "id": "rkcb-5D",
                   "trigger": "5D",
-                  "meaning": "0 or 3 key cards (RKCB 1430).",
+                  "meaning": "RKCB 1430 response: 0 or 3 key cards; the bid has no independent HCP or diamond-length promise.",
                   "facts": {
                     "convention": {
                       "blackwood": true,
@@ -3012,13 +5435,28 @@ window.BridgeSystemData = {
                           3
                         ]
                       }
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "RKCB 1430 response: 0 or 3 key cards; the bid has no independent HCP or diamond-length promise.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 0,
+                        "max": 40
+                      },
+                      "suitLengths": []
                     }
+                  },
+                  "filters": {
+                    "minHcp": 0,
+                    "maxHcp": 40
                   }
                 },
                 {
                   "id": "rkcb-5H",
                   "trigger": "5H",
-                  "meaning": "2 key cards without the trump queen (RKCB 1430).",
+                  "meaning": "RKCB 1430 response: 2 key cards without the trump queen; the bid has no independent HCP or heart-length promise.",
                   "facts": {
                     "convention": {
                       "blackwood": true,
@@ -3040,13 +5478,28 @@ window.BridgeSystemData = {
                         ],
                         "trumpQueen": false
                       }
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "RKCB 1430 response: 2 key cards without the trump queen; the bid has no independent HCP or heart-length promise.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 0,
+                        "max": 40
+                      },
+                      "suitLengths": []
                     }
+                  },
+                  "filters": {
+                    "minHcp": 0,
+                    "maxHcp": 40
                   }
                 },
                 {
                   "id": "rkcb-5S",
                   "trigger": "5S",
-                  "meaning": "2 key cards with the trump queen (RKCB 1430).",
+                  "meaning": "RKCB 1430 response: 2 key cards with the trump queen; the bid has no independent HCP or spade-length promise.",
                   "facts": {
                     "convention": {
                       "blackwood": true,
@@ -3068,13 +5521,28 @@ window.BridgeSystemData = {
                         ],
                         "trumpQueen": true
                       }
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "RKCB 1430 response: 2 key cards with the trump queen; the bid has no independent HCP or spade-length promise.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 0,
+                        "max": 40
+                      },
+                      "suitLengths": []
                     }
+                  },
+                  "filters": {
+                    "minHcp": 0,
+                    "maxHcp": 40
                   }
                 },
                 {
                   "id": "rkcb-5NT",
                   "trigger": "5NT",
-                  "meaning": "King/queen inquiry for grand-slam attempts.",
+                  "meaning": "Grand-slam try after RKCB: 5NT confirms possession of all key cards and asks for specific kings; it has no natural notrump range.",
                   "facts": {
                     "convention": {
                       "blackwood": true,
@@ -3085,12 +5553,29 @@ window.BridgeSystemData = {
                         "active": true,
                         "method": "specific-king"
                       }
+                    },
+                    "lastBid": {
+                      "seat": "{{seat}}",
+                      "code": "{{call.code}}",
+                      "meaning": "Grand-slam try after RKCB: 5NT confirms possession of all key cards and asks for specific kings; it has no natural notrump range.",
+                      "points": {
+                        "method": "HCP",
+                        "min": 0,
+                        "max": 40
+                      },
+                      "suitLengths": []
                     }
+                  },
+                  "filters": {
+                    "minHcp": 0,
+                    "maxHcp": 40
                   }
                 }
               ],
               "filters": {
-                "auctionRole": "contextual"
+                "auctionRole": "contextual",
+                "minHcp": 0,
+                "maxHcp": 40
               },
               "facts": {
                 "convention": {
@@ -3112,6 +5597,17 @@ window.BridgeSystemData = {
                     "phase": "slam-pursuit",
                     "phaseNumber": 4
                   }
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Roman Key Card Blackwood (1430) after a trump suit is agreed: 4NT asks for the four aces plus the trump king; it has no independent HCP or natural suit-length range.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 0,
+                    "max": 40
+                  },
+                  "suitLengths": []
                 }
               }
             }
@@ -3124,53 +5620,255 @@ window.BridgeSystemData = {
             {
               "id": "cDBL",
               "trigger": "X",
-              "meaning": "Takeout/penalty double context-dependent.",
+              "meaning": "Takeout double of a low-level suit opening: approximately opening values (12+ total points) with support for the unbid suits, or 18+ strength with a hand too strong for a simple overcall.",
               "filters": {
                 "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "opponentOpening": "1C",
+                "minHcp": 12,
+                "maxHcp": 40,
+                "suitLengthAlternatives": [
+                  {
+                    "description": "Usually 3+ cards in every unbid suit, preferably four cards in each unbid major."
+                  }
+                ]
+              },
+              "facts": {
+                "convention": {
+                  "takeoutDouble": true
+                },
+                "forcing": {
+                  "game": false,
+                  "round": true,
+                  "source": "takeout double"
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Takeout double of a low-level suit opening: approximately opening values (12+ total points) with support for the unbid suits, or 18+ strength with a hand too strong for a simple overcall.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 12,
+                    "max": 40
+                  },
+                  "suitLengths": [],
+                  "suitLengthAlternatives": [
+                    {
+                      "description": "Usually 3+ cards in every unbid suit, preferably four cards in each unbid major."
+                    }
+                  ]
+                }
               }
             },
             {
               "id": "cXX",
               "trigger": "XX",
-              "meaning": "Redouble for re-penalty or extra strength.",
+              "meaning": "Strength-showing redouble after an opposing takeout double: normally 10+ HCP, interest in penalizing the opponents, and no particular suit length promised.",
               "filters": {
-                "auctionRole": "contextual"
+                "auctionRole": "contextual",
+                "minHcp": 10,
+                "maxHcp": 40,
+                "minSuit": {},
+                "maxSuit": {}
+              },
+              "facts": {
+                "convention": {
+                  "strengthRedouble": true
+                },
+                "forcing": {
+                  "game": false,
+                  "round": true,
+                  "source": "redouble"
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Strength-showing redouble after an opposing takeout double: normally 10+ HCP, interest in penalizing the opponents, and no particular suit length promised.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 10,
+                    "max": 40
+                  },
+                  "suitLengths": []
+                }
               }
             },
             {
               "id": "oc1C",
               "trigger": "1C",
-              "meaning": "Natural one club overcall.",
+              "meaning": "Natural one-level club overcall: typically 8–17 HCP and a good 5+ card suit; vulnerability and suit quality affect the lower end.",
               "filters": {
-                "auctionRole": "contextual"
+                "auctionRole": "contextual",
+                "minHcp": 8,
+                "maxHcp": 17,
+                "minSuit": {
+                  "C": 5
+                },
+                "maxSuit": {
+                  "C": 13
+                }
+              },
+              "facts": {
+                "overcall": {
+                  "natural": true,
+                  "suit": "C",
+                  "minimumLength": 5
+                },
+                "forcing": {
+                  "game": false,
+                  "round": false
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural one-level club overcall: typically 8–17 HCP and a good 5+ card suit; vulnerability and suit quality affect the lower end.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 8,
+                    "max": 17
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "C",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                }
               }
             },
             {
               "id": "oc1D",
               "trigger": "1D",
-              "meaning": "Natural one diamond overcall.",
+              "meaning": "Natural one-level diamond overcall: typically 8–17 HCP and a good 5+ card suit; vulnerability and suit quality affect the lower end.",
               "filters": {
                 "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "opponentOpening": "1C",
+                "minHcp": 8,
+                "maxHcp": 17,
+                "minSuit": {
+                  "D": 5
+                },
+                "maxSuit": {
+                  "D": 13
+                }
+              },
+              "facts": {
+                "overcall": {
+                  "natural": true,
+                  "suit": "D",
+                  "minimumLength": 5
+                },
+                "forcing": {
+                  "game": false,
+                  "round": false
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural one-level diamond overcall: typically 8–17 HCP and a good 5+ card suit; vulnerability and suit quality affect the lower end.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 8,
+                    "max": 17
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "D",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                }
               }
             },
             {
               "id": "oc1H",
               "trigger": "1H",
-              "meaning": "Natural one heart overcall.",
+              "meaning": "Natural one-level heart overcall: typically 8–17 HCP and a good 5+ card suit; vulnerability and suit quality affect the lower end.",
               "filters": {
                 "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "opponentOpening": "1C",
+                "minHcp": 8,
+                "maxHcp": 17,
+                "minSuit": {
+                  "H": 5
+                },
+                "maxSuit": {
+                  "H": 13
+                }
+              },
+              "facts": {
+                "overcall": {
+                  "natural": true,
+                  "suit": "H",
+                  "minimumLength": 5
+                },
+                "forcing": {
+                  "game": false,
+                  "round": false
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural one-level heart overcall: typically 8–17 HCP and a good 5+ card suit; vulnerability and suit quality affect the lower end.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 8,
+                    "max": 17
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "H",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                }
               }
             },
             {
               "id": "oc1S",
               "trigger": "1S",
-              "meaning": "Natural one spade overcall.",
+              "meaning": "Natural one-level spade overcall: typically 8–17 HCP and a good 5+ card suit; vulnerability and suit quality affect the lower end.",
               "filters": {
                 "auctionRole": "overcall",
-                "opponentOpening": "1C"
+                "opponentOpening": "1C",
+                "minHcp": 8,
+                "maxHcp": 17,
+                "minSuit": {
+                  "S": 5
+                },
+                "maxSuit": {
+                  "S": 13
+                }
+              },
+              "facts": {
+                "overcall": {
+                  "natural": true,
+                  "suit": "S",
+                  "minimumLength": 5
+                },
+                "forcing": {
+                  "game": false,
+                  "round": false
+                },
+                "lastBid": {
+                  "seat": "{{seat}}",
+                  "code": "{{call.code}}",
+                  "meaning": "Natural one-level spade overcall: typically 8–17 HCP and a good 5+ card suit; vulnerability and suit quality affect the lower end.",
+                  "points": {
+                    "method": "HCP",
+                    "min": 8,
+                    "max": 17
+                  },
+                  "suitLengths": [
+                    {
+                      "suit": "S",
+                      "min": 5,
+                      "max": 13
+                    }
+                  ]
+                }
               }
             }
           ]
@@ -3281,12 +5979,12 @@ window.BridgeSystemData = {
             "S"
           ],
           "pointRange": {
-            "min": 6,
-            "max": 10
+            "min": 5,
+            "max": 11
           },
           "suitLengthRange": {
             "min": 6,
-            "max": 13
+            "max": 6
           }
         },
         "weakOpenings": {
@@ -3335,8 +6033,8 @@ window.BridgeSystemData = {
         }
       },
       "openingReference": {
-        "source": "Standard teaching reference; partnership agreements may vary.",
-        "summary": "Modern 2/1 Game Forcing base: five-card majors, 15–17 notrump, strong 2♣, and three weak twos.",
+        "source": "Bridge World Standard 2017 and ACBL 2/1/SAYC teaching references; partnership agreements may vary.",
+        "summary": "Modern 2/1 GF baseline: 12–21 one-level suit openings, five-card majors, three-card better minors, 15–17 1NT, 20–21 2NT, strong artificial 2C, and disciplined weak twos.",
         "openings": [
           {
             "bid": "1♣",
@@ -3389,8 +6087,8 @@ window.BridgeSystemData = {
           {
             "bid": "2♦/2♥/2♠",
             "pointRange": {
-              "min": 6,
-              "max": 10
+              "min": 5,
+              "max": 11
             },
             "lengthLabel": "weak two; exactly six cards (with 3/4-level preempt ladders also catalogued)"
           },
@@ -3437,7 +6135,7 @@ window.BridgeSystemData = {
       },
       "factSchema": {
         "id": "bridge-bidding-facts",
-        "version": "1.1",
+        "version": "1.2",
         "patchSemantics": "deep-merge",
         "deleteSentinel": {
           "$delete": true
@@ -3460,7 +6158,7 @@ window.BridgeSystemData = {
       "initialFacts": {
         "factLayer": {
           "schema": "bridge-bidding-facts",
-          "version": "1.1",
+          "version": "1.2",
           "merge": "deep-patch"
         },
         "agreement": {
@@ -3508,7 +6206,17 @@ window.BridgeSystemData = {
         "fit": {
           "confirmed": false
         },
+        "slam": {
+          "interest": false,
+          "control": {
+            "active": false,
+            "available": false
+          }
+        },
         "progress": {
+          "controlBidding": {
+            "active": false
+          },
           "twoOverOne": {
             "active": false,
             "phase": "not-started",
@@ -3517,7 +6225,30 @@ window.BridgeSystemData = {
             "gameForceSatisfied": false
           }
         }
-      }
+      },
+      "referenceRevision": "2026-09-11",
+      "referenceSources": [
+        {
+          "title": "Bridge World Standard 2017",
+          "url": "https://www.bridgeworld.com/pages/readingroom/bws/bwscompletesystem.html",
+          "usedFor": "Five-card majors, 15–17 1NT, 20–weak-22 2NT family, game-forcing 2/1, semiforcing/forcing-notrump structure, inverted minor-style raises, and major-raise continuations."
+        },
+        {
+          "title": "ACBL — Introduction to Two-Over-One Game Forcing",
+          "url": "https://cdn.acbl.org/assets/documents/teachers/Major-Suit-Raises-II-TM.pdf",
+          "usedFor": "Opening-strength two-level new-suit responses, forcing 1NT, uncontested/unpassed-hand applicability, and forcing progression to game."
+        },
+        {
+          "title": "ACBL Standard American Yellow Card System Booklet",
+          "url": "https://web2.acbl.org/documentlibrary/play/SP3%20%28bk%29%20single%20pages.pdf",
+          "usedFor": "Base opening ranges, three-card minors, five-card majors, Stayman, Jacoby transfers, strong 2C, 20–21 2NT, and weak-two shape."
+        },
+        {
+          "title": "ACBL — Jacoby 2NT",
+          "url": "https://web2.acbl.org/documentLibrary/play/Commonly_Used_Conventions/Commonly_Used_Conventions.pdf",
+          "usedFor": "Standard major-suit raise ranges and trump lengths."
+        }
+      ]
     },
     {
       "schemaVersion": "1.3",

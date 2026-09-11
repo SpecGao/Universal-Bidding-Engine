@@ -115,8 +115,6 @@
         if (m && m.meaning) lines.push(`• ${m.meaning}`);
         const diagnostic = expressionDiagnostic(m);
         if (diagnostic) lines.push(`  ${diagnostic}`);
-        const factText = factChangeText(m && m.facts);
-        if (factText) lines.push(`  ${factText}`);
       }
     }
     if (lines.length === 1) {
@@ -473,34 +471,60 @@
     render();
   }
 
+  function suggestionsInBidOrder(suggestions) {
+    return [...(suggestions || [])].sort((left, right) => {
+      const leftBid = normalizeCode(left && left.bid);
+      const rightBid = normalizeCode(right && right.bid);
+      const leftWeight = Object.prototype.hasOwnProperty.call(BID_SORT_WEIGHT, leftBid)
+        ? BID_SORT_WEIGHT[leftBid]
+        : Number.MAX_SAFE_INTEGER;
+      const rightWeight = Object.prototype.hasOwnProperty.call(BID_SORT_WEIGHT, rightBid)
+        ? BID_SORT_WEIGHT[rightBid]
+        : Number.MAX_SAFE_INTEGER;
+      return leftWeight - rightWeight || leftBid.localeCompare(rightBid);
+    });
+  }
+
   function renderMeaningAndSuggestions(analysis) {
+    const suggestions = suggestionsInBidOrder(analysis.suggestions);
     if (!analysis.frames.length) {
       ui.meaningBox.value = "No calls yet. Enter bids to begin.\n";
       ui.suggestionNotes.value = "Start suggestions are from opening-book nodes.";
-      renderSuggestionChips(analysis.suggestions);
+      renderSuggestionChips(suggestions);
       return;
     }
 
     const lastFrame = analysis.frames[analysis.frames.length - 1];
-    const lastMeanings = lastFrame.matches.map((match) => {
+    const meaningsForFrame = (frame) => [...new Set(frame.matches.map((match) => {
       const diagnostic = expressionDiagnostic(match);
-      const factText = factChangeText(match.facts);
-      return [match.meaning, diagnostic, factText].filter(Boolean).join("\n  ");
-    }).filter(Boolean);
+      return [match.meaning, diagnostic].filter(Boolean).join("\n  ");
+    }).filter(Boolean))];
+    const lastMeanings = meaningsForFrame(lastFrame);
     if (lastMeanings.length) {
       ui.meaningBox.value = `Last call ${lastFrame.call.code} by ${lastFrame.seat}:\n${lastMeanings.join("\n")}`;
     } else {
-      ui.meaningBox.value = `Last call ${lastFrame.call.code} by ${lastFrame.seat}:\n(No direct meaning in active trees, keeping auction continuing from off-system context.)`;
+      let latestMeaningFrame = null;
+      let latestMeanings = [];
+      for (let index = analysis.frames.length - 2; index >= 0; index--) {
+        const candidateMeanings = meaningsForFrame(analysis.frames[index]);
+        if (!candidateMeanings.length) continue;
+        latestMeaningFrame = analysis.frames[index];
+        latestMeanings = candidateMeanings;
+        break;
+      }
+      const recentMeaning = latestMeaningFrame
+        ? `\n\nMost recent system meaning — ${latestMeaningFrame.call.code} by ${latestMeaningFrame.seat}:\n${latestMeanings.join("\n")}`
+        : "";
+      ui.meaningBox.value = `Last call ${lastFrame.call.code} by ${lastFrame.seat}:\n(No direct system meaning for this call.)${recentMeaning}`;
     }
 
     const suggestionText = [];
-    for (const suggestion of analysis.suggestions) {
+    for (const suggestion of suggestions) {
       const diagnostic = expressionDiagnostic(suggestion);
-      const factText = factChangeText(suggestion.facts);
-      suggestionText.push(`${suggestion.bid} => ${suggestion.meaning}${diagnostic ? `\n  ${diagnostic}` : ""}${factText ? `\n  ${factText}` : ""}`);
+      suggestionText.push(`${suggestion.bid} => ${suggestion.meaning}${diagnostic ? `\n  ${diagnostic}` : ""}`);
     }
     ui.suggestionNotes.value = suggestionText.join("\n");
-    renderSuggestionChips(analysis.suggestions);
+    renderSuggestionChips(suggestions);
   }
 
   function renderSuggestionChips(suggestions) {
@@ -511,8 +535,7 @@
       const label = document.createElement("strong");
       label.textContent = suggestion.bid;
       const desc = document.createElement("span");
-      const factText = factChangeText(suggestion.facts);
-      desc.textContent = `${suggestion.meaning || "No meaning saved."}${factText ? ` (${factText})` : ""}`;
+      desc.textContent = suggestion.meaning || "No meaning saved.";
       const diagnosticText = expressionDiagnostic(suggestion);
       const diagnostic = document.createElement("code");
       diagnostic.className = "meta-note";
@@ -535,25 +558,52 @@
     }
   }
 
+  function bundledSystemEntries() {
+    const systems = window.BridgeSystemData && Array.isArray(window.BridgeSystemData.systems)
+      ? window.BridgeSystemData.systems
+      : [];
+    return systems.map((system) => ({
+      id: system.systemId,
+      name: system.systemName || system.systemId,
+      fileData: system,
+      default: system.systemId === "standard-natural",
+    })).filter((entry) => entry.id);
+  }
+
   async function loadSystemIndex() {
+    const bundledSystems = bundledSystemEntries();
+    if (window.location.protocol === "file:" && bundledSystems.length) {
+      state.systems = bundledSystems;
+      return;
+    }
     try {
-      const response = await fetch("Customization/loadable/system-index.json");
-      if (!response.ok) throw new Error("index fetch failed");
+      const response = await fetch("/api/systems", { cache: "no-store" });
+      if (!response.ok) throw new Error("system endpoint fetch failed");
       const list = await response.json();
-      state.systems = list.systems || [];
-    } catch (error) {
-      state.systems = [
-        { id: "standard-natural", name: "Standard Natural (Core)", file: "Customization/standard-natural.json", default: true },
-        { id: "two-over-one", name: "2/1 Game Forcing", file: "Customization/standard-two-over-one.json", default: false },
-        { id: "precision-1c", name: "Precision Club", file: "Customization/standard-precision-1c.json", default: false },
-        { id: "acol", name: "Standard English Acol", file: "Customization/standard-acol.json", default: false },
-      ];
-      console.warn("System index fallback used", error.message);
+      state.systems = Array.isArray(list.systems) ? list.systems : [];
+      return;
+    } catch (endpointError) {
+      try {
+        const response = await fetch("Customization/loadable/system-index.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("index fetch failed");
+        const list = await response.json();
+        state.systems = Array.isArray(list.systems) ? list.systems : [];
+        return;
+      } catch (indexError) {
+        state.systems = bundledSystems.length ? bundledSystems : [
+          { id: "standard-natural", name: "Standard Natural (Core)", file: "Customization/loadable/standard-natural.json", default: true },
+          { id: "two-over-one", name: "2/1 Game Forcing", file: "Customization/loadable/standard-two-over-one.json", default: false },
+          { id: "precision-1c", name: "1C Precision (Core)", file: "Customization/loadable/standard-precision-1c.json", default: false },
+          { id: "acol", name: "ACOL (classic)", file: "Customization/loadable/standard-acol.json", default: false },
+          { id: "personal-fg", name: "Personal FG 2/1 v0.5", file: "Customization/loadable/personal-fgv0-5.json", default: false },
+        ];
+        console.warn("System catalog fallback used", endpointError.message, indexError.message);
+      }
     }
   }
 
   async function loadSystemByFile(filePath) {
-    const response = await fetch(filePath);
+    const response = await fetch(filePath, { cache: "no-store" });
     if (!response.ok) throw new Error(`Unable to fetch ${filePath}`);
     return response.json();
   }
@@ -684,7 +734,7 @@
     let analysis = null;
     try {
       await ensureSystemLoaded();
-      analysis = engine.evaluate(state.auction, state.dealer, state.handFilter, state.systemSide || undefined);
+      analysis = engine.evaluateForDisplay(state.auction, state.dealer, state.handFilter, state.systemSide || undefined);
     } catch (error) {
       console.error(error);
       setBidInputWarning(`System expressions could not be executed: ${error.message}`);
@@ -779,9 +829,7 @@
     buildBidGrid();
     bindActions();
     ensureAuctionMeaningTooltip();
-    if (state.systems[0]) {
-      state.currentSystemId = state.systems[0].id;
-      ui.systemSelect.value = state.currentSystemId;
+    if (state.currentSystemId) {
       try {
         const defaultSystem = await ensureSystemLoaded();
         engine.setSystem(defaultSystem);

@@ -1078,10 +1078,7 @@
       copy.symbolBindings = cloneBindings(context.symbolBindings);
     }
     if (context && context.control) {
-      copy.control = Object.assign({}, context.control);
-      copy.control.bidHistory = Array.isArray(context.control.bidHistory)
-        ? context.control.bidHistory.slice()
-        : [];
+      copy.control = cloneFactValue(context.control);
     }
     copy.facts = normalizeFacts(context && context.facts);
     return copy;
@@ -1094,6 +1091,21 @@
       return parsed ? { kind: "exact", code: parsed.code } : null;
     })();
     return atom ? matchExpressionAtom(atom, call, bindings || {}) : null;
+  }
+
+  function executableChildren(node) {
+    const result = [];
+    const collect = (children) => {
+      for (const child of children || []) {
+        if (child && child.trigger) {
+          result.push(child);
+        } else if (child && child.nodeType === "group") {
+          collect(child.children);
+        }
+      }
+    };
+    collect(node && node.children);
+    return result;
   }
 
   function dedupePaths(paths) {
@@ -1109,72 +1121,340 @@
     return deduped;
   }
 
-  function isControlBid(call, context) {
-    if (!call || call.type !== "bid") return false;
-    const parsed = parseBid(call);
-    if (!parsed || parsed.suit === "NT" || parsed.suit === "P" || parsed.suit === "X" || parsed.suit === "XX") return false;
+  const CONTROL_SUIT_NAMES = { C: "clubs", D: "diamonds", H: "hearts", S: "spades" };
+  const CONTROL_SEAT_NAMES = { N: "North", E: "East", S: "South", W: "West" };
+
+  function normalizedCall(rawCall) {
+    return rawCall && rawCall.code ? rawCall : parseBid(rawCall);
+  }
+
+  function controlStyleText(style) {
+    if (style === "first-round") return "first-round";
+    if (style === "second-round") return "second-round";
+    return "first- or second-round";
+  }
+
+  function controlAllowedSuits(control) {
+    return Array.isArray(control && control.suits) && control.suits.length
+      ? control.suits.filter((suit) => ["C", "D", "H", "S"].includes(suit))
+      : ["C", "D", "H", "S"];
+  }
+
+  function controlShownSuits(control) {
+    const shown = new Set();
+    const bySeat = control && control.shownBySeat;
+    if (!bySeat || typeof bySeat !== "object") return shown;
+    Object.values(bySeat).forEach((suits) => {
+      if (!suits || typeof suits !== "object") return;
+      Object.keys(suits).forEach((suit) => shown.add(suit));
+    });
+    return shown;
+  }
+
+  function previousContractIndex(auctionCalls, callIndex) {
+    for (let index = callIndex - 1; index >= 0; index--) {
+      const call = normalizedCall(auctionCalls[index]);
+      if (call && call.type === "bid") return contractBidIndex(call);
+    }
+    return -1;
+  }
+
+  function skippedControlSuits(control, call, auctionCalls, callIndex) {
+    if (!control || control.inferSkipped === false) return [];
+    const parsed = normalizedCall(call);
+    const actualIndex = contractBidIndex(parsed);
+    if (!parsed || actualIndex == null) return [];
+    const earlierIndex = previousContractIndex(auctionCalls, callIndex);
+    const allowed = new Set(controlAllowedSuits(control));
+    const alreadyShown = controlShownSuits(control);
+    const skipped = [];
+    const minLevel = Number(control.startLevel == null ? 1 : control.startLevel);
+
+    for (let index = earlierIndex + 1; index < actualIndex; index++) {
+      const code = contractBidFromIndex(index);
+      const candidate = parseBid(code);
+      if (!candidate || candidate.suit === "NT") continue;
+      if (candidate.level < minLevel) continue;
+      if (candidate.suit === control.agreedSuit || !allowed.has(candidate.suit)) continue;
+      if (alreadyShown.has(candidate.suit) || skipped.includes(candidate.suit)) continue;
+      skipped.push(candidate.suit);
+    }
+    return skipped;
+  }
+
+  function isControlBid(call, context, callIndex) {
+    const parsed = normalizedCall(call);
+    if (!parsed || parsed.type !== "bid" || parsed.suit === "NT") return false;
     const control = context && context.control;
-    if (!control) return false;
-    const allowed = Array.isArray(control.suits) && control.suits.length ? control.suits : ["C", "D", "H", "S"];
-    const minLevel = Number(control.startLevel || 4);
-    if (Number.isNaN(minLevel)) return false;
-    if (parsed.level < minLevel) return false;
+    if (!control || control.active === false) return false;
+    if (Number.isInteger(control.startedAtIndex) && Number.isInteger(callIndex) && callIndex <= control.startedAtIndex) {
+      return false;
+    }
+    const minLevel = Number(control.startLevel == null ? 1 : control.startLevel);
+    if (Number.isNaN(minLevel) || parsed.level < minLevel) return false;
     if (control.agreedSuit && parsed.suit === control.agreedSuit) return false;
-    return allowed.indexOf(parsed.suit) !== -1;
+    return controlAllowedSuits(control).includes(parsed.suit);
   }
 
-  function updateControlHistory(controlCtx, call) {
-    if (!controlCtx) return null;
-    const out = Object.assign({}, controlCtx);
-    const parsed = parseBid(call);
-    if (!parsed || !parsed.suit) return out;
-    const bidHistory = Array.isArray(out.bidHistory) ? out.bidHistory.slice() : [];
-    bidHistory.push(parsed.code);
-    out.bidHistory = bidHistory;
-    out.lastLevel = parsed.level;
-    out.lastSuit = parsed.suit;
-    out.lastCall = parsed.code;
-    return out;
+  function controlMeaning(control, event) {
+    const shownSuit = CONTROL_SUIT_NAMES[event.suit] || event.suit;
+    const agreedSuit = CONTROL_SUIT_NAMES[control.agreedSuit] || control.agreedSuit || "the agreed suit";
+    const style = controlStyleText(control.style);
+    const bidder = CONTROL_SEAT_NAMES[event.seat] || event.seat || "the bidder";
+    const skippedNames = event.skippedSuits.map((suit) => CONTROL_SUIT_NAMES[suit] || suit);
+    const skippedList = skippedNames.length === 2
+      ? `${skippedNames[0]} and ${skippedNames[1]}`
+      : skippedNames.length > 2
+        ? `${skippedNames.slice(0, -1).join(", ")}, and ${skippedNames[skippedNames.length - 1]}`
+        : skippedNames[0] || "";
+    const skipText = skippedNames.length
+      ? ` Bypassing ${skippedList} denies ${style} control there in ${bidder}'s hand.`
+      : " No lower eligible control suit was bypassed.";
+    const values = {
+      bid: event.code,
+      suit: event.suit,
+      suitName: shownSuit,
+      agreedSuit: control.agreedSuit,
+      agreedSuitName: agreedSuit,
+      style: control.style,
+      styleText: style,
+      seat: event.seat,
+      bidder,
+      skippedSuits: event.skippedSuits.join("/"),
+      skippedSuitNames: skippedList,
+      skipText,
+    };
+    const template = control.meaningTemplate;
+    if (template) {
+      return String(template).replace(/\{\{\s*([^}]+?)\s*\}\}/g, (whole, key) => (
+        Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : whole
+      )).replace(/\s+([.,;:])/g, "$1").trim();
+    }
+    return `${event.code} shows ${style} control in ${shownSuit} with ${agreedSuit} agreed as trumps.${skipText}`;
   }
 
-  function buildControlSuggestions(path, auction) {
-    const cfg = path.node.generated || {};
-    if (!cfg || cfg.type !== "control-bids") return [];
-    const context = (path.context && path.context.control) || {};
-    const agreedSuit = context.agreedSuit || cfg.agreedSuit || "";
-    const suits = (cfg.suits && cfg.suits.length ? cfg.suits : ["C", "D", "H", "S"]).slice();
-    const used = [];
-    if (Array.isArray(context.bidHistory)) {
-      for (const code of context.bidHistory) {
-        const parsed = parseBid(code);
-        if (parsed && parsed.suit) used.push(parsed.suit);
+  function controlActivationFacts(control) {
+    const shownBySeat = cloneFactValue(control.shownBySeat || {});
+    return {
+      fit: {
+        confirmed: true,
+        suit: control.agreedSuit,
+      },
+      slam: {
+        interest: true,
+        control: {
+          active: true,
+          available: true,
+          agreedSuit: control.agreedSuit,
+          style: control.style,
+          inferSkipped: control.inferSkipped !== false,
+          shownBySeat,
+          deniedBySeat: cloneFactValue(control.deniedBySeat || {}),
+          history: (control.bidHistory || []).slice(),
+        },
+      },
+      progress: {
+        controlBidding: {
+          active: true,
+          agreedSuit: control.agreedSuit,
+          source: control.source || "system rule",
+        },
+      },
+    };
+  }
+
+  function controlClearFacts(call) {
+    const parsed = normalizedCall(call) || {};
+    return {
+      slam: {
+        control: {
+          active: false,
+          available: false,
+          endedBy: parsed.code || "",
+        },
+      },
+      progress: {
+        controlBidding: {
+          active: false,
+          endedBy: parsed.code || "",
+        },
+      },
+    };
+  }
+
+  function activateControlPhase(context, rawConfig, meta) {
+    if (!rawConfig || rawConfig.type !== "control-bids") return null;
+    const resolved = resolveFactValue(cloneFactValue(rawConfig), context || {}, meta || {});
+    const agreedSuit = resolved.agreedSuit || readFactTemplatePath(context && context.facts, "fit.suit") || "";
+    if (!["C", "D", "H", "S"].includes(agreedSuit)) return null;
+    const existing = context && context.control;
+    const samePhase = existing && existing.active !== false && existing.agreedSuit === agreedSuit;
+    const control = samePhase ? cloneFactValue(existing) : {
+      active: true,
+      controlEnabled: true,
+      agreedSuit,
+      suits: resolved.suits || ["C", "D", "H", "S"],
+      startLevel: resolved.startLevel,
+      style: resolved.style || "first-or-second-round",
+      inferSkipped: resolved.inferSkipped !== false,
+      description: resolved.description || "",
+      meaningTemplate: resolved.meaningTemplate || "",
+      source: resolved.source || (meta && meta.sourceId) || "system rule",
+      startedAtIndex: meta && Number.isInteger(meta.callIndex) ? meta.callIndex : -1,
+      bidHistory: [],
+      events: [],
+      shownBySeat: {},
+      deniedBySeat: {},
+    };
+
+    if (Array.isArray(resolved.knownControls)) {
+      for (const known of resolved.knownControls) {
+        if (!known || !["C", "D", "H", "S"].includes(known.suit)) continue;
+        const knownSeat = known.seat || (meta && meta.seat) || "partnership";
+        control.shownBySeat[knownSeat] = control.shownBySeat[knownSeat] || {};
+        control.shownBySeat[knownSeat][known.suit] = {
+          round: known.round || control.style,
+          source: known.source || "known control",
+          code: known.code || (meta && meta.call && meta.call.code) || "",
+        };
       }
     }
-    const filteredSuits = suits.filter((suit) => suit !== agreedSuit && used.indexOf(suit) === -1);
-    const startLevel = Number(context.startLevel != null ? context.startLevel : cfg.startLevel != null ? cfg.startLevel : 4);
-    const lastLevel = Number(context.lastLevel || 0);
-    const level = Math.min(7, Math.max(2, Math.max(startLevel, lastLevel)));
+    context.control = control;
+    return { control, facts: controlActivationFacts(control) };
+  }
 
-    const suggestions = [];
-    for (const suit of filteredSuits) {
-      const bid = parseBid(`${level}${suit}`);
-      if (!bid) continue;
-      suggestions.push({
-        bid: bidToCode(bid),
-        meaning: cfg.description || `Control bid in ${suit}. Skip suit means no control there.`,
-        fromNodeId: path.node.id,
-        generated: true,
-        toNodeId: path.node.id,
+  function controlBidResult(context, call, seat, auctionCalls, callIndex) {
+    if (!isControlBid(call, context, callIndex)) return null;
+    const parsed = normalizedCall(call);
+    const control = cloneFactValue(context.control);
+    const alreadyRecorded = (control.events || []).some((event) => (
+      event.callIndex === callIndex && event.code === parsed.code && event.seat === seat
+    ));
+    if (alreadyRecorded) return null;
+    const event = {
+      callIndex,
+      code: parsed.code,
+      level: parsed.level,
+      suit: parsed.suit,
+      seat,
+      round: control.style || "first-or-second-round",
+      skippedSuits: skippedControlSuits(control, parsed, auctionCalls, callIndex),
+    };
+    const meaning = controlMeaning(control, event);
+    control.bidHistory = Array.isArray(control.bidHistory) ? control.bidHistory.slice() : [];
+    control.bidHistory.push(parsed.code);
+    control.events = Array.isArray(control.events) ? control.events.slice() : [];
+    control.events.push(event);
+    control.lastLevel = parsed.level;
+    control.lastSuit = parsed.suit;
+    control.lastCall = parsed.code;
+    control.shownBySeat = cloneFactValue(control.shownBySeat || {});
+    control.shownBySeat[seat] = control.shownBySeat[seat] || {};
+    control.shownBySeat[seat][parsed.suit] = {
+      code: parsed.code,
+      round: event.round,
+      source: "control bid",
+    };
+    control.deniedBySeat = cloneFactValue(control.deniedBySeat || {});
+    if (event.skippedSuits.length) {
+      control.deniedBySeat[seat] = control.deniedBySeat[seat] || {};
+      event.skippedSuits.forEach((suit) => {
+        control.deniedBySeat[seat][suit] = {
+          at: parsed.code,
+          round: event.round,
+          reason: "bypassed in ascending control bidding",
+        };
       });
     }
 
-    const hasAnyCalls = Boolean([...auction].reverse().find((x) => x && x.type === "bid"));
-    if (!suggestions.length && hasAnyCalls) {
+    const facts = {
+      lastBid: {
+        seat,
+        code: parsed.code,
+        meaning,
+        points: { method: "control", min: null, max: null },
+        suitLengths: [],
+      },
+      fit: {
+        confirmed: true,
+        suit: control.agreedSuit,
+      },
+      slam: {
+        interest: true,
+        control: {
+          active: true,
+          available: true,
+          agreedSuit: control.agreedSuit,
+          style: event.round,
+          latest: cloneFactValue(event),
+          shownBySeat: cloneFactValue(control.shownBySeat),
+          deniedBySeat: cloneFactValue(control.deniedBySeat),
+          history: control.bidHistory.slice(),
+        },
+      },
+      progress: {
+        controlBidding: {
+          active: true,
+          agreedSuit: control.agreedSuit,
+          lastCall: parsed.code,
+          lastSeat: seat,
+        },
+      },
+    };
+    const twoOverOne = context && context.facts && context.facts.progress && context.facts.progress.twoOverOne;
+    if (twoOverOne && twoOverOne.active) {
+      facts.progress.twoOverOne = {
+        active: true,
+        phase: "control-bidding",
+        phaseNumber: 3,
+        fitConfirmed: true,
+        agreedSuit: control.agreedSuit,
+        gameForceSatisfied: false,
+      };
+    }
+    return { control, event, meaning, facts };
+  }
+
+  function buildControlSuggestions(path, auction, legalCalls, nextSeat) {
+    const context = (path.context && path.context.control) || {};
+    if (!context || context.active === false || !context.agreedSuit) return [];
+    const shown = controlShownSuits(context);
+    const suits = controlAllowedSuits(context).filter((suit) => suit !== context.agreedSuit && !shown.has(suit));
+    const startLevel = Number(context.startLevel == null ? 1 : context.startLevel);
+    const suggestions = [];
+
+    for (const suit of suits) {
+      let code = null;
+      for (let level = Math.max(1, startLevel); level <= 7; level++) {
+        const candidate = `${level}${suit}`;
+        if (legalCalls.has(candidate)) {
+          code = candidate;
+          break;
+        }
+      }
+      if (!code) continue;
+      const previewContext = cloneContext(path.context);
+      const result = controlBidResult(previewContext, parseBid(code), nextSeat, auction.concat(parseBid(code)), auction.length);
+      if (!result) continue;
       suggestions.push({
-        bid: "P",
-        meaning: "No new control available from current control-history state.",
+        bid: code,
+        meaning: result.meaning,
         fromNodeId: path.node.id,
         generated: true,
+        generatedControl: true,
+        toNodeId: path.node.id,
+        facts: result.facts,
+        factsAfter: mergeFacts(path.context.facts, result.facts),
+      });
+    }
+
+    if (!suggestions.length && auction.some((call) => normalizedCall(call) && normalizedCall(call).type === "bid")) {
+      suggestions.push({
+        bid: "P",
+        meaning: "No new control is available from the current control-bidding state.",
+        fromNodeId: path.node.id,
+        generated: true,
+        generatedControl: true,
         toNodeId: path.node.id,
       });
     }
@@ -1227,6 +1507,8 @@
             priority: Number(rule.priority || 0),
             filters: rule.filters || {},
             facts: normalizeFacts(rule.facts),
+            generated: rule.generated || null,
+            clearControl: Boolean(rule.clearControl),
             matchSuffix: Boolean(rule.matchSuffix),
             requiresAgreement: (Array.isArray(rule.requiresAgreement)
               ? rule.requiresAgreement
@@ -1271,11 +1553,15 @@
       };
     }
 
-    evaluate(auctionCalls, dealer, handFilterRaw, systemSide) {
+    evaluate(auctionCalls, dealer, handFilterRaw, systemSide, options) {
       if (!this.currentSystem) {
         throw new Error("No system loaded");
       }
       const handFilter = this.normalizeHandFilter(handFilterRaw);
+      const filterHistoricalCalls = !options || options.filterHistoricalCalls !== false;
+      const historicalHandFilter = filterHistoricalCalls
+        ? handFilter
+        : this.normalizeHandFilter(handFilterDefaults());
       const normalizedCalls = auctionCalls.map((c) => (c && c.code ? c : parseBid(c))).filter(Boolean);
 
       const startingContext = systemSide === "NS" || systemSide === "EW" ? { systemSide } : {};
@@ -1285,7 +1571,7 @@
 
       normalizedCalls.forEach((call, idx) => {
         const seat = seatOf(idx, dealer);
-        const stepResult = this._advanceOneStep(paths, call, seat, handFilter, normalizedCalls, idx);
+        const stepResult = this._advanceOneStep(paths, call, seat, historicalHandFilter, normalizedCalls, idx);
         frames.push({
           call: { ...call },
           seat,
@@ -1296,7 +1582,7 @@
       });
 
       const effectiveSystemSide = this._effectiveSystemSide(paths, systemSide);
-      this._appendSequenceRuleMatches(frames, normalizedCalls, dealer, handFilter, effectiveSystemSide, paths);
+      this._appendSequenceRuleMatches(frames, normalizedCalls, dealer, historicalHandFilter, effectiveSystemSide, paths);
       const suggestions = this._mergeSuggestions(
         this._buildSuggestions(paths, normalizedCalls, dealer, handFilter),
         this._buildSequenceSuggestions(normalizedCalls, dealer, handFilter, effectiveSystemSide)
@@ -1309,6 +1595,14 @@
         handFilter,
         facts: paths.length ? normalizeFacts(paths[0].context.facts) : normalizeFacts(this.currentSystem.initialFacts),
       };
+    }
+
+    evaluateForDisplay(auctionCalls, dealer, handFilterRaw, systemSide) {
+      // A single UI hand describes the next bidder, not both partners' earlier calls.
+      // Preserve all historical meanings while still filtering next-call suggestions.
+      return this.evaluate(auctionCalls, dealer, handFilterRaw, systemSide, {
+        filterHistoricalCalls: false,
+      });
     }
 
     _effectiveSystemSide(paths, requestedSide) {
@@ -1385,6 +1679,27 @@
       if (!rules.length) return;
       for (let index = 0; index < frames.length; index++) {
         const frame = frames[index];
+        for (const path of paths || []) {
+          if (!belongsToSystemSide(path.context, frame.seat)) continue;
+          const controlResult = controlBidResult(path.context, frame.call, frame.seat, auctionCalls, index);
+          if (!controlResult) continue;
+          const pathContext = path.context;
+          pathContext.control = controlResult.control;
+          pathContext.facts = mergeFacts(pathContext.facts, controlResult.facts);
+          if (!frame.matches.some((match) => match.generatedControl && match.controlEvent && match.controlEvent.callIndex === index)) {
+            frame.matches.push({
+              node: { id: "__generated_control_bid__" },
+              toNodeId: "__generated_control_bid__",
+              meaning: controlResult.meaning,
+              alert: false,
+              generated: true,
+              generatedControl: true,
+              controlEvent: cloneFactValue(controlResult.event),
+              facts: controlResult.facts,
+              factsAfter: normalizeFacts(pathContext.facts),
+            });
+          }
+        }
         for (const rule of rules) {
           const frameSide = seatSideOfSeat(frame.seat);
           const side = systemSide || frameSide;
@@ -1409,8 +1724,29 @@
             systemSide: side,
             facts: paths && paths.length ? paths[0].context.facts : this.currentSystem.initialFacts,
           };
-          const factDelta = resolveFacts(rule.facts, factContext, { call: frame.call, seat: frame.seat });
-          const factsAfter = mergeFacts(factContext.facts, factDelta);
+          let factDelta = resolveFacts(rule.facts, factContext, { call: frame.call, seat: frame.seat });
+          let factsAfter = mergeFacts(factContext.facts, factDelta);
+          let activationFacts = {};
+          if (rule.generated && rule.generated.type === "control-bids") {
+            const previewContext = cloneContext(factContext);
+            previewContext.facts = factsAfter;
+            const activated = activateControlPhase(previewContext, rule.generated, {
+              call: frame.call,
+              seat: frame.seat,
+              callIndex: index,
+              sourceId: rule.id,
+            });
+            if (activated) {
+              activationFacts = activated.facts;
+              factDelta = mergeFacts(factDelta, activationFacts);
+              factsAfter = mergeFacts(factsAfter, activationFacts);
+            }
+          }
+          if (rule.clearControl) {
+            const clearedFacts = controlClearFacts(frame.call);
+            factDelta = mergeFacts(factDelta, clearedFacts);
+            factsAfter = mergeFacts(factsAfter, clearedFacts);
+          }
           frame.matches.push({
             node: { id: rule.id },
             toNodeId: rule.id,
@@ -1423,7 +1759,30 @@
           });
           (paths || []).forEach((path) => {
             if (!path.context.systemSide || path.context.systemSide === side) {
-              path.context.facts = mergeFacts(path.context.facts, factDelta);
+              const ruleContext = cloneContext(path.context);
+              ruleContext.symbolBindings = Object.assign({}, acceptedMatch.bindings || {});
+              ruleContext.facts = path.context.facts;
+              path.context.facts = mergeFacts(path.context.facts, resolveFacts(rule.facts, ruleContext, {
+                call: frame.call,
+                seat: frame.seat,
+              }));
+              if (rule.generated && rule.generated.type === "control-bids") {
+                ruleContext.facts = path.context.facts;
+                const activated = activateControlPhase(ruleContext, rule.generated, {
+                  call: frame.call,
+                  seat: frame.seat,
+                  callIndex: index,
+                  sourceId: rule.id,
+                });
+                if (activated) {
+                  path.context.control = activated.control;
+                  path.context.facts = mergeFacts(path.context.facts, activated.facts);
+                }
+              }
+              if (rule.clearControl) {
+                delete path.context.control;
+                path.context.facts = mergeFacts(path.context.facts, controlClearFacts(frame.call));
+              }
             }
           });
           frame.facts = factsAfter;
@@ -1516,9 +1875,8 @@
       const next = [];
 
       for (const path of paths) {
-        const childList = path.node.children || [];
+        const childList = executableChildren(path.node);
         const matched = [];
-        const controlContext = path.context && path.context.control;
 
         if (!belongsToSystemSide(path.context, seat)) {
           next.push({ node: path.node, context: cloneContext(path.context) });
@@ -1541,21 +1899,26 @@
           if (!childContext.systemSide) {
             childContext.systemSide = seatSideOfSeat(seat);
           }
+          let factDelta = resolveFacts(child.facts, childContext, { call, seat });
+          childContext.facts = mergeFacts(childContext.facts, factDelta);
           if (child.generated && child.generated.type === "control-bids") {
-            childContext.control = {
-              controlEnabled: true,
-              agreedSuit: child.generated.agreedSuit || "",
-              suits: child.generated.suits || ["C", "D", "H", "S"],
-              startLevel: child.generated.startLevel,
-              description: child.generated.description,
-              bidHistory: [],
-            };
+            const activated = activateControlPhase(childContext, child.generated, {
+              call,
+              seat,
+              callIndex,
+              sourceId: child.id,
+            });
+            if (activated) {
+              factDelta = mergeFacts(factDelta, activated.facts);
+              childContext.facts = mergeFacts(childContext.facts, activated.facts);
+            }
           }
           if (child.clearControl) {
             delete childContext.control;
+            const clearedFacts = controlClearFacts(call);
+            factDelta = mergeFacts(factDelta, clearedFacts);
+            childContext.facts = mergeFacts(childContext.facts, clearedFacts);
           }
-          const factDelta = resolveFacts(child.facts, childContext, { call, seat });
-          childContext.facts = mergeFacts(childContext.facts, factDelta);
           matched.push({
             node: child,
             context: childContext,
@@ -1568,11 +1931,23 @@
         }
 
         if (!matched.length) {
-          if (isControlBid(call, path.context)) {
-            const updated = updateControlHistory(controlContext, call);
+          const controlResult = controlBidResult(path.context, call, seat, auctionCalls, callIndex);
+          if (controlResult) {
             const pathContext = cloneContext(path.context);
-            pathContext.control = updated;
+            pathContext.control = controlResult.control;
+            pathContext.facts = mergeFacts(pathContext.facts, controlResult.facts);
             next.push({ node: path.node, context: pathContext });
+            matches.push({
+              node: path.node,
+              context: pathContext,
+              meaning: controlResult.meaning,
+              alert: false,
+              generated: true,
+              generatedControl: true,
+              controlEvent: cloneFactValue(controlResult.event),
+              facts: controlResult.facts,
+              factsAfter: normalizeFacts(pathContext.facts),
+            });
           } else {
             // Keep path for recovery when bidding goes off-system.
             next.push({ node: path.node, context: cloneContext(path.context) });
@@ -1595,7 +1970,7 @@
 
       for (const path of paths) {
         if (!belongsToSystemSide(path.context, nextSeat)) continue;
-        const nodeChildren = path.node.children || [];
+        const nodeChildren = executableChildren(path.node);
         for (const child of nodeChildren) {
           if (!child.trigger) continue;
           if (!matchesAuctionRole(child.filters, auctionCalls, auctionCalls.length)) continue;
@@ -1623,8 +1998,8 @@
             });
           }
         }
-        if (path.node.generated && path.node.generated.type === "control-bids") {
-          const controlSuggestions = buildControlSuggestions(path, auctionCalls);
+        if (path.context && path.context.control && path.context.control.active !== false) {
+          const controlSuggestions = buildControlSuggestions(path, auctionCalls, legalCalls, nextSeat);
           for (const item of controlSuggestions) {
             if (legalCalls.has(item.bid)) {
               suggestions.push(item);

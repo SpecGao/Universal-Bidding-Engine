@@ -116,6 +116,31 @@
   "meaning": "Blackwood after explicit suit agreement",
   "priority": 120
 }</code></pre>
+        <h3>Shared control-bidding phase</h3>
+        <p>
+          A tree node or sequence rule can activate the engine's system-independent control state. The engine keeps
+          the agreed suit, records shown controls by bidder, and records eligible suits bypassed in ascending control
+          bidding as denials by that bidder. Executed controls return readable meaning text before their
+          <code>Facts set:</code> details.
+        </p>
+        <pre><code>{
+  "id": "fit-opening-suit",
+  "expression": "1X-2Y-?-#X",
+  "where": ["Y&lt;X"],
+  "requiresAgreement": ["X"],
+  "meaning": "The opening suit is agreed; control bidding is available.",
+  "generated": {
+    "type": "control-bids",
+    "agreedSuit": "{{X}}",
+    "style": "first-or-second-round",
+    "inferSkipped": true,
+    "meaningTemplate": "{{bid}} shows {{styleText}} control in {{suitName}} with {{agreedSuitName}} agreed as trumps.{{skipText}}"
+  }
+}</code></pre>
+        <p>
+          A splinter can additionally supply <code>knownControls</code> for its short suit. Add
+          <code>"clearControl": true</code> to game, signoff, or RKCB rules that end the phase.
+        </p>
         <p>
           SystemBuilder checks each rule as you type. An overlap is reported with a concrete legal witness.
           An overlap with different meanings at the same priority is an inconsistency; a different priority is

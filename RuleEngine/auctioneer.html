@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bridge Rule Engine - Auctioneer</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="engine/biddingEngine.js"></script>
+  <script src="engine/biddingEngine.js?v=20260911-meaning-display"></script>
 </head>
 <body id="app">
   <div class="page-shell">
@@ -70,6 +70,7 @@
         <p class="meta-note">
           Text input accepts P, X, XX, 1C, 1NT, 2D, etc. Buttons are filtered by Bridge legality; illegal bids are disabled.
           Choose a partnership when using expression-only systems; Auto learns it from the transition tree.
+          Hand ranges filter suggestions for the next system bidder; meanings for calls already in the auction remain visible.
           Hyphens use compact partnership notation: <code>1S-2C</code> inserts the opponent pass, while <code>1S-^2C-2H</code> records an opponent 2C overcall. Spaces and commas remain literal seat-by-seat input.
         </p>
       </div>
@@ -123,6 +124,7 @@
     </section>
   </div>
   <div id="auctionMeaningTooltip" class="auction-meaning-tooltip" role="tooltip" aria-live="polite"></div>
-  <script src="auctioneer.js"></script>
+  <script src="Customization/system-data.js?v=20260911-system-data"></script>
+  <script src="auctioneer.js?v=20260911-meaning-display"></script>
 </body>
 </html>

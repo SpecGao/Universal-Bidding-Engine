@@ -291,6 +291,91 @@ test("the shipped 2/1 system explains 1S-P-2C with the default broad hand filter
   assert.equal(incompatible.frames[0].matches.some((item) => item.toNodeId === "o1S"), false);
 });
 
+test("display evaluation keeps 2/1 meanings visible when the next-hand filter is incompatible", () => {
+  const systemPath = path.join(__dirname, "..", "Customization", "standard-two-over-one.json");
+  const system = JSON.parse(fs.readFileSync(systemPath, "utf8"));
+  const engine = new api.UniversalBiddingEngine();
+  engine.setSystem(system);
+  const responderHand = {
+    minHcp: 6,
+    maxHcp: 9,
+    minSuit: { S: 3 },
+  };
+
+  const opening = engine.evaluateForDisplay(["1S", "P"], "N", responderHand, "NS");
+  const openingMatch = opening.frames[0].matches.find((item) => item.toNodeId === "o1S");
+  assert.equal(openingMatch.meaning.includes("12+ points and 5+ spades"), true);
+  assert.equal(opening.suggestions.some((item) => item.bid === "2S"), true);
+
+  const twoOverOne = engine.evaluateForDisplay(["1S", "P", "2C"], "N", responderHand, "NS");
+  const responseMatch = twoOverOne.frames[2].matches.find(
+    (item) => item.toNodeId === "two-over-one-learned-sequence"
+  );
+  assert.equal(responseMatch.meaning.startsWith("2/1 game forcing"), true);
+});
+
+test("standard 2/1 organizational groups expose every weak opening to Auctioneer", () => {
+  const systemPath = path.join(__dirname, "..", "Customization", "standard-two-over-one.json");
+  const system = JSON.parse(fs.readFileSync(systemPath, "utf8"));
+  const engine = new api.UniversalBiddingEngine();
+  engine.setSystem(system);
+  const expectedOpenings = ["3C", "4C", "2D", "3D", "4D", "2H", "3H", "4H", "2S", "3S", "4S"];
+
+  for (const bid of expectedOpenings) {
+    const result = engine.evaluateForDisplay([bid], "N", { minHcp: 12, maxHcp: 21 }, "NS");
+    assert.equal(
+      result.frames[0].matches.some((item) => item.meaning),
+      true,
+      `missing grouped opening meaning for ${bid}`
+    );
+  }
+});
+
+test("the standard 2/1 catalog documents point ranges, suit lengths, and corrected Stayman structure", () => {
+  const systemPath = path.join(__dirname, "..", "Customization", "standard-two-over-one.json");
+  const system = JSON.parse(fs.readFileSync(systemPath, "utf8"));
+  const nodes = new Map();
+  const visit = (node) => {
+    nodes.set(node.id, node);
+    for (const child of node.children || []) visit(child);
+  };
+  for (const convention of system.conventions) for (const child of convention.children || []) visit(child);
+
+  for (const node of nodes.values()) {
+    if (!node.trigger) continue;
+    assert.equal(Boolean(node.meaning), true, `missing explanation for ${node.id}`);
+    assert.equal(Boolean(node.facts?.lastBid), true, `missing bid evidence for ${node.id}`);
+    assert.notEqual(node.filters?.minHcp, undefined, `missing minimum HCP for ${node.id}`);
+    assert.notEqual(node.filters?.maxHcp, undefined, `missing maximum HCP for ${node.id}`);
+  }
+
+  assert.deepEqual(nodes.get("o1C").filters, { auctionRole: "opening", minHcp: 12, maxHcp: 21, minSuit: { C: 3 }, maxSuit: { C: 13 } });
+  assert.equal(nodes.get("o1D").filters.minSuit.D, 3);
+  assert.equal(nodes.get("o1H").filters.minSuit.H, 5);
+  assert.equal(nodes.get("o1S").filters.minSuit.S, 5);
+  assert.deepEqual([nodes.get("o1NT").filters.minHcp, nodes.get("o1NT").filters.maxHcp], [15, 17]);
+  assert.deepEqual([nodes.get("twoone-2NT").filters.minHcp, nodes.get("twoone-2NT").filters.maxHcp], [20, 21]);
+
+  assert.deepEqual([nodes.get("o1H-1NT").filters.minHcp, nodes.get("o1H-1NT").filters.maxHcp], [6, 12]);
+  assert.equal(nodes.get("o1H-1NT").facts.convention.forcingOneNotrump, true);
+  assert.deepEqual([nodes.get("o1S-2S").filters.minHcp, nodes.get("o1S-2S").filters.maxHcp], [6, 9]);
+  assert.equal(nodes.get("o1S-2S").filters.minSuit.S, 3);
+  assert.equal(nodes.get("o1S-2H-21").filters.minSuit.H, 5);
+  assert.equal(nodes.get("o1S-2D-21").filters.minSuit.D, 4);
+
+  const oneNotrump = nodes.get("o1NT");
+  const stayman = nodes.get("nt2C");
+  assert.equal(oneNotrump.children.some((node) => node.id === "nt2C-2D"), false);
+  assert.deepEqual(stayman.children.map((node) => node.id), ["nt2C-2D", "nt2C-2H", "nt2C-2S"]);
+  assert.equal(nodes.get("nt2D").filters.minSuit.H, 5);
+  assert.equal(nodes.get("nt2H").filters.minSuit.S, 5);
+
+  assert.deepEqual([nodes.get("oc1S").filters.minHcp, nodes.get("oc1S").filters.maxHcp], [8, 17]);
+  assert.equal(nodes.get("oc1S").filters.minSuit.S, 5);
+  assert.equal(Array.isArray(system.referenceSources), true);
+  assert.equal(system.referenceSources.length >= 3, true);
+});
+
 test("the standard 2/1 fact layer advances through entry, strain, fit, controls, and completion", () => {
   const systemPath = path.join(__dirname, "..", "Customization", "standard-two-over-one.json");
   const system = JSON.parse(fs.readFileSync(systemPath, "utf8"));
@@ -318,9 +403,68 @@ test("the standard 2/1 fact layer advances through entry, strain, fit, controls,
   assert.equal(complete.facts.progress.twoOverOne.gameForceSatisfied, true);
   assert.equal(complete.facts.forcing.game, false);
 
-  const simpleRaise = engine.evaluate(["1S", "P", "2S"], "N", hand, "NS");
+  const simpleRaise = engine.evaluate(["1S", "P", "2S"], "N", {}, "NS");
   assert.equal(simpleRaise.facts.convention.twoOverOne, false);
   assert.equal(simpleRaise.facts.forcing.game, false);
+});
+
+test("system-independent control bidding executes after an explicit 2/1 fit and records skipped controls", () => {
+  const systemPath = path.join(__dirname, "..", "Customization", "standard-two-over-one.json");
+  const system = JSON.parse(fs.readFileSync(systemPath, "utf8"));
+  const engine = new api.UniversalBiddingEngine();
+  engine.setSystem(system);
+  const hand = { minHcp: 12, maxHcp: 21 };
+  const agreed = ["1S", "P", "2C", "P", "2D", "P", "2S", "P"];
+
+  const fit = engine.evaluate(agreed, "N", hand, "NS");
+  assert.equal(fit.paths[0].context.control.agreedSuit, "S");
+  assert.equal(fit.facts.slam.control.available, true);
+  const heartSuggestion = fit.suggestions.find((item) => item.generatedControl && item.bid === "3H");
+  assert.equal(Boolean(heartSuggestion), true);
+  assert.match(heartSuggestion.meaning, /spades agreed as trumps/i);
+  assert.match(heartSuggestion.meaning, /clubs and diamonds/i);
+  assert.deepEqual(heartSuggestion.facts.slam.control.latest.skippedSuits, ["C", "D"]);
+
+  const executed = engine.evaluate(agreed.concat("3H"), "N", hand, "NS");
+  const controlMatch = executed.frames[8].matches.find((item) => item.generatedControl);
+  assert.equal(Boolean(controlMatch), true);
+  assert.match(controlMatch.meaning, /3H shows first- or second-round control in hearts/i);
+  assert.deepEqual(controlMatch.controlEvent.skippedSuits, ["C", "D"]);
+  assert.equal(controlMatch.facts.slam.control.deniedBySeat.N.C.reason, "bypassed in ascending control bidding");
+  assert.equal(executed.facts.progress.twoOverOne.phase, "control-bidding");
+
+  const continued = engine.evaluate(agreed.concat(["3H", "P", "4D"]), "N", hand, "NS");
+  const secondControl = continued.frames[10].matches.find((item) => item.generatedControl);
+  assert.equal(Boolean(secondControl), true);
+  assert.deepEqual(secondControl.controlEvent.skippedSuits, ["C"]);
+  assert.equal(continued.paths[0].context.control.events.length, 2);
+
+  const blackwood = engine.evaluate(agreed.concat(["3H", "P", "4NT"]), "N", hand, "NS");
+  assert.equal(blackwood.paths[0].context.control, undefined);
+  assert.equal(blackwood.facts.slam.control.active, false);
+  assert.equal(blackwood.facts.slam.aceAsk.active, true);
+});
+
+test("a splinter initializes agreed-trump and known-shortness control state", () => {
+  const systemPath = path.join(__dirname, "..", "Customization", "standard-two-over-one.json");
+  const system = JSON.parse(fs.readFileSync(systemPath, "utf8"));
+  const engine = new api.UniversalBiddingEngine();
+  engine.setSystem(system);
+  const hand = { minHcp: 12, maxHcp: 21 };
+
+  const splinter = engine.evaluate(["1S", "P", "4C", "P"], "N", hand, "NS");
+  const control = splinter.paths[0].context.control;
+  assert.equal(control.agreedSuit, "S");
+  assert.equal(control.shownBySeat.S.C.source, "splinter shortness");
+  const heartSuggestion = splinter.suggestions.find((item) => item.generatedControl && item.bid === "4H");
+  assert.equal(Boolean(heartSuggestion), true);
+  assert.deepEqual(heartSuggestion.facts.slam.control.latest.skippedSuits, ["D"]);
+
+  const executed = engine.evaluate(["1S", "P", "4C", "P", "4H"], "N", hand, "NS");
+  const match = executed.frames[4].matches.find((item) => item.generatedControl);
+  assert.equal(Boolean(match), true);
+  assert.match(match.meaning, /diamonds denies/i);
+  assert.equal(executed.facts.slam.control.deniedBySeat.N.D.at, "4H");
 });
 
 test("personal FG v0.5 carries facts, required alerts, and symbolic delayed-splinter filters", () => {
@@ -375,9 +519,19 @@ test("the browser data bundle contains the same learned 2/1 rules", () => {
   assert.equal(source.startsWith(prefix), true);
   const bundle = JSON.parse(source.slice(prefix.length, source.lastIndexOf(";")));
   const system = bundle.systems.find((item) => item.systemId === "two-over-one");
-  assert.equal(system.schemaVersion, "1.4");
+  assert.equal(system.schemaVersion, "1.5");
   assert.equal(system.sequenceRules.some((rule) => rule.id === "two-over-one-learned-sequence"), true);
   assert.equal(system.sequenceRules.some((rule) => rule.id === "two-over-one-explicit-fit-blackwood"), true);
+});
+
+test("Auctioneer loads the synchronized system bundle when opened directly from disk", () => {
+  const html = fs.readFileSync(path.join(__dirname, "..", "auctioneer.html"), "utf8");
+  const source = fs.readFileSync(path.join(__dirname, "..", "auctioneer.js"), "utf8");
+  assert.match(html, /Customization\/system-data\.js\?v=/);
+  assert.match(html, /engine\/biddingEngine\.js\?v=/);
+  assert.match(html, /auctioneer\.js\?v=/);
+  assert.match(source, /window\.location\.protocol === "file:"/);
+  assert.match(source, /fileData: system/);
 });
 
 console.log(`# ${passed} tests passed`);

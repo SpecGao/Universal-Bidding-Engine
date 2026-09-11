@@ -59,10 +59,33 @@ Rules can add `where` relations over learned suits. This describes all natural 2
 
 ## System execution
 
-A system may contain a top-level `sequenceRules` array. `UniversalBiddingEngine.setSystem` compiles each rule; `evaluate` adds completed rules to frame meanings and adds legal, expression-completing calls to suggestions. Rule objects accept `id`, `expression` (or `sequence`/`pattern`), `where`, `requiresAgreement`, `meaning`, `alert`, `priority`, and the existing hand `filters`.
+A system may contain a top-level `sequenceRules` array. `UniversalBiddingEngine.setSystem` compiles each rule; `evaluate` adds completed rules to frame meanings and adds legal, expression-completing calls to suggestions. Rule objects accept `id`, `expression` (or `sequence`/`pattern`), `where`, `requiresAgreement`, `meaning`, `alert`, `priority`, `facts`, `generated`, `clearControl`, and the existing hand `filters`.
 
 Without `^`, system execution removes opponent calls before matching, preserving compact partnership notation such as `1X-2Y`. If an expression contains `^`, it is matched against the full auction: unprefixed atoms are system-side calls and `^`-prefixed atoms are opponent calls. For example, `1S-^2C-2H` describes a competitive auction without writing an opponent pass.
 
 Explicit-fit Blackwood is represented by `*-#X-*-#X-*-4NT` with `"requiresAgreement": ["X"]`. The leading wildcard means the learned suit need not be the first call, and the agreement guard requires both partnership seats—not one bidder twice—to have named `X`.
 
 The same symbol matcher is used by ordinary transition-tree `trigger` values. A tree can therefore open with `1X`, retain the learned suit in its path context, and use `2X` for a raise or `2Y` for a distinct new suit. Suggestions are always emitted as concrete legal calls.
+
+## System-independent control bidding
+
+A tree node or sequence rule can enter the shared control-bidding state with `generated.type` set to `control-bids`. The engine resolves the agreed suit, keeps the state after the matching tree path ends, records controls by seat, and records eligible suits bypassed during ascending control bidding as denials by that bidder. An executed generated control is returned as an ordinary frame match with both readable `meaning` text and structured `facts`.
+
+```json
+{
+  "id": "fit-opening-suit",
+  "expression": "1X-2Y-?-#X",
+  "where": ["Y<X"],
+  "requiresAgreement": ["X"],
+  "meaning": "The opening suit is agreed; control bidding is available.",
+  "generated": {
+    "type": "control-bids",
+    "agreedSuit": "{{X}}",
+    "style": "first-or-second-round",
+    "inferSkipped": true,
+    "meaningTemplate": "{{bid}} shows {{styleText}} control in {{suitName}} with {{agreedSuitName}} agreed as trumps.{{skipText}}"
+  }
+}
+```
+
+Splinters use the same mechanism and may preload their short suit as a known control with `knownControls`. Set `clearControl` on a terminal rule such as game, signoff, or RKCB to leave control mode. System files decide when the phase starts and what style it uses; ascending-bid inference and fact maintenance remain engine behavior.
